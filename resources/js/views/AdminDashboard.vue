@@ -1,292 +1,644 @@
 <template>
-  <div class="min-h-[calc(100vh-64px)] bg-slate-50 py-10 text-slate-900 dark:bg-slate-950 dark:text-slate-50">
-    <div class="container mx-auto px-4">
-      <div class="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-        <div>
-          <h1 class="text-2xl font-semibold tracking-tight sm:text-3xl">
-            Admin panel
-          </h1>
-          <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
-            Manage projects and skills protected by JWT authentication.
-          </p>
-        </div>
-        <div class="flex items-center gap-3 text-xs">
-          <div
-            v-if="user"
-            class="inline-flex items-center gap-2 rounded-full bg-slate-900/90 px-3 py-1 text-slate-50 dark:bg-slate-900"
-          >
-            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400/90 text-xs font-semibold text-slate-950">
-              {{ userInitials }}
-            </span>
-            <div class="leading-tight">
-              <div class="font-medium">
-                {{ user.name || 'Admin user' }}
-              </div>
-              <div class="text-[11px] text-slate-300">
-                Authenticated with JWT
-              </div>
-            </div>
-          </div>
-          <button
-            v-if="user"
-            type="button"
-            class="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 shadow-sm transition hover:border-rose-400 hover:text-rose-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-rose-400 dark:hover:text-rose-300"
-            @click="handleLogout"
-          >
-            Log out
+  <div class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50 font-sans">
+    
+    <!-- Toast Notifications -->
+    <div class="fixed bottom-6 right-6 z-50 flex flex-col gap-2">
+      <transition-group name="toast">
+        <div 
+          v-for="toast in toasts" 
+          :key="toast.id" 
+          class="flex items-center gap-3 rounded-lg border p-4 shadow-lg backdrop-blur-md transition-all duration-300"
+          :class="{
+            'border-emerald-200 bg-emerald-50/90 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/90 dark:text-emerald-200': toast.type === 'success',
+            'border-rose-200 bg-rose-50/90 text-rose-800 dark:border-rose-800 dark:bg-rose-900/90 dark:text-rose-200': toast.type === 'error',
+            'border-blue-200 bg-blue-50/90 text-blue-800 dark:border-blue-800 dark:bg-blue-900/90 dark:text-blue-200': toast.type === 'info'
+          }"
+        >
+          <component :is="toast.icon" class="h-5 w-5 flex-shrink-0" />
+          <p class="text-sm font-medium">{{ toast.message }}</p>
+          <button @click="removeToast(toast.id)" class="ml-2 opacity-70 hover:opacity-100">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
-      </div>
-      <div v-if="!user" class="grid gap-6 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.2fr)]">
-        <div class="rounded-2xl border border-slate-200 bg-slate-100 p-5 text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-50">
-          <h2 class="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-900 dark:text-slate-50">
-            Sign in
-          </h2>
-          <p class="mb-4 text-xs text-slate-700 dark:text-slate-300">
-            Use the seeded admin user email and password to authenticate. The token is stored in local storage and attached to every admin API request.
-          </p>
-          <form class="space-y-3 text-sm" @submit.prevent="handleLogin">
-            <div>
-              <label class="mb-1 block text-xs font-medium text-slate-800 dark:text-slate-200">
-                Email
-              </label>
-              <input
-                v-model.trim="loginForm.email"
-                type="email"
-                class="form-control block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-0 transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-              />
-            </div>
-            <div>
-              <label class="mb-1 block text-xs font-medium text-slate-800 dark:text-slate-200">
-                Password
-              </label>
-              <input
-                v-model.trim="loginForm.password"
-                type="password"
-                class="form-control block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-0 transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-              />
-            </div>
-            <button
-              type="submit"
-              class="btn btn-primary inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-indigo-900/40 transition hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:cursor-not-allowed disabled:bg-slate-600"
-              :disabled="loginState === 'submitting'"
-            >
-              <span
-                v-if="loginState === 'submitting'"
-                class="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-indigo-200 border-t-transparent"
-              ></span>
-              <span>
-                {{ loginState === 'submitting' ? 'Signing in...' : 'Sign in' }}
-              </span>
-            </button>
-            <p v-if="loginError" class="text-xs text-rose-500">
-              {{ loginError }}
-            </p>
-          </form>
+      </transition-group>
+    </div>
+
+    <!-- Login View -->
+    <div v-if="!user" class="flex min-h-screen items-center justify-center p-6">
+      <div class="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900">
+        <div class="bg-slate-900 px-8 py-12 text-center">
+           <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500 text-white shadow-lg shadow-indigo-500/30">
+             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+           </div>
+           <h2 class="text-2xl font-bold text-white">Admin Access</h2>
+           <p class="mt-2 text-slate-400">Secure credential management system</p>
         </div>
-        <div class="rounded-2xl bg-slate-950 p-5 text-xs text-slate-100 dark:bg-slate-900">
-          <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-            How this admin panel works
-          </div>
-          <ul class="space-y-2 text-slate-200">
-            <li>JWT-based auth guard configured on the Laravel API.</li>
-            <li>Tokens are stored client-side and attached to axios requests.</li>
-            <li>Admin routes are protected by the api guard and prefix.</li>
-            <li>Projects and skills are managed through RESTful JSON endpoints.</li>
-          </ul>
-        </div>
-      </div>
-      <div v-else class="mt-6 grid gap-6 md:grid-cols-2">
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/70">
-          <h2 class="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-indigo-600">
-            Add project
-          </h2>
-          <form class="space-y-3 text-sm" @submit.prevent="handleCreateProject">
+        
+        <div class="p-8">
+          <form @submit.prevent="handleLogin" class="space-y-5">
             <div>
-              <label class="mb-1 block text-xs font-medium text-slate-900 dark:text-slate-200">
-                Title
-              </label>
-              <input
-                v-model.trim="projectForm.title"
-                type="text"
-                class="form-control block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-0 transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-              />
-            </div>
-            <div>
-              <label class="mb-1 block text-xs font-medium text-slate-900 dark:text-slate-200">
-                Description
-              </label>
-              <textarea
-                v-model.trim="projectForm.description"
-                rows="3"
-                class="form-control block w-full resize-none rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-0 transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-              ></textarea>
-            </div>
-            <div class="grid gap-3 md:grid-cols-2">
-              <div>
-                <label class="mb-1 block text-xs font-medium text-slate-900 dark:text-slate-200">
-                  Image filename
-                </label>
-                <input
-                  v-model.trim="projectForm.image"
-                  type="text"
-                  class="form-control block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-0 transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  placeholder="dashboard.png (stored in public/images/projects)"
-                />
-              </div>
-              <div>
-                <label class="mb-1 block text-xs font-medium text-slate-900 dark:text-slate-200">
-                  Live URL
-                </label>
-                <input
-                  v-model.trim="projectForm.url"
-                  type="url"
-                  class="form-control block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-0 transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  placeholder="https://"
-                />
-              </div>
-            </div>
-            <div class="grid gap-3 md:grid-cols-2">
-              <div>
-                <label class="mb-1 block text-xs font-medium text-slate-900 dark:text-slate-200">
-                  GitHub URL
-                </label>
-                <input
-                  v-model.trim="projectForm.github_url"
-                  type="url"
-                  class="form-control block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-0 transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  placeholder="https://github.com/"
-                />
-              </div>
-              <div>
-                <label class="mb-1 block text-xs font-medium text-slate-900 dark:text-slate-200">
-                  Type
-                </label>
-                <select
-                  v-model="projectForm.type"
-                  class="form-select block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-0 transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Email Address</label>
+              <div class="relative">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                </div>
+                <input 
+                  v-model="loginForm.email" 
+                  type="email" 
+                  class="block w-full rounded-lg border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-4 text-slate-900 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:bg-slate-900"
+                  placeholder="admin@example.com"
+                  required
                 >
-                  <option value="web">Laravel + Vue web app</option>
-                  <option value="mobile">Flutter + API mobile app</option>
-                  <option value="other">Other</option>
-                </select>
               </div>
             </div>
+            
             <div>
-              <label class="mb-1 block text-xs font-medium text-slate-900 dark:text-slate-200">
-                Technologies
-              </label>
-              <input
-                v-model.trim="projectForm.technologies"
-                type="text"
-                class="form-control block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-0 transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                placeholder="comma separated, e.g. Laravel, Vue 3, Tailwind"
-              />
+              <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Password</label>
+              <div class="relative">
+                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                </div>
+                <input 
+                  v-model="loginForm.password" 
+                  type="password" 
+                  class="block w-full rounded-lg border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-4 text-slate-900 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:bg-slate-900"
+                  placeholder="••••••••"
+                  required
+                >
+              </div>
             </div>
-            <button
-              type="submit"
-              class="btn btn-primary inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-indigo-900/40 transition hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:cursor-not-allowed disabled:bg-slate-600"
-              :disabled="projectSubmitting"
+            
+            <div v-if="loginError" class="flex items-center gap-2 rounded-lg bg-rose-50 p-3 text-sm text-rose-600 dark:bg-rose-900/20 dark:text-rose-400">
+              <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              {{ loginError }}
+            </div>
+
+            <button 
+              type="submit" 
+              :disabled="loginState === 'submitting'"
+              class="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 font-semibold text-white transition-all hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/25 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              <span
-                v-if="projectSubmitting"
-                class="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-indigo-200 border-t-transparent"
-              ></span>
-              <span>
-                {{ projectSubmitting ? 'Saving...' : 'Save project' }}
-              </span>
+              <svg v-if="loginState === 'submitting'" class="h-5 w-5 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              <span>{{ loginState === 'submitting' ? 'Authenticating...' : 'Sign In' }}</span>
             </button>
-            <p v-if="projectError" class="text-xs text-rose-500">
-              {{ projectError }}
-            </p>
-          </form>
-        </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/70">
-          <h2 class="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-indigo-600">
-            Add skill
-          </h2>
-          <form class="space-y-3 text-sm" @submit.prevent="handleCreateSkill">
-            <div>
-              <label class="mb-1 block text-xs font-medium text-slate-900 dark:text-slate-200">
-                Name
-              </label>
-              <input
-                v-model.trim="skillForm.name"
-                type="text"
-                class="form-control block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-0 transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-              />
-            </div>
-            <div class="grid gap-3 md:grid-cols-2">
-              <div>
-                <label class="mb-1 block text-xs font-medium text-slate-900 dark:text-slate-200">
-                  Category
-                </label>
-                <input
-                  v-model.trim="skillForm.category"
-                  type="text"
-                  class="form-control block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-0 transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  placeholder="Backend, Frontend, Mobile..."
-                />
-              </div>
-              <div>
-                <label class="mb-1 block text-xs font-medium text-slate-900 dark:text-slate-200">
-                  Proficiency (%)
-                </label>
-                <input
-                  v-model.number="skillForm.proficiency"
-                  type="number"
-                  min="0"
-                  max="100"
-                  class="form-control block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-0 transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                />
-              </div>
-            </div>
-            <div>
-              <label class="mb-1 block text-xs font-medium text-slate-900 dark:text-slate-200">
-                Icon label
-              </label>
-              <input
-                v-model.trim="skillForm.icon"
-                type="text"
-                class="form-control block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-0 transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                placeholder="L, V, F..."
-              />
-            </div>
-            <button
-              type="submit"
-              class="btn btn-primary inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-indigo-900/40 transition hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:cursor-not-allowed disabled:bg-slate-600"
-              :disabled="skillSubmitting"
-            >
-              <span
-                v-if="skillSubmitting"
-                class="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-indigo-200 border-t-transparent"
-              ></span>
-              <span>
-                {{ skillSubmitting ? 'Saving...' : 'Save skill' }}
-              </span>
-            </button>
-            <p v-if="skillError" class="text-xs text-rose-500">
-              {{ skillError }}
-            </p>
           </form>
         </div>
       </div>
     </div>
+
+    <!-- Admin Dashboard Layout -->
+    <div v-else class="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
+      
+      <!-- Mobile Sidebar Overlay -->
+      <div v-if="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 z-20 bg-slate-900/50 backdrop-blur-sm lg:hidden"></div>
+
+      <!-- Sidebar -->
+      <aside 
+        class="fixed inset-y-0 left-0 z-30 w-64 transform border-r border-slate-200 bg-white transition-transform duration-300 dark:border-slate-800 dark:bg-slate-900 lg:static lg:translate-x-0"
+        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+      >
+        <div class="flex h-full flex-col">
+          <!-- Logo -->
+          <div class="flex h-16 items-center border-b border-slate-100 px-6 dark:border-slate-800">
+            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold mr-3">
+              A
+            </div>
+            <span class="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Admin Console</span>
+          </div>
+
+          <!-- Navigation -->
+          <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+            <p class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Menu</p>
+            <button 
+              v-for="tab in tabs" 
+              :key="tab.id"
+              @click="currentTab = tab.id; sidebarOpen = false"
+              class="group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+              :class="currentTab === tab.id 
+                ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-400' 
+                : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50'"
+            >
+              <component 
+                :is="tab.icon" 
+                class="h-5 w-5 transition-colors"
+                :class="currentTab === tab.id ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300'"
+              />
+              {{ tab.label }}
+            </button>
+          </nav>
+
+          <!-- User Profile (Bottom Sidebar) -->
+          <div class="border-t border-slate-100 p-4 dark:border-slate-800">
+            <div class="flex items-center gap-3">
+              <div class="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300">
+                {{ user.name.charAt(0).toUpperCase() }}
+              </div>
+              <div class="flex-1 overflow-hidden">
+                <p class="truncate text-sm font-medium text-slate-900 dark:text-white">{{ user.name }}</p>
+                <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ user.email }}</p>
+              </div>
+              <button @click="handleLogout" class="rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/20 dark:hover:text-rose-400" title="Sign out">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <div class="flex flex-1 flex-col overflow-hidden">
+        <!-- Top Header (Mobile Only) -->
+        <header class="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 dark:border-slate-800 dark:bg-slate-900 lg:hidden">
+          <button @click="sidebarOpen = true" class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+          </button>
+          <span class="font-semibold text-slate-900 dark:text-white">Admin Console</span>
+          <div class="w-6"></div> <!-- Spacer -->
+        </header>
+
+        <!-- Main Scrollable Area -->
+        <main class="flex-1 overflow-y-auto bg-slate-50 p-4 dark:bg-slate-950 lg:p-8">
+          <div class="mx-auto max-w-7xl">
+            
+            <!-- Dashboard View -->
+            <div v-if="currentTab === 'dashboard'" class="space-y-6 animate-fade-in">
+              <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Dashboard Overview</h1>
+              
+              <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <!-- Stat Card 1 -->
+                <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Projects</p>
+                      <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">{{ projects.length }}</p>
+                    </div>
+                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400">
+                      <component :is="ProjectIcon" class="h-6 w-6" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Stat Card 2 -->
+                <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Skills</p>
+                      <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">{{ skills.length }}</p>
+                    </div>
+                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
+                      <component :is="SkillIcon" class="h-6 w-6" />
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Quick Action Card -->
+                 <div class="rounded-xl border border-slate-200 bg-gradient-to-br from-indigo-600 to-violet-600 p-6 shadow-sm text-white">
+                    <h3 class="font-bold text-lg mb-2">Quick Actions</h3>
+                    <div class="flex gap-2">
+                       <button @click="currentTab = 'projects'; openProjectModal()" class="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors">
+                          + Add Project
+                       </button>
+                       <button @click="currentTab = 'skills'; openSkillModal()" class="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors">
+                          + Add Skill
+                       </button>
+                    </div>
+                 </div>
+              </div>
+
+              <!-- Recent Activity Table (Placeholder) -->
+              <div class="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <div class="border-b border-slate-100 px-6 py-4 dark:border-slate-800">
+                  <h3 class="font-semibold text-slate-900 dark:text-white">System Status</h3>
+                </div>
+                <div class="p-6">
+                  <div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                    <span class="relative flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </span>
+                    System Operational • Logged in as {{ user.email }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Projects Management -->
+            <div v-if="currentTab === 'projects'" class="space-y-6 animate-fade-in">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Projects Management</h1>
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                  <div class="relative w-full sm:w-64">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    </div>
+                    <input 
+                      v-model="searchQuery" 
+                      type="text" 
+                      placeholder="Search projects..." 
+                      class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-10 pr-4 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800"
+                    >
+                  </div>
+                  <button 
+                    @click="openProjectModal()"
+                    class="inline-flex flex-shrink-0 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 hover:shadow-indigo-500/30 transition-all"
+                  >
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    <span class="hidden sm:inline">New Project</span>
+                    <span class="sm:hidden">Add</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden dark:border-slate-800 dark:bg-slate-900">
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-slate-500 dark:bg-slate-800/50 dark:text-slate-400">
+                      <tr>
+                        <th class="px-6 py-4 font-medium">Project</th>
+                        <th class="px-6 py-4 font-medium">Type</th>
+                        <th class="px-6 py-4 font-medium">Tech Stack</th>
+                        <th class="px-6 py-4 font-medium text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                      <tr v-if="filteredProjects.length === 0">
+                        <td colspan="4" class="px-6 py-12 text-center text-slate-500">
+                           <div class="flex flex-col items-center justify-center">
+                              <component :is="ProjectIcon" class="h-10 w-10 text-slate-300 mb-2" />
+                              <p>{{ searchQuery ? 'No matching projects found' : 'No projects found' }}</p>
+                           </div>
+                        </td>
+                      </tr>
+                      <tr v-for="project in filteredProjects" :key="project.id" class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                        <td class="px-6 py-4">
+                          <div class="flex items-center gap-4">
+                            <div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100 border border-slate-200 dark:bg-slate-800 dark:border-slate-700">
+                               <img v-if="project.image" :src="`/images/projects/${project.image}`" class="h-full w-full object-cover" />
+                               <div v-else class="flex h-full w-full items-center justify-center text-slate-400">
+                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                               </div>
+                            </div>
+                            <div>
+                              <div class="font-semibold text-slate-900 dark:text-white">{{ project.title }}</div>
+                              <a v-if="project.url" :href="project.url" target="_blank" class="text-xs text-indigo-600 hover:underline dark:text-indigo-400 truncate max-w-[150px] block">{{ project.url }}</a>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4">
+                          <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800 dark:bg-slate-800 dark:text-slate-200 capitalize">
+                            {{ project.type }}
+                          </span>
+                        </td>
+                        <td class="px-6 py-4">
+                           <div class="flex flex-wrap gap-1">
+                              <span v-for="(tech, idx) in (Array.isArray(project.technologies) ? project.technologies : [])" :key="idx" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
+                                 {{ tech }}
+                              </span>
+                           </div>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                          <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button @click="openProjectModal(project)" class="rounded-lg p-2 text-slate-400 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900/20 dark:hover:text-indigo-400" title="Edit">
+                              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                            </button>
+                            <button @click="deleteProject(project.id)" class="rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/20 dark:hover:text-rose-400" title="Delete">
+                              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Skills Management -->
+            <div v-if="currentTab === 'skills'" class="space-y-6 animate-fade-in">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Skills Management</h1>
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                   <div class="relative w-full sm:w-64">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    </div>
+                    <input 
+                      v-model="searchQuery" 
+                      type="text" 
+                      placeholder="Search skills..." 
+                      class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-10 pr-4 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800"
+                    >
+                  </div>
+                  <button 
+                    @click="openSkillModal()"
+                    class="inline-flex flex-shrink-0 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 hover:shadow-indigo-500/30 transition-all"
+                  >
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    <span class="hidden sm:inline">New Skill</span>
+                    <span class="sm:hidden">Add</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div v-if="filteredSkills.length === 0" class="col-span-full rounded-xl border border-dashed border-slate-300 p-12 text-center text-slate-500 dark:border-slate-700">
+                   {{ searchQuery ? 'No matching skills found' : 'No skills added yet.' }}
+                </div>
+                <div 
+                  v-for="skill in filteredSkills" 
+                  :key="skill.id" 
+                  class="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-indigo-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-indigo-700 transition-all"
+                >
+                  <div class="flex items-start justify-between">
+                    <div class="flex items-center gap-3">
+                       <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                          {{ skill.icon || skill.name.charAt(0) }}
+                       </div>
+                       <div>
+                          <h3 class="font-semibold text-slate-900 dark:text-white">{{ skill.name }}</h3>
+                          <p class="text-xs text-slate-500">{{ skill.category }}</p>
+                       </div>
+                    </div>
+                    
+                    <div class="flex gap-1">
+                      <button @click="openSkillModal(skill)" class="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-indigo-600 dark:hover:bg-slate-800">
+                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                      </button>
+                      <button @click="deleteSkill(skill.id)" class="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-rose-600 dark:hover:bg-slate-800">
+                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div class="mt-4">
+                     <div class="flex items-center justify-between text-xs mb-1">
+                        <span class="text-slate-500">Proficiency</span>
+                        <span class="font-medium text-slate-700 dark:text-slate-300">{{ skill.proficiency }}%</span>
+                     </div>
+                     <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                        <div class="h-full rounded-full bg-indigo-500 transition-all duration-1000" :style="{ width: `${skill.proficiency}%` }"></div>
+                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Profile Settings -->
+            <div v-if="currentTab === 'profile'" class="max-w-2xl animate-fade-in">
+              <h1 class="mb-6 text-2xl font-bold text-slate-900 dark:text-white">Profile Settings</h1>
+              
+              <div class="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <div class="border-b border-slate-100 px-6 py-4 dark:border-slate-800">
+                   <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Personal Information</h2>
+                   <p class="text-sm text-slate-500">Update your account details and password.</p>
+                </div>
+                
+                <div class="p-6">
+                  <form @submit.prevent="handleUpdateProfile" class="space-y-6">
+                    <div class="grid gap-6 md:grid-cols-2">
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Full Name</label>
+                        <input 
+                          v-model="profileForm.name" 
+                          type="text" 
+                          class="block w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                        >
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Email Address</label>
+                        <input 
+                          v-model="profileForm.email" 
+                          type="email" 
+                          class="block w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                        >
+                      </div>
+                    </div>
+                    
+                    <div class="rounded-lg bg-slate-50 p-4 dark:bg-slate-800/50">
+                      <h3 class="mb-4 text-sm font-semibold text-slate-900 dark:text-white">Change Password</h3>
+                      <div class="grid gap-6 md:grid-cols-2">
+                        <div>
+                          <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">New Password</label>
+                          <input 
+                            v-model="profileForm.password" 
+                            type="password" 
+                            class="block w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                            placeholder="Leave blank to keep current"
+                          >
+                        </div>
+                        <div>
+                          <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Confirm Password</label>
+                          <input 
+                            v-model="profileForm.password_confirmation" 
+                            type="password" 
+                            class="block w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                            placeholder="Confirm new password"
+                          >
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-4 border-t border-slate-100 pt-6 dark:border-slate-800">
+                       <button 
+                        type="button" 
+                        @click="fetchCurrentUser"
+                        class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                      >
+                        Reset
+                      </button>
+                      <button 
+                        type="submit" 
+                        :disabled="profileSubmitting"
+                        class="rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-70 shadow-sm hover:shadow-indigo-500/30 transition-all"
+                      >
+                        {{ profileSubmitting ? 'Saving...' : 'Save Changes' }}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Project Modal -->
+    <div v-if="showProjectModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-fade-in">
+      <div class="w-full max-w-2xl rounded-2xl bg-white shadow-2xl dark:bg-slate-900 max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-700">
+        <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ editingProject ? 'Edit Project' : 'New Project' }}</h3>
+          <button @click="closeProjectModal" class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+        
+        <form @submit.prevent="saveProject" class="p-6 space-y-5">
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Project Title</label>
+            <input v-model="projectForm.title" type="text" class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800" required>
+          </div>
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Description</label>
+            <textarea v-model="projectForm.description" rows="3" class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800" required></textarea>
+          </div>
+          <div class="grid gap-5 sm:grid-cols-2">
+             <div>
+               <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Image Filename</label>
+               <input v-model="projectForm.image" type="text" class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800" placeholder="dashboard.png">
+             </div>
+             <div>
+               <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Project Type</label>
+               <select v-model="projectForm.type" class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800">
+                 <option value="web">Web Application</option>
+                 <option value="mobile">Mobile Application</option>
+                 <option value="other">Other</option>
+               </select>
+             </div>
+          </div>
+          <div class="grid gap-5 sm:grid-cols-2">
+             <div>
+               <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Live URL</label>
+               <input v-model="projectForm.url" type="url" class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800">
+             </div>
+             <div>
+               <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">GitHub URL</label>
+               <input v-model="projectForm.github_url" type="url" class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800">
+             </div>
+          </div>
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Technologies <span class="text-slate-400 font-normal">(Comma separated)</span></label>
+            <input v-model="projectForm.technologies" type="text" class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800" placeholder="Laravel, Vue, Tailwind">
+          </div>
+          
+          <div class="flex justify-end pt-2">
+            <button type="submit" class="rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 shadow-sm">
+              {{ editingProject ? 'Update Project' : 'Create Project' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Skill Modal -->
+    <div v-if="showSkillModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-fade-in">
+      <div class="w-full max-w-md rounded-2xl bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+        <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ editingSkill ? 'Edit Skill' : 'New Skill' }}</h3>
+          <button @click="closeSkillModal" class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+        
+        <form @submit.prevent="saveSkill" class="p-6 space-y-5">
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Skill Name</label>
+            <input v-model="skillForm.name" type="text" class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800" required>
+          </div>
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Category</label>
+            <input v-model="skillForm.category" type="text" class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800" placeholder="Backend, Frontend..." required>
+          </div>
+          <div class="grid gap-5 grid-cols-2">
+             <div>
+               <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Proficiency (%)</label>
+               <input v-model.number="skillForm.proficiency" type="number" min="0" max="100" class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800" required>
+             </div>
+             <div>
+               <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Icon (Text)</label>
+               <input v-model="skillForm.icon" type="text" class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800" placeholder="e.g. L">
+             </div>
+          </div>
+          
+          <div class="flex justify-end pt-2">
+            <button type="submit" class="rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 shadow-sm">
+              {{ editingSkill ? 'Update Skill' : 'Create Skill' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, shallowRef, watch } from 'vue';
 import axios from 'axios';
 
+// Icons (Simple SVGs as components)
+const DashboardIcon = { template: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>' };
+const ProjectIcon = { template: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>' };
+const SkillIcon = { template: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>' };
+const UserIcon = { template: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>' };
+const SuccessIcon = { template: '<svg class="text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' };
+const ErrorIcon = { template: '<svg class="text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' };
+
+const tabs = [
+  { id: 'dashboard', label: 'Dashboard', icon: shallowRef(DashboardIcon) },
+  { id: 'projects', label: 'Projects', icon: shallowRef(ProjectIcon) },
+  { id: 'skills', label: 'Skills', icon: shallowRef(SkillIcon) },
+  { id: 'profile', label: 'Settings', icon: shallowRef(UserIcon) },
+];
+
+// Layout State
+const sidebarOpen = ref(false);
+const currentTab = ref('dashboard');
 const user = ref(null);
-const loginForm = reactive({
-  email: 'test@example.com',
-  password: '',
+
+watch(currentTab, () => {
+  searchQuery.value = '';
 });
+
+// Toast State
+const toasts = ref([]);
+let toastId = 0;
+
+function addToast(message, type = 'info') {
+  const id = toastId++;
+  const icon = type === 'success' ? SuccessIcon : (type === 'error' ? ErrorIcon : SuccessIcon);
+  toasts.value.push({ id, message, type, icon });
+  setTimeout(() => removeToast(id), 5000);
+}
+
+function removeToast(id) {
+  toasts.value = toasts.value.filter(t => t.id !== id);
+}
+
+// Auth State
+const loginForm = reactive({ email: '', password: '' });
 const loginState = ref('idle');
 const loginError = ref('');
 
+// Data State
+const projects = ref([]);
+const skills = ref([]);
+const searchQuery = ref('');
+
+const filteredProjects = computed(() => {
+  if (!searchQuery.value) return projects.value;
+  const lowerQuery = searchQuery.value.toLowerCase();
+  return projects.value.filter(p => 
+    p.title.toLowerCase().includes(lowerQuery) || 
+    p.description.toLowerCase().includes(lowerQuery) ||
+    (Array.isArray(p.technologies) && p.technologies.some(t => t.toLowerCase().includes(lowerQuery)))
+  );
+});
+
+const filteredSkills = computed(() => {
+  if (!searchQuery.value) return skills.value;
+  const lowerQuery = searchQuery.value.toLowerCase();
+  return skills.value.filter(s => 
+    s.name.toLowerCase().includes(lowerQuery) || 
+    s.category.toLowerCase().includes(lowerQuery)
+  );
+});
+
+// Project Modal State
+const showProjectModal = ref(false);
+const editingProject = ref(null);
 const projectForm = reactive({
   title: '',
   description: '',
@@ -296,38 +648,27 @@ const projectForm = reactive({
   type: 'web',
   technologies: '',
 });
-const projectSubmitting = ref(false);
-const projectError = ref('');
 
+// Skill Modal State
+const showSkillModal = ref(false);
+const editingSkill = ref(null);
 const skillForm = reactive({
   name: '',
   category: '',
   proficiency: 80,
   icon: '',
 });
-const skillSubmitting = ref(false);
-const skillError = ref('');
 
-const userInitials = computed(() => {
-  if (!user.value || !user.value.name) {
-    return 'AD';
-  }
-
-  const parts = user.value.name.split(' ').filter(Boolean);
-
-  if (!parts.length) {
-    return 'AD';
-  }
-
-  if (parts.length === 1) {
-    return parts[0].charAt(0).toUpperCase();
-  }
-
-  return (
-    parts[0].charAt(0).toUpperCase() +
-    parts[parts.length - 1].charAt(0).toUpperCase()
-  );
+// Profile State
+const profileForm = reactive({
+  name: '',
+  email: '',
+  password: '',
+  password_confirmation: '',
 });
+const profileSubmitting = ref(false);
+
+// --- Auth Functions ---
 
 function setToken(token) {
   window.localStorage.setItem('access_token', token);
@@ -343,8 +684,11 @@ async function fetchCurrentUser() {
   try {
     const { data } = await axios.get('/auth/me');
     user.value = data;
+    profileForm.name = data.name;
+    profileForm.email = data.email;
+    await loadData();
   } catch {
-    user.value = null;
+    handleLogout();
   }
 }
 
@@ -361,93 +705,201 @@ async function handleLogin() {
     if (data && data.access_token) {
       setToken(data.access_token);
       await fetchCurrentUser();
-    } else {
-      loginError.value = 'Unexpected response from server.';
+      addToast('Welcome back!', 'success');
     }
   } catch {
-    loginError.value = 'Invalid credentials or server error.';
+    loginError.value = 'Invalid credentials.';
+    addToast('Login failed. Please check your credentials.', 'error');
   } finally {
     loginState.value = 'idle';
   }
 }
 
 async function handleLogout() {
+  try { await axios.post('/auth/logout'); } catch {}
+  clearToken();
+  user.value = null;
+  addToast('Signed out successfully.', 'info');
+}
+
+async function loadData() {
   try {
-    await axios.post('/auth/logout');
-  } catch {
-  } finally {
-    clearToken();
-    user.value = null;
+    const [pRes, sRes] = await Promise.all([
+      axios.get('/projects'),
+      axios.get('/skills')
+    ]);
+    projects.value = pRes.data;
+    skills.value = sRes.data;
+  } catch (e) {
+    console.error(e);
+    addToast('Failed to load data.', 'error');
   }
 }
 
-async function handleCreateProject() {
-  projectSubmitting.value = true;
-  projectError.value = '';
+// --- Project Functions ---
 
-  const technologies = projectForm.technologies
-    ? projectForm.technologies
-        .split(',')
-        .map(value => value.trim())
-        .filter(Boolean)
-    : [];
+function openProjectModal(project = null) {
+  editingProject.value = project;
+  if (project) {
+    projectForm.title = project.title;
+    projectForm.description = project.description;
+    projectForm.image = project.image;
+    projectForm.url = project.url;
+    projectForm.github_url = project.github_url;
+    projectForm.type = project.type;
+    // Handle technologies parsing
+    let techs = project.technologies;
+    if (Array.isArray(techs)) {
+       projectForm.technologies = techs.join(', ');
+    } else {
+       projectForm.technologies = techs || '';
+    }
+  } else {
+    // Reset form
+    Object.keys(projectForm).forEach(k => projectForm[k] = k === 'type' ? 'web' : '');
+  }
+  showProjectModal.value = true;
+}
 
+function closeProjectModal() {
+  showProjectModal.value = false;
+  editingProject.value = null;
+}
+
+async function saveProject() {
   try {
-    await axios.post('/admin/projects', {
-      title: projectForm.title,
-      description: projectForm.description,
-      image: projectForm.image || null,
-      url: projectForm.url || null,
-      github_url: projectForm.github_url || null,
-      type: projectForm.type,
-      technologies,
-    });
+    // Parse technologies
+    let techs = [];
+    if (projectForm.technologies) {
+      techs = projectForm.technologies.split(',').map(t => t.trim()).filter(Boolean);
+    }
 
-    projectForm.title = '';
-    projectForm.description = '';
-    projectForm.image = '';
-    projectForm.url = '';
-    projectForm.github_url = '';
-    projectForm.type = 'web';
-    projectForm.technologies = '';
-  } catch {
-    projectError.value =
-      'Unable to save project. Check your token or input.';
-  } finally {
-    projectSubmitting.value = false;
+    const payload = { ...projectForm, technologies: techs };
+
+    if (editingProject.value) {
+      await axios.put(`/admin/projects/${editingProject.value.id}`, payload);
+      addToast('Project updated successfully.', 'success');
+    } else {
+      await axios.post('/admin/projects', payload);
+      addToast('Project created successfully.', 'success');
+    }
+    
+    await loadData();
+    closeProjectModal();
+  } catch (e) {
+    addToast('Failed to save project.', 'error');
   }
 }
 
-async function handleCreateSkill() {
-  skillSubmitting.value = true;
-  skillError.value = '';
-
+async function deleteProject(id) {
+  if (!confirm('Are you sure you want to delete this project?')) return;
   try {
-    await axios.post('/admin/skills', {
-      name: skillForm.name,
-      category: skillForm.category,
-      proficiency: skillForm.proficiency,
-      icon: skillForm.icon || null,
-    });
+    await axios.delete(`/admin/projects/${id}`);
+    addToast('Project deleted.', 'success');
+    await loadData();
+  } catch {
+    addToast('Failed to delete project.', 'error');
+  }
+}
 
+// --- Skill Functions ---
+
+function openSkillModal(skill = null) {
+  editingSkill.value = skill;
+  if (skill) {
+    skillForm.name = skill.name;
+    skillForm.category = skill.category;
+    skillForm.proficiency = skill.proficiency;
+    skillForm.icon = skill.icon;
+  } else {
     skillForm.name = '';
     skillForm.category = '';
     skillForm.proficiency = 80;
     skillForm.icon = '';
+  }
+  showSkillModal.value = true;
+}
+
+function closeSkillModal() {
+  showSkillModal.value = false;
+  editingSkill.value = null;
+}
+
+async function saveSkill() {
+  try {
+    if (editingSkill.value) {
+      await axios.put(`/admin/skills/${editingSkill.value.id}`, skillForm);
+      addToast('Skill updated successfully.', 'success');
+    } else {
+      await axios.post('/admin/skills', skillForm);
+      addToast('Skill created successfully.', 'success');
+    }
+    await loadData();
+    closeSkillModal();
   } catch {
-    skillError.value =
-      'Unable to save skill. Check your token or input.';
+    addToast('Failed to save skill.', 'error');
+  }
+}
+
+async function deleteSkill(id) {
+  if (!confirm('Are you sure?')) return;
+  try {
+    await axios.delete(`/admin/skills/${id}`);
+    addToast('Skill deleted.', 'success');
+    await loadData();
+  } catch {
+    addToast('Failed to delete skill.', 'error');
+  }
+}
+
+// --- Profile Functions ---
+
+async function handleUpdateProfile() {
+  profileSubmitting.value = true;
+  
+  try {
+    const { data } = await axios.put('/auth/profile', {
+      name: profileForm.name,
+      email: profileForm.email,
+      password: profileForm.password || undefined,
+      password_confirmation: profileForm.password_confirmation || undefined,
+    });
+    
+    user.value = data;
+    addToast('Profile updated successfully.', 'success');
+    profileForm.password = '';
+    profileForm.password_confirmation = '';
+  } catch (error) {
+    addToast(error.response?.data?.message || 'Failed to update profile.', 'error');
   } finally {
-    skillSubmitting.value = false;
+    profileSubmitting.value = false;
   }
 }
 
 onMounted(async () => {
   const token = window.localStorage.getItem('access_token');
-
   if (token) {
     setToken(token);
     await fetchCurrentUser();
   }
 });
 </script>
+
+<style scoped>
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.3s ease;
+}
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateX(20px);
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
