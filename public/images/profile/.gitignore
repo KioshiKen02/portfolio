@@ -1,0 +1,8 @@
+# Place your profile picture in this folder.
+# Example: public/images/profile/profile.jpg
+
+# Ignore everything by default.
+*
+
+# But keep this file.
+!.gitignore

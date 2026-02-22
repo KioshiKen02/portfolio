@@ -1,0 +1,8 @@
+# Place project snapshot images in this folder.
+# Example: public/images/projects/ticketing-app.png
+
+# Ignore everything by default.
+*
+
+# But keep this file.
+!.gitignore
