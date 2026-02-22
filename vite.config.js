@@ -12,10 +12,8 @@ export default defineConfig({
         vue(),
         tailwindcss(),
     ],
-    server: {
-        host: '172.24.240.1',
-        watch: {
-            ignored: ['**/storage/framework/views/**'],
-        },
+    test: {
+        environment: 'jsdom',
+        globals: true,
     },
 });
