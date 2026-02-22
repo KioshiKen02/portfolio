@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-white theme-transition">
-    <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80">
-      <nav class="container mx-auto flex items-center justify-between px-6 py-4">
+    <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80 h-[var(--header-height)]">
+      <nav class="container mx-auto flex h-full items-center justify-between px-6">
         <div class="flex items-center gap-3">
           <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white shadow-lg dark:bg-white dark:text-slate-900">
             <span class="text-xl font-bold">M</span>

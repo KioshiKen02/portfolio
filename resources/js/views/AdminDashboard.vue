@@ -24,20 +24,30 @@
     </div>
 
     <!-- Login View -->
-    <div v-if="!user" class="flex min-h-screen items-center justify-center p-6">
-      <div class="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900">
-        <div class="bg-slate-900 px-8 py-12 text-center">
-           <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500 text-white shadow-lg shadow-indigo-500/30">
-             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+    <div v-if="!user" class="relative flex min-h-screen items-center justify-center overflow-hidden p-6">
+      <!-- Hero Background Gradient -->
+      <div class="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-100 via-white to-white dark:from-slate-900 dark:via-slate-950 dark:to-slate-950 opacity-40"></div>
+      
+      <div class="w-full max-w-md overflow-hidden rounded-[var(--radius-card)] border border-slate-200 bg-white/80 backdrop-blur-xl shadow-2xl dark:border-slate-800 dark:bg-slate-900/80">
+        <div class="bg-slate-900/95 px-8 py-10 text-center relative overflow-hidden">
+           <!-- Code Window Header Style -->
+           <div class="absolute top-4 left-4 flex gap-1.5">
+              <div class="h-3 w-3 rounded-full bg-rose-500"></div>
+              <div class="h-3 w-3 rounded-full bg-amber-500"></div>
+              <div class="h-3 w-3 rounded-full bg-emerald-500"></div>
            </div>
-           <h2 class="text-2xl font-bold text-white">Admin Access</h2>
-           <p class="mt-2 text-slate-400">Secure credential management system</p>
+
+           <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/30">
+             <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+           </div>
+           <h2 class="text-3xl font-bold tracking-tight text-white">Admin Console</h2>
+           <p class="mt-2 text-slate-400 font-medium">System Access Portal</p>
         </div>
         
         <div class="p-8">
-          <form @submit.prevent="handleLogin" class="space-y-5">
+          <form @submit.prevent="handleLogin" class="space-y-6">
             <div>
-              <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Email Address</label>
+              <label class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">Email Address</label>
               <div class="relative">
                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                   <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
@@ -45,7 +55,7 @@
                 <input 
                   v-model="loginForm.email" 
                   type="email" 
-                  class="block w-full rounded-lg border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-4 text-slate-900 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:bg-slate-900"
+                  class="input-field pl-10"
                   placeholder="admin@example.com"
                   required
                 >
@@ -53,7 +63,7 @@
             </div>
             
             <div>
-              <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Password</label>
+              <label class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">Password</label>
               <div class="relative">
                  <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                   <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
@@ -61,14 +71,14 @@
                 <input 
                   v-model="loginForm.password" 
                   :type="showLoginPassword ? 'text' : 'password'" 
-                  class="block w-full rounded-lg border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-10 text-slate-900 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:bg-slate-900"
+                  class="input-field pl-10 pr-10"
                   placeholder="••••••••"
                   required
                 >
                 <button 
                   type="button"
                   @click="showLoginPassword = !showLoginPassword"
-                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer transition-colors"
                   :aria-label="showLoginPassword ? 'Hide password' : 'Show password'"
                 >
                   <svg v-if="showLoginPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
@@ -85,9 +95,9 @@
             <button 
               type="submit" 
               :disabled="loginState === 'submitting'"
-              class="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 font-semibold text-white transition-all hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/25 disabled:opacity-70 disabled:cursor-not-allowed"
+              class="btn-primary w-full"
             >
-              <svg v-if="loginState === 'submitting'" class="h-5 w-5 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              <svg v-if="loginState === 'submitting'" class="h-5 w-5 animate-spin text-white mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
               <span>{{ loginState === 'submitting' ? 'Authenticating...' : 'Sign In' }}</span>
             </button>
           </form>
@@ -96,28 +106,32 @@
     </div>
 
     <!-- Admin Dashboard Layout -->
-    <div v-else class="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
+    <div v-else class="flex min-h-[calc(100vh-var(--header-height))] bg-slate-50 dark:bg-slate-950 relative">
       
       <!-- Mobile Sidebar Overlay -->
-      <div v-if="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 z-20 bg-slate-900/50 backdrop-blur-sm lg:hidden"></div>
+      <div 
+        v-if="sidebarOpen" 
+        @click="sidebarOpen = false" 
+        class="fixed inset-0 z-20 bg-slate-900/50 backdrop-blur-sm lg:hidden top-[var(--header-height)]"
+      ></div>
 
       <!-- Sidebar -->
       <aside 
-        class="fixed inset-y-0 left-0 z-30 w-64 transform border-r border-slate-200 bg-white transition-transform duration-300 dark:border-slate-800 dark:bg-slate-900 lg:static lg:translate-x-0"
+        class="fixed inset-y-0 left-0 z-30 w-64 transform border-r border-slate-200 bg-white transition-transform duration-300 dark:border-slate-800 dark:bg-slate-900 lg:sticky lg:top-[var(--header-height)] lg:h-[calc(100vh-var(--header-height))] lg:translate-x-0 top-[var(--header-height)]"
         :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
       >
         <div class="flex h-full flex-col">
-          <!-- Logo -->
-          <div class="flex h-16 items-center border-b border-slate-100 px-6 dark:border-slate-800">
-            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold mr-3">
-              A
-            </div>
-            <span class="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Admin Console</span>
+          <!-- Logo (Hidden on desktop as App Header exists, visible on mobile inside menu?) -->
+          <!-- Actually, since we have the App Header, do we need the 'Admin Console' logo in the sidebar? 
+               The request says 'hero header remains fully visible'. 
+               If we keep the sidebar below the header, we don't need to duplicate the logo.
+               But the sidebar has navigation. Let's keep it clean. -->
+          <div class="flex h-16 items-center border-b border-slate-100 px-6 dark:border-slate-800 lg:hidden">
+            <span class="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Menu</span>
           </div>
 
           <!-- Navigation -->
           <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-            <p class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Menu</p>
             <button 
               v-for="tab in tabs" 
               :key="tab.id"
@@ -155,8 +169,8 @@
       </aside>
 
       <!-- Main Content Area -->
-      <div class="flex flex-1 flex-col overflow-hidden">
-        <!-- Top Header (Mobile Only) -->
+      <div class="flex flex-1 flex-col">
+        <!-- Top Header (Mobile Only - Menu Toggle) -->
         <header class="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 dark:border-slate-800 dark:bg-slate-900 lg:hidden">
           <button @click="sidebarOpen = true" class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
@@ -166,7 +180,7 @@
         </header>
 
         <!-- Main Scrollable Area -->
-        <main class="flex-1 overflow-y-auto bg-slate-50 p-4 dark:bg-slate-950 lg:p-8">
+        <main class="flex-1 bg-slate-50 p-4 dark:bg-slate-950 lg:p-8">
           <div class="mx-auto max-w-7xl">
             
             <!-- Dashboard View -->
@@ -175,39 +189,42 @@
               
               <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 <!-- Stat Card 1 -->
-                <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+                <div class="card p-6">
                   <div class="flex items-center justify-between">
                     <div>
                       <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Projects</p>
                       <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">{{ projects.length }}</p>
                     </div>
-                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400">
                       <component :is="ProjectIcon" class="h-6 w-6" />
                     </div>
                   </div>
                 </div>
 
                 <!-- Stat Card 2 -->
-                <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+                <div class="card p-6">
                   <div class="flex items-center justify-between">
                     <div>
                       <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Skills</p>
                       <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">{{ skills.length }}</p>
                     </div>
-                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
                       <component :is="SkillIcon" class="h-6 w-6" />
                     </div>
                   </div>
                 </div>
                 
                 <!-- Quick Action Card -->
-                 <div class="rounded-xl border border-slate-200 bg-gradient-to-br from-indigo-600 to-violet-600 p-6 shadow-sm text-white">
-                    <h3 class="font-bold text-lg mb-2">Quick Actions</h3>
-                    <div class="flex gap-2">
-                       <button @click="currentTab = 'projects'; openProjectModal()" class="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors">
+                 <div class="rounded-[var(--radius-card)] border border-slate-200 bg-gradient-to-br from-indigo-600 to-violet-600 p-6 shadow-lg text-white relative overflow-hidden">
+                    <!-- Decor -->
+                    <div class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-white/10 blur-xl"></div>
+                    
+                    <h3 class="font-bold text-lg mb-4 relative z-10">Quick Actions</h3>
+                    <div class="flex gap-3 relative z-10">
+                       <button @click="currentTab = 'projects'; openProjectModal()" class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-semibold backdrop-blur-sm transition-all hover:-translate-y-0.5">
                           + Add Project
                        </button>
-                       <button @click="currentTab = 'skills'; openSkillModal()" class="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors">
+                       <button @click="currentTab = 'skills'; openSkillModal()" class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-semibold backdrop-blur-sm transition-all hover:-translate-y-0.5">
                           + Add Skill
                        </button>
                     </div>
@@ -215,7 +232,7 @@
               </div>
 
               <!-- Recent Activity Table (Placeholder) -->
-              <div class="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <div class="card">
                 <div class="border-b border-slate-100 px-6 py-4 dark:border-slate-800">
                   <h3 class="font-semibold text-slate-900 dark:text-white">System Status</h3>
                 </div>
@@ -244,21 +261,21 @@
                       v-model="searchQuery" 
                       type="text" 
                       placeholder="Search projects..." 
-                      class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-10 pr-4 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800"
+                      class="input-field pl-10"
                     >
                   </div>
                   <button 
                     @click="openProjectModal()"
-                    class="inline-flex flex-shrink-0 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 hover:shadow-indigo-500/30 transition-all"
+                    class="btn-primary"
                   >
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                     <span class="hidden sm:inline">New Project</span>
                     <span class="sm:hidden">Add</span>
                   </button>
                 </div>
               </div>
 
-              <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden dark:border-slate-800 dark:bg-slate-900">
+              <div class="card overflow-hidden">
                 <div class="overflow-x-auto">
                   <table class="w-full text-left text-sm">
                     <thead class="bg-slate-50 text-slate-500 dark:bg-slate-800/50 dark:text-slate-400">
@@ -335,14 +352,14 @@
                       v-model="searchQuery" 
                       type="text" 
                       placeholder="Search skills..." 
-                      class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-10 pr-4 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800"
+                      class="input-field pl-10"
                     >
                   </div>
                   <button 
                     @click="openSkillModal()"
-                    class="inline-flex flex-shrink-0 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 hover:shadow-indigo-500/30 transition-all"
+                    class="btn-primary"
                   >
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                     <span class="hidden sm:inline">New Skill</span>
                     <span class="sm:hidden">Add</span>
                   </button>
@@ -350,13 +367,13 @@
               </div>
 
               <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                <div v-if="filteredSkills.length === 0" class="col-span-full rounded-xl border border-dashed border-slate-300 p-12 text-center text-slate-500 dark:border-slate-700">
+                <div v-if="filteredSkills.length === 0" class="col-span-full rounded-[var(--radius-card)] border border-dashed border-slate-300 p-12 text-center text-slate-500 dark:border-slate-700">
                    {{ searchQuery ? 'No matching skills found' : 'No skills added yet.' }}
                 </div>
                 <div 
                   v-for="skill in filteredSkills" 
                   :key="skill.id" 
-                  class="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-indigo-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-indigo-700 transition-all"
+                  class="card group relative overflow-hidden p-5 hover:border-indigo-300 dark:hover:border-indigo-700 transition-all"
                 >
                   <div class="flex items-start justify-between">
                     <div class="flex items-center gap-3">
@@ -404,12 +421,12 @@
                      v-model="searchQuery" 
                      type="text" 
                      placeholder="Search messages..." 
-                     class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-10 pr-4 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800"
+                     class="input-field pl-10"
                    >
                 </div>
               </div>
 
-              <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden dark:border-slate-800 dark:bg-slate-900">
+              <div class="card overflow-hidden">
                 <div class="overflow-x-auto">
                   <table class="w-full text-left text-sm">
                     <thead class="bg-slate-50 text-slate-500 dark:bg-slate-800/50 dark:text-slate-400">
@@ -468,11 +485,66 @@
               </div>
             </div>
 
+            <!-- Site Settings -->
+            <div v-if="currentTab === 'settings'" class="max-w-4xl animate-fade-in">
+              <div class="flex items-center justify-between mb-6">
+                 <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Site Configuration</h1>
+                 <button 
+                   @click="saveSettings" 
+                   class="btn-primary"
+                 >
+                   Save Changes
+                 </button>
+              </div>
+
+              <div class="card overflow-hidden">
+                <div class="border-b border-slate-100 px-6 py-4 dark:border-slate-800 flex justify-between items-center">
+                   <div>
+                      <h2 class="text-lg font-semibold text-slate-900 dark:text-white">General Settings</h2>
+                      <p class="text-sm text-slate-500">Manage global site configuration variables.</p>
+                   </div>
+                   <button @click="settings.push({ key: '', value: '', type: 'text', group: 'general' })" class="text-sm text-indigo-600 font-medium hover:underline">+ Add Field</button>
+                </div>
+                
+                <div class="p-6 space-y-6">
+                   <div v-if="settings.length === 0" class="text-center py-8 text-slate-500">
+                      No settings found. Add one to get started.
+                   </div>
+                   
+                   <div v-for="(setting, index) in settings" :key="index" class="flex gap-4 items-start group border-b border-slate-50 pb-6 last:border-0 last:pb-0 dark:border-slate-800">
+                      <div class="w-1/3">
+                         <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Key</label>
+                         <input v-model="setting.key" type="text" class="input-field font-mono text-sm" placeholder="e.g. site_title">
+                      </div>
+                      <div class="flex-1">
+                         <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Value</label>
+                         <textarea v-if="setting.type === 'textarea'" v-model="setting.value" rows="3" class="input-field text-sm"></textarea>
+                         <input v-else v-model="setting.value" :type="setting.type" class="input-field text-sm">
+                      </div>
+                      <div class="w-28">
+                         <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Type</label>
+                         <select v-model="setting.type" class="input-field text-sm py-2">
+                            <option value="text">Text</option>
+                            <option value="textarea">Long Text</option>
+                            <option value="email">Email</option>
+                            <option value="url">URL</option>
+                         </select>
+                      </div>
+                      <div class="pt-6">
+                         <button @click="settings.splice(index, 1)" class="p-2 text-slate-400 hover:text-rose-500 transition-colors" title="Remove Field">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                         </button>
+                      </div>
+                   </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Profile Settings -->
             <div v-if="currentTab === 'profile'" class="max-w-2xl animate-fade-in">
               <h1 class="mb-6 text-2xl font-bold text-slate-900 dark:text-white">Profile Settings</h1>
               
-              <div class="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <div class="card overflow-hidden">
                 <div class="border-b border-slate-100 px-6 py-4 dark:border-slate-800">
                    <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Personal Information</h2>
                    <p class="text-sm text-slate-500">Update your account details and password.</p>
@@ -482,19 +554,19 @@
                   <form @submit.prevent="handleUpdateProfile" class="space-y-6">
                     <div class="grid gap-6 md:grid-cols-2">
                       <div>
-                        <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Full Name</label>
+                        <label class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">Full Name</label>
                         <input 
                           v-model="profileForm.name" 
                           type="text" 
-                          class="block w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                          class="input-field"
                         >
                       </div>
                       <div>
-                        <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Email Address</label>
+                        <label class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">Email Address</label>
                         <input 
                           v-model="profileForm.email" 
                           type="email" 
-                          class="block w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                          class="input-field"
                         >
                       </div>
                     </div>
@@ -503,18 +575,18 @@
                       <h3 class="mb-4 text-sm font-semibold text-slate-900 dark:text-white">Change Password</h3>
                       <div class="grid gap-6 md:grid-cols-2">
                         <div>
-                          <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">New Password</label>
+                          <label class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">New Password</label>
                         <div class="relative">
                           <input 
                             v-model="profileForm.password" 
                             :type="showProfilePassword ? 'text' : 'password'" 
-                            class="block w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 pr-10 text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                            class="input-field pr-10"
                             placeholder="Leave blank to keep current"
                           >
                           <button 
                             type="button"
                             @click="showProfilePassword = !showProfilePassword"
-                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer transition-colors"
                             :aria-label="showProfilePassword ? 'Hide password' : 'Show password'"
                           >
                             <svg v-if="showProfilePassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
@@ -523,18 +595,18 @@
                         </div>
                         </div>
                         <div>
-                          <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Confirm Password</label>
+                          <label class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">Confirm Password</label>
                         <div class="relative">
                           <input 
                             v-model="profileForm.password_confirmation" 
                             :type="showProfileConfirmPassword ? 'text' : 'password'" 
-                            class="block w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 pr-10 text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                            class="input-field pr-10"
                             placeholder="Confirm new password"
                           >
                           <button 
                             type="button"
                             @click="showProfileConfirmPassword = !showProfileConfirmPassword"
-                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer transition-colors"
                             :aria-label="showProfileConfirmPassword ? 'Hide password' : 'Show password'"
                           >
                             <svg v-if="showProfileConfirmPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
@@ -549,14 +621,14 @@
                        <button 
                         type="button" 
                         @click="fetchCurrentUser"
-                        class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                        class="btn-secondary"
                       >
                         Reset
                       </button>
                       <button 
                         type="submit" 
                         :disabled="profileSubmitting"
-                        class="rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-70 shadow-sm hover:shadow-indigo-500/30 transition-all"
+                        class="btn-primary"
                       >
                         {{ profileSubmitting ? 'Saving...' : 'Save Changes' }}
                       </button>
@@ -783,6 +855,7 @@ const ProjectIcon = createIcon('M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0
 const SkillIcon = createIcon('M13 10V3L4 14h7v7l9-11h-7z');
 const MessageIcon = createIcon('M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z');
 const UserIcon = createIcon('M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z');
+const SettingsIcon = createIcon('M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z');
 const SuccessIcon = createIcon('M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'text-emerald-500');
 const ErrorIcon = createIcon('M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'text-rose-500');
 
@@ -791,7 +864,8 @@ const tabs = [
   { id: 'projects', label: 'Projects', icon: shallowRef(ProjectIcon) },
   { id: 'skills', label: 'Skills', icon: shallowRef(SkillIcon) },
   { id: 'messages', label: 'Messages', icon: shallowRef(MessageIcon) },
-  { id: 'profile', label: 'Settings', icon: shallowRef(UserIcon) },
+  { id: 'settings', label: 'Site Settings', icon: shallowRef(SettingsIcon) },
+  { id: 'profile', label: 'Profile', icon: shallowRef(UserIcon) },
 ];
 
 // Layout State
@@ -954,22 +1028,78 @@ async function handleLogout() {
   try { await axios.post('/auth/logout'); } catch {}
   clearToken();
   user.value = null;
+  // Clear sensitive data on logout
+  projects.value = [];
+  skills.value = [];
+  messages.value = [];
+  searchQuery.value = '';
   addToast('Signed out successfully.', 'info');
 }
 
-async function loadData() {
+// Settings State
+const settings = ref([]);
+const settingsLoading = ref(false);
+
+// --- Settings Functions ---
+async function loadSettings() {
+  settingsLoading.value = true;
   try {
-    const [pRes, sRes, mRes] = await Promise.all([
-      axios.get('/projects'),
-      axios.get('/skills'),
-      axios.get('/admin/contacts')
-    ]);
-    projects.value = pRes.data;
-    skills.value = sRes.data;
-    messages.value = mRes.data.data; // Paginated response
-  } catch (e) {
-    console.error(e);
-    addToast('Failed to load data.', 'error');
+    const { data } = await axios.get('/admin/settings');
+    settings.value = data;
+    // Ensure default groups exist if empty
+    if (settings.value.length === 0) {
+       settings.value = [
+          { key: 'site_title', value: '', type: 'text', group: 'general' },
+          { key: 'contact_email', value: '', type: 'email', group: 'general' },
+          { key: 'linkedin_url', value: '', type: 'url', group: 'social' },
+          { key: 'github_url', value: '', type: 'url', group: 'social' },
+       ];
+    }
+  } catch {
+    addToast('Failed to load settings.', 'error');
+  } finally {
+    settingsLoading.value = false;
+  }
+}
+
+async function saveSettings() {
+  try {
+    await axios.post('/admin/settings', { settings: settings.value });
+    addToast('Settings saved successfully.', 'success');
+  } catch {
+    addToast('Failed to save settings.', 'error');
+  }
+}
+
+function addSettingField() {
+  settings.value.push({
+    key: `new_setting_${Date.now()}`,
+    value: '',
+    type: 'text',
+    group: 'general'
+  });
+}
+
+function removeSettingField(index) {
+  settings.value.splice(index, 1);
+}
+
+async function loadData() {
+  const results = await Promise.allSettled([
+    axios.get('/projects'),
+    axios.get('/skills'),
+    axios.get('/admin/contacts'),
+    axios.get('/admin/settings')
+  ]);
+
+  const [pRes, sRes, mRes, setRes] = results;
+
+  if (pRes.status === 'fulfilled') projects.value = pRes.value.data;
+  if (sRes.status === 'fulfilled') skills.value = sRes.value.data;
+  if (mRes.status === 'fulfilled') messages.value = mRes.value.data.data;
+  
+  if (setRes.status === 'fulfilled') {
+     settings.value = setRes.value.data;
   }
 }
 

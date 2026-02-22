@@ -32,7 +32,7 @@
 
             <div class="flex flex-wrap gap-4">
               <button @click="scrollToSection('projects')"
-                class="group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-slate-900 px-8 py-4 font-medium text-white shadow-lg transition-all hover:bg-slate-800 hover:shadow-xl dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
+                class="group relative inline-flex items-center justify-center overflow-hidden rounded-[var(--radius-button)] bg-[var(--color-brand)] px-8 py-4 font-medium text-white shadow-lg transition-all hover:bg-[var(--color-brand-hover)] hover:shadow-xl hover:-translate-y-0.5 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
                 View Selected Work
                 <svg class="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
@@ -40,7 +40,7 @@
                 </svg>
               </button>
               <button @click="scrollToSection('contact')"
-                class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-8 py-4 font-medium text-slate-900 transition-all hover:bg-slate-50 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:text-white dark:hover:bg-slate-900">
+                class="inline-flex items-center justify-center rounded-[var(--radius-button)] border border-slate-200 bg-white px-8 py-4 font-medium text-slate-900 transition-all hover:bg-slate-50 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:text-white dark:hover:bg-slate-900">
                 Contact Me
               </button>
             </div>
@@ -361,12 +361,12 @@
             </div>
           </div>
 
-          <div class="rounded-2xl bg-slate-50 p-8 dark:bg-slate-900" v-fade-slide-up>
+          <div class="card p-8" v-fade-slide-up>
             <form @submit.prevent="handleContactSubmit" class="space-y-4">
               <div>
                 <label for="name" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Name</label>
                 <input v-model.trim="form.name" type="text" id="name"
-                  class="mt-1 block w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-white dark:focus:ring-white outline-none transition"
+                  class="input-field mt-1"
                   placeholder="Your Name" />
                 <p v-if="errors.name" class="mt-1 text-xs text-rose-500">{{ errors.name }}</p>
               </div>
@@ -374,7 +374,7 @@
               <div>
                 <label for="email" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Email</label>
                 <input v-model.trim="form.email" type="email" id="email"
-                  class="mt-1 block w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-white dark:focus:ring-white outline-none transition"
+                  class="input-field mt-1"
                   placeholder="you@example.com" />
                 <p v-if="errors.email" class="mt-1 text-xs text-rose-500">{{ errors.email }}</p>
               </div>
@@ -383,13 +383,13 @@
                 <label for="message"
                   class="block text-sm font-medium text-slate-700 dark:text-slate-300">Message</label>
                 <textarea v-model.trim="form.message" id="message" rows="4"
-                  class="mt-1 block w-full resize-none rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-white dark:focus:ring-white outline-none transition"
+                  class="input-field mt-1 resize-none"
                   placeholder="How can I help you?"></textarea>
                 <p v-if="errors.message" class="mt-1 text-xs text-rose-500">{{ errors.message }}</p>
               </div>
 
               <button type="submit" :disabled="submitState === 'submitting'"
-                class="w-full rounded-lg bg-slate-900 px-6 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-slate-800 disabled:opacity-70 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
+                class="btn-primary w-full">
                 <span v-if="submitState === 'submitting'">Sending...</span>
                 <span v-else>Send Message</span>
               </button>
