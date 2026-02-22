@@ -60,11 +60,19 @@
                 </div>
                 <input 
                   v-model="loginForm.password" 
-                  type="password" 
-                  class="block w-full rounded-lg border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-4 text-slate-900 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:bg-slate-900"
+                  :type="showLoginPassword ? 'text' : 'password'" 
+                  class="block w-full rounded-lg border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-10 text-slate-900 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:bg-slate-900"
                   placeholder="••••••••"
                   required
                 >
+                <button 
+                  type="button"
+                  @click="showLoginPassword = !showLoginPassword"
+                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                  :aria-label="showLoginPassword ? 'Hide password' : 'Show password'"
+                >
+                  <component :is="showLoginPassword ? EyeSlashIcon : EyeIcon" class="h-5 w-5" />
+                </button>
               </div>
             </div>
             
@@ -383,6 +391,82 @@
               </div>
             </div>
 
+            <!-- Messages Management -->
+            <div v-if="currentTab === 'messages'" class="space-y-6 animate-fade-in">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Messages</h1>
+                <div class="relative w-full sm:w-64">
+                   <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                   </div>
+                   <input 
+                     v-model="searchQuery" 
+                     type="text" 
+                     placeholder="Search messages..." 
+                     class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-10 pr-4 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800"
+                   >
+                </div>
+              </div>
+
+              <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden dark:border-slate-800 dark:bg-slate-900">
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-slate-500 dark:bg-slate-800/50 dark:text-slate-400">
+                      <tr>
+                        <th class="px-6 py-4 font-medium">Status</th>
+                        <th class="px-6 py-4 font-medium">Sender</th>
+                        <th class="px-6 py-4 font-medium">Subject</th>
+                        <th class="px-6 py-4 font-medium">Date</th>
+                        <th class="px-6 py-4 font-medium text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                      <tr v-if="filteredMessages.length === 0">
+                        <td colspan="5" class="px-6 py-12 text-center text-slate-500">
+                           <div class="flex flex-col items-center justify-center">
+                              <component :is="MessageIcon" class="h-10 w-10 text-slate-300 mb-2" />
+                              <p>{{ searchQuery ? 'No matching messages found' : 'No messages yet' }}</p>
+                           </div>
+                        </td>
+                      </tr>
+                      <tr v-for="message in filteredMessages" :key="message.id" class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer" @click="openMessageModal(message)">
+                        <td class="px-6 py-4">
+                           <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium" 
+                            :class="{
+                              'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300': message.status === 'new',
+                              'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300': message.status === 'read',
+                              'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300': message.status === 'replied'
+                            }">
+                             <span class="h-1.5 w-1.5 rounded-full" :class="{
+                               'bg-indigo-500': message.status === 'new',
+                               'bg-slate-500': message.status === 'read',
+                               'bg-emerald-500': message.status === 'replied'
+                             }"></span>
+                             {{ message.status.charAt(0).toUpperCase() + message.status.slice(1) }}
+                           </span>
+                        </td>
+                        <td class="px-6 py-4">
+                          <div class="font-medium text-slate-900 dark:text-white">{{ message.name }}</div>
+                          <div class="text-xs text-slate-500">{{ message.email }}</div>
+                        </td>
+                        <td class="px-6 py-4 max-w-xs truncate text-slate-600 dark:text-slate-400">
+                          {{ message.subject }}
+                        </td>
+                        <td class="px-6 py-4 text-slate-500">
+                          {{ new Date(message.created_at).toLocaleDateString() }}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                          <button @click.stop="deleteMessage(message.id)" class="rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/20 dark:hover:text-rose-400">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
             <!-- Profile Settings -->
             <div v-if="currentTab === 'profile'" class="max-w-2xl animate-fade-in">
               <h1 class="mb-6 text-2xl font-bold text-slate-900 dark:text-white">Profile Settings</h1>
@@ -419,21 +503,41 @@
                       <div class="grid gap-6 md:grid-cols-2">
                         <div>
                           <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">New Password</label>
+                        <div class="relative">
                           <input 
                             v-model="profileForm.password" 
-                            type="password" 
-                            class="block w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                            :type="showProfilePassword ? 'text' : 'password'" 
+                            class="block w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 pr-10 text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                             placeholder="Leave blank to keep current"
                           >
+                          <button 
+                            type="button"
+                            @click="showProfilePassword = !showProfilePassword"
+                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                            :aria-label="showProfilePassword ? 'Hide password' : 'Show password'"
+                          >
+                            <component :is="showProfilePassword ? EyeSlashIcon : EyeIcon" class="h-5 w-5" />
+                          </button>
+                        </div>
                         </div>
                         <div>
                           <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Confirm Password</label>
+                        <div class="relative">
                           <input 
                             v-model="profileForm.password_confirmation" 
-                            type="password" 
-                            class="block w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                            :type="showProfileConfirmPassword ? 'text' : 'password'" 
+                            class="block w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 pr-10 text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                             placeholder="Confirm new password"
                           >
+                          <button 
+                            type="button"
+                            @click="showProfileConfirmPassword = !showProfileConfirmPassword"
+                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                            :aria-label="showProfileConfirmPassword ? 'Hide password' : 'Show password'"
+                          >
+                            <component :is="showProfileConfirmPassword ? EyeSlashIcon : EyeIcon" class="h-5 w-5" />
+                          </button>
+                        </div>
                         </div>
                       </div>
                     </div>
@@ -561,6 +665,89 @@
       </div>
     </div>
 
+    <!-- Message Modal -->
+    <div v-if="showMessageModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-fade-in">
+      <div class="w-full max-w-2xl rounded-2xl bg-white shadow-2xl dark:bg-slate-900 max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-700 flex flex-col">
+        <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
+          <div class="flex items-center gap-3">
+             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+             </div>
+             <div>
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ selectedMessage?.name }}</h3>
+                <p class="text-xs text-slate-500">{{ selectedMessage?.email }}</p>
+             </div>
+          </div>
+          <button @click="closeMessageModal" class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+        
+        <div class="p-6 flex-1 overflow-y-auto">
+           <div class="mb-6">
+              <div class="flex items-center justify-between mb-2">
+                 <h4 class="font-semibold text-slate-900 dark:text-white">{{ selectedMessage?.subject }}</h4>
+                 <span class="text-xs text-slate-500">{{ new Date(selectedMessage?.created_at).toLocaleString() }}</span>
+              </div>
+              <div class="rounded-lg bg-slate-50 p-4 text-sm leading-relaxed text-slate-700 dark:bg-slate-800/50 dark:text-slate-300 whitespace-pre-wrap">
+                {{ selectedMessage?.message }}
+              </div>
+           </div>
+
+           <div class="border-t border-slate-100 pt-6 dark:border-slate-800">
+              <h4 class="mb-3 font-semibold text-slate-900 dark:text-white">Reply via Email</h4>
+              <textarea 
+                v-model="replyMessage" 
+                rows="5" 
+                class="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800"
+                placeholder="Type your reply here..."
+              ></textarea>
+              <div class="flex justify-end pt-4">
+                <button 
+                  @click="sendReply" 
+                  :disabled="sendingReply || !replyMessage.trim()"
+                  class="flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed shadow-sm"
+                >
+                  <svg v-if="sendingReply" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  <svg v-else class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                  {{ sendingReply ? 'Sending...' : 'Send Reply' }}
+                </button>
+              </div>
+           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-desc">
+      <div class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+        <div class="flex items-center justify-center mb-4">
+          <div class="rounded-full bg-rose-100 p-3 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400">
+             <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+          </div>
+        </div>
+        <h3 id="modal-title" class="mb-2 text-center text-xl font-bold text-slate-900 dark:text-white">Delete Message?</h3>
+        <p id="modal-desc" class="mb-6 text-center text-sm text-slate-500 dark:text-slate-400">
+          Are you sure you want to delete this message? This action cannot be undone.
+        </p>
+        <div class="grid grid-cols-2 gap-3">
+          <button 
+            @click="showDeleteModal = false"
+            class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-colors"
+          >
+            Cancel
+          </button>
+          <button 
+            @click="confirmDelete"
+            :disabled="isDeleting"
+            class="flex items-center justify-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500 disabled:opacity-70 disabled:cursor-not-allowed shadow-sm transition-colors"
+          >
+            {{ isDeleting ? 'Deleting...' : 'Delete' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -572,14 +759,18 @@ import axios from 'axios';
 const DashboardIcon = { template: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>' };
 const ProjectIcon = { template: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>' };
 const SkillIcon = { template: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>' };
+const MessageIcon = { template: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>' };
 const UserIcon = { template: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>' };
 const SuccessIcon = { template: '<svg class="text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' };
 const ErrorIcon = { template: '<svg class="text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' };
+const EyeIcon = { template: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>' };
+const EyeSlashIcon = { template: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>' };
 
 const tabs = [
   { id: 'dashboard', label: 'Dashboard', icon: shallowRef(DashboardIcon) },
   { id: 'projects', label: 'Projects', icon: shallowRef(ProjectIcon) },
   { id: 'skills', label: 'Skills', icon: shallowRef(SkillIcon) },
+  { id: 'messages', label: 'Messages', icon: shallowRef(MessageIcon) },
   { id: 'profile', label: 'Settings', icon: shallowRef(UserIcon) },
 ];
 
@@ -611,6 +802,12 @@ function removeToast(id) {
 const loginForm = reactive({ email: '', password: '' });
 const loginState = ref('idle');
 const loginError = ref('');
+const showLoginPassword = ref(false);
+
+// Delete Confirmation State
+const showDeleteModal = ref(false);
+const itemToDelete = ref(null);
+const isDeleting = ref(false);
 
 // Data State
 const projects = ref([]);
@@ -635,6 +832,22 @@ const filteredSkills = computed(() => {
     s.category.toLowerCase().includes(lowerQuery)
   );
 });
+
+// Messages State
+const messages = ref([]);
+const filteredMessages = computed(() => {
+  if (!searchQuery.value) return messages.value;
+  const lowerQuery = searchQuery.value.toLowerCase();
+  return messages.value.filter(m => 
+    m.name.toLowerCase().includes(lowerQuery) || 
+    m.email.toLowerCase().includes(lowerQuery) || 
+    m.subject.toLowerCase().includes(lowerQuery)
+  );
+});
+const showMessageModal = ref(false);
+const selectedMessage = ref(null);
+const replyMessage = ref('');
+const sendingReply = ref(false);
 
 // Project Modal State
 const showProjectModal = ref(false);
@@ -667,6 +880,8 @@ const profileForm = reactive({
   password_confirmation: '',
 });
 const profileSubmitting = ref(false);
+const showProfilePassword = ref(false);
+const showProfileConfirmPassword = ref(false);
 
 // --- Auth Functions ---
 
@@ -724,15 +939,85 @@ async function handleLogout() {
 
 async function loadData() {
   try {
-    const [pRes, sRes] = await Promise.all([
+    const [pRes, sRes, mRes] = await Promise.all([
       axios.get('/projects'),
-      axios.get('/skills')
+      axios.get('/skills'),
+      axios.get('/admin/contacts')
     ]);
     projects.value = pRes.data;
     skills.value = sRes.data;
+    messages.value = mRes.data.data; // Paginated response
   } catch (e) {
     console.error(e);
     addToast('Failed to load data.', 'error');
+  }
+}
+
+// --- Message Functions ---
+
+async function openMessageModal(message) {
+  selectedMessage.value = message;
+  replyMessage.value = '';
+  showMessageModal.value = true;
+  
+  if (message.status === 'new') {
+    try {
+      await axios.get(`/admin/contacts/${message.id}`);
+      message.status = 'read';
+    } catch {}
+  }
+}
+
+function closeMessageModal() {
+  showMessageModal.value = false;
+  selectedMessage.value = null;
+}
+
+async function sendReply() {
+  if (!replyMessage.value.trim()) return;
+  
+  sendingReply.value = true;
+  try {
+    await axios.post(`/admin/contacts/${selectedMessage.value.id}/reply`, {
+      reply_message: replyMessage.value
+    });
+    
+    selectedMessage.value.status = 'replied';
+    addToast('Reply sent successfully.', 'success');
+    closeMessageModal();
+  } catch {
+    addToast('Failed to send reply.', 'error');
+  } finally {
+    sendingReply.value = false;
+  }
+}
+
+async function deleteMessage(id) {
+  itemToDelete.value = { id, type: 'message' };
+  showDeleteModal.value = true;
+}
+
+async function confirmDelete() {
+  if (!itemToDelete.value) return;
+
+  isDeleting.value = true;
+  const { id, type } = itemToDelete.value;
+
+  try {
+    if (type === 'message') {
+      await axios.delete(`/admin/contacts/${id}`);
+      messages.value = messages.value.filter(m => m.id !== id);
+      addToast('Message deleted.', 'success');
+      if (selectedMessage.value && selectedMessage.value.id === id) {
+        closeMessageModal();
+      }
+    }
+  } catch {
+    addToast('Failed to delete item.', 'error');
+  } finally {
+    isDeleting.value = false;
+    showDeleteModal.value = false;
+    itemToDelete.value = null;
   }
 }
 

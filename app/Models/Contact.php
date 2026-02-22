@@ -14,5 +14,29 @@ class Contact extends Model
         'email',
         'subject',
         'message',
+        'status',
+        'ip_address',
+        'read_at',
+        'replied_at',
     ];
+
+    protected $casts = [
+        'read_at' => 'datetime',
+        'replied_at' => 'datetime',
+    ];
+
+    public function scopeNew($query)
+    {
+        return $query->where('status', 'new');
+    }
+
+    public function scopeRead($query)
+    {
+        return $query->where('status', 'read');
+    }
+
+    public function scopeReplied($query)
+    {
+        return $query->where('status', 'replied');
+    }
 }

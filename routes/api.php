@@ -22,6 +22,11 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/skills', [SkillController::class, 'store']);
         Route::put('/skills/{skill}', [SkillController::class, 'update']);
         Route::delete('/skills/{skill}', [SkillController::class, 'destroy']);
+
+        Route::get('/contacts', [ContactController::class, 'index']);
+        Route::get('/contacts/{contact}', [ContactController::class, 'show']);
+        Route::post('/contacts/{contact}/reply', [ContactController::class, 'reply']);
+        Route::delete('/contacts/{contact}', [ContactController::class, 'destroy']);
     });
 });
 
