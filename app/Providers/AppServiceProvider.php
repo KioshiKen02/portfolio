@@ -22,11 +22,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (Schema::hasTable('settings')) {
-            View::composer('app', function ($view) {
-                $settings = Setting::all()->pluck('value', 'key');
-                $view->with('settings', $settings);
-            });
+        try {
+            if (Schema::hasTable('settings')) {
+                View::composer('app', function ($view) {
+                    $settings = Setting::all()->pluck('value', 'key');
+                    $view->with('settings', $settings);
+                });
+            }
+        } catch (\Exception $e) {
+            // Log the error or ignore it if the DB isn't ready yet
         }
     }
 }
