@@ -47,15 +47,11 @@ Your project has been pre-configured with `vercel.json` and `api/index.php` to r
 In the "Build & Development Settings" section:
 - **Build Command**: Override and enter:
   ```bash
-  npm install && npm run build && php artisan config:cache && php artisan route:cache && php artisan view:cache
+  npm run build
   ```
 - **Output Directory**: Override and enter: `public`
-- **Install Command**: Leave default (or `composer install --no-dev --optimize-autoloader` if you need custom composer logic, but Vercel usually handles this automatically if `composer.json` is present).
-  *Note: To ensure PHP dependencies are installed, you might need to add `composer install` to the build command or rely on Vercel's auto-detection.*
-  **Recommended Build Command**:
-  ```bash
-  composer install --no-dev --optimize-autoloader && npm install && npm run build && php artisan config:cache && php artisan route:cache
-  ```
+- **Install Command**: Leave default (or empty).
+  *Note: Do NOT include `composer` or `php` commands here. Vercel's build environment is Node.js-based. The `vercel-php` runtime will automatically install PHP dependencies (composer) during the deployment phase.*
 
 ### 3. Environment Variables
 Add the following environment variables in the Vercel project settings:
