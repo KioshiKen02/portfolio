@@ -12,9 +12,9 @@ const router = createRouter({
             name: 'home',
             component: HomeView,
             meta: {
-                title: 'Full-Stack Web & Mobile Developer Portfolio',
+                title: 'System Programmer – Melvin Rey C Tambis',
                 description:
-                    'Portfolio website built with Laravel 12 and Vue 3 showcasing full-stack and mobile projects.',
+                    'Portfolio of Melvin Rey C Tambis, System Programmer specializing in PHP Laravel backends, Vue.js frontends, and Flutter mobile applications.',
             },
         },
         {
@@ -22,9 +22,9 @@ const router = createRouter({
             name: 'admin',
             component: AdminDashboard,
             meta: {
-                title: 'Admin – Portfolio Projects and Skills Management',
+                title: 'Admin – Melvin Rey C Tambis',
                 description:
-                    'Protected admin panel to manage portfolio projects and skills using JWT authentication.',
+                    'Protected admin panel to manage portfolio projects and skills.',
             },
         },
     ],
@@ -51,10 +51,19 @@ const router = createRouter({
 });
 
 router.afterEach(to => {
-    const defaultTitle =
-        'Full-Stack Web & Mobile Developer Portfolio';
-
-    document.title = to.meta?.title || defaultTitle;
+    const settings = window.AppConfig?.settings || {};
+    const siteTitle = settings.site_title || 'Melvin Rey C Tambis';
+    const siteDesc = settings.site_description || 'System Programmer';
+    
+    // Construct title: "Page Title - Site Name" or just "Site Name - Tagline"
+    const pageTitle = to.meta?.title || `${siteTitle} – ${siteDesc}`;
+    
+    // If dynamic settings exist, override hardcoded meta title logic
+    if (settings.site_title && to.meta?.title && to.meta.title.includes('Melvin Rey C Tambis')) {
+         document.title = to.meta.title.replace('Melvin Rey C Tambis', siteTitle);
+    } else {
+         document.title = pageTitle;
+    }
 
     const description = document.querySelector(
         'meta[name="description"]'
@@ -64,7 +73,7 @@ router.afterEach(to => {
         description.setAttribute(
             'content',
             to.meta?.description ||
-                'Portfolio website built with Laravel 12 and Vue 3.'
+                `Portfolio of ${settings.site_author || 'Melvin Rey C Tambis'} specializing in ${siteDesc}.`
         );
     }
 });

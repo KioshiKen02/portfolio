@@ -3,15 +3,15 @@
     <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80 h-[var(--header-height)]">
       <nav class="container mx-auto flex h-full items-center justify-between px-6">
         <div class="flex items-center gap-3">
-          <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white shadow-lg dark:bg-white dark:text-slate-900">
-            <span class="text-xl font-bold">M</span>
+          <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 overflow-hidden">
+             <img :src="settings.site_logo || '/logo.svg'" alt="Logo" class="h-6 w-6" />
           </span>
           <div class="leading-tight">
             <div class="text-sm font-bold tracking-tight text-slate-900 dark:text-white">
-              Melvin Rey C Tambis
+              {{ settings.site_title || 'Melvin Rey C Tambis' }}
             </div>
             <div class="text-xs font-medium text-slate-500 dark:text-slate-400">
-              System Programmer
+              {{ settings.site_description || 'System Programmer' }}
             </div>
           </div>
         </div>
@@ -72,6 +72,8 @@ const theme = ref(isDark ? 'dark' : 'light');
 
 const router = useRouter();
 const route = useRoute();
+
+const settings = ref(window.AppConfig?.settings || {});
 
 function applyTheme(value) {
   const root = document.documentElement;

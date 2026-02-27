@@ -21,12 +21,12 @@
             </div>
 
             <h1 class="text-5xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-6xl xl:text-7xl">
-              Building scalable <br />
+              {{ settings.site_title || 'Building scalable' }} <br />
               <span class="text-slate-500 dark:text-slate-400">digital systems.</span>
             </h1>
 
             <p class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-400">
-              I'm <strong class="text-slate-900 dark:text-white">Melvin Rey C Tambis</strong>, a System Programmer
+              I'm <strong class="text-slate-900 dark:text-white">{{ settings.site_author || 'Melvin Rey C Tambis' }}</strong>, a {{ settings.site_description || 'System Programmer' }}
               crafting high-performance Laravel backends, reactive Vue.js interfaces, and cross-platform Flutter apps.
             </p>
 
@@ -340,8 +340,8 @@
                 </div>
                 <div>
                   <h3 class="font-semibold text-slate-900 dark:text-white">Email</h3>
-                  <a href="mailto:official.melvinreytambis@gmail.com"
-                    class="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">official.melvinreytambis@gmail.com</a>
+                  <a :href="`mailto:${settings.contact_email || 'official.melvinreytambis@gmail.com'}`"
+                    class="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">{{ settings.contact_email || 'official.melvinreytambis@gmail.com' }}</a>
                 </div>
               </div>
               <div class="flex items-start gap-4">
@@ -354,8 +354,8 @@
                 </div>
                 <div>
                   <h3 class="font-semibold text-slate-900 dark:text-white">GitHub</h3>
-                  <a href="https://github.com/KioshiKen02" target="_blank"
-                    class="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">github.com/KioshiKen02</a>
+                  <a :href="settings.github_url || 'https://github.com/KioshiKen02'" target="_blank"
+                    class="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">{{ (settings.github_url || 'github.com/KioshiKen02').replace(/^https?:\/\//, '') }}</a>
                 </div>
               </div>
             </div>
@@ -418,6 +418,7 @@ const projects = ref([]);
 const skills = ref([]);
 const loadingProjects = ref(false);
 const loadingSkills = ref(false);
+const settings = ref(window.AppConfig?.settings || {});
 
 const form = reactive({
   name: '',
