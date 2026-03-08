@@ -12,6 +12,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
     Route::match(['get', 'post'], '/me', [AuthController::class, 'me']);
+    Route::put('/profile', [AuthController::class, 'update']);
 });
 
 Route::middleware('auth:api')->group(function () {
