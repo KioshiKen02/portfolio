@@ -15,5 +15,13 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->report(function (\Throwable $e) {
+            if (php_sapi_name() === 'cli' || env('LOG_CHANNEL') === 'stderr') {
+                file_put_contents('php://stderr', "Exception: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n");
+            }
+        });
     })->create();
+
+$app->register(\Illuminate\View\ViewServiceProvider::class);
+
+return $app;
