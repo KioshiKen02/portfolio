@@ -23,14 +23,19 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         try {
-            if (Schema::hasTable('settings')) {
+            // Only run if not in console and the table exists
+            if (!$this->app->runningInConsole() && Schema::hasTable('settings')) {
                 View::composer('app', function ($view) {
-                    $settings = Setting::all()->pluck('value', 'key');
-                    $view->with('settings', $settings);
+                    try {
+                        $settings = Setting::all()->pluck('value', 'key');
+                        $view->with('settings', $settings);
+                    } catch (\Throwable $e) {
+                        $view->with('settings', collect());
+                    }
                 });
             }
-        } catch (\Exception $e) {
-            // Log the error or ignore it if the DB isn't ready yet
+        } catch (\Throwable $e) {
+            // Silently fail during boot to avoid exception loops on Vercel
         }
     }
 }
