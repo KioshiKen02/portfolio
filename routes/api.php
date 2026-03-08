@@ -7,30 +7,23 @@ use App\Http\Controllers\SkillController;
 use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/auth/login', [AuthController::class, 'login']);
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'auth'
+], function ($router) {
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('refresh', [AuthController::class, 'refresh']);
+    Route::post('me', [AuthController::class, 'me']);
+});
 
 Route::middleware('auth:api')->group(function () {
-    Route::get('/auth/me', [AuthController::class, 'me']);
-    Route::post('/auth/logout', [AuthController::class, 'logout']);
-    Route::post('/auth/refresh', [AuthController::class, 'refresh']);
-    Route::put('/auth/profile', [AuthController::class, 'update']);
-
     Route::prefix('admin')->group(function () {
-        Route::post('/projects', [ProjectController::class, 'store']);
-        Route::put('/projects/{project}', [ProjectController::class, 'update']);
-        Route::delete('/projects/{project}', [ProjectController::class, 'destroy']);
-
-        Route::post('/skills', [SkillController::class, 'store']);
-        Route::put('/skills/{skill}', [SkillController::class, 'update']);
-        Route::delete('/skills/{skill}', [SkillController::class, 'destroy']);
-
-        Route::get('/contacts', [ContactController::class, 'index']);
-        Route::get('/contacts/{contact}', [ContactController::class, 'show']);
-        Route::post('/contacts/{contact}/reply', [ContactController::class, 'reply']);
-        Route::delete('/contacts/{contact}', [ContactController::class, 'destroy']);
-
-        Route::get('/settings', [SettingController::class, 'index']);
-        Route::post('/settings', [SettingController::class, 'update']);
+        Route::apiResource('projects', ProjectController::class);
+        Route::apiResource('skills', SkillController::class);
+        Route::apiResource('settings', SettingController::class);
+        Route::get('contacts', [ContactController::class, 'index']);
+        Route::delete('contacts/{id}', [ContactController::class, 'destroy']);
     });
 });
 

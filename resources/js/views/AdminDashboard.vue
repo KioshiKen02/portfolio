@@ -1006,6 +1006,7 @@ async function handleLogin() {
   loginError.value = '';
 
   try {
+    // await axios.get('/sanctum/csrf-cookie'); // Not using Sanctum cookies for JWT auth
     const { data } = await axios.post('/auth/login', {
       email: loginForm.email,
       password: loginForm.password,
@@ -1015,9 +1016,11 @@ async function handleLogin() {
       setToken(data.access_token);
       await fetchCurrentUser();
       addToast('Welcome back!', 'success');
+      currentTab.value = 'dashboard';
     }
-  } catch {
-    loginError.value = 'Invalid credentials.';
+  } catch (error) {
+    console.error('Login error:', error);
+    loginError.value = error.response?.data?.message || 'Invalid credentials.';
     addToast('Login failed. Please check your credentials.', 'error');
   } finally {
     loginState.value = 'idle';
