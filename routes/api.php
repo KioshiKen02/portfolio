@@ -7,13 +7,11 @@ use App\Http\Controllers\SkillController;
 use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
 
-Route::group([
-    'prefix' => 'auth'
-], function ($router) {
+Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
-    Route::post('/me', [AuthController::class, 'me']);
+    Route::match(['get', 'post'], '/me', [AuthController::class, 'me']);
 });
 
 Route::middleware('auth:api')->group(function () {
