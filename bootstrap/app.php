@@ -23,5 +23,6 @@ return Application::configure(basePath: dirname(__DIR__))
     })->create();
 
 $app->register(\Illuminate\View\ViewServiceProvider::class);
+$app->register(\Illuminate\Filesystem\FilesystemServiceProvider::class);
 
 return $app;
