@@ -51,6 +51,28 @@ class ProjectController extends Controller
         return response()->json($project);
     }
 
+    public function upload(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+        ]);
+
+        if ($request->hasFile('image')) {
+            // Determine disk based on environment
+            $disk = env('FILESYSTEM_DISK', 'public');
+            
+            // Store the file
+            $path = $request->file('image')->store('projects', $disk);
+            
+            // Get the URL
+            $url = \Illuminate\Support\Facades\Storage::disk($disk)->url($path);
+            
+            return response()->json(['url' => $url]);
+        }
+
+        return response()->json(['message' => 'Upload failed'], 400);
+    }
+
     public function destroy(Project $project)
     {
         $project->delete();

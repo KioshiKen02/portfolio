@@ -17,6 +17,7 @@ Route::prefix('auth')->group(function () {
 
 Route::middleware('auth:api')->group(function () {
     Route::prefix('admin')->group(function () {
+        Route::post('upload', [ProjectController::class, 'upload']);
         Route::apiResource('projects', ProjectController::class);
         Route::apiResource('skills', SkillController::class);
         Route::apiResource('settings', SettingController::class);

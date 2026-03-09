@@ -60,6 +60,19 @@ return [
             'report' => false,
         ],
 
+        'supabase' => [
+            'driver' => 's3',
+            'key' => env('SUPABASE_ACCESS_KEY_ID'), // Your Supabase S3 Access Key
+            'secret' => env('SUPABASE_SECRET_ACCESS_KEY'), // Your Supabase S3 Secret Key
+            'region' => env('SUPABASE_REGION', 'us-east-1'), // Supabase uses a dummy region
+            'bucket' => env('SUPABASE_BUCKET'), // Your Bucket Name (e.g., 'projects')
+            'url' => env('SUPABASE_URL'), // The public URL base
+            'endpoint' => env('SUPABASE_ENDPOINT'), // https://<project-ref>.supabase.co/storage/v1/s3
+            'use_path_style_endpoint' => true,
+            'throw' => false,
+            'report' => false,
+        ],
+
     ],
 
     /*
