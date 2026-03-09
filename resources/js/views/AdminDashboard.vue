@@ -909,33 +909,36 @@ const skills = ref([]);
 const searchQuery = ref('');
 
 const filteredProjects = computed(() => {
+  if (!projects.value) return [];
   if (!searchQuery.value) return projects.value;
   const lowerQuery = searchQuery.value.toLowerCase();
   return projects.value.filter(p => 
-    p.title.toLowerCase().includes(lowerQuery) || 
-    p.description.toLowerCase().includes(lowerQuery) ||
+    (p.title && p.title.toLowerCase().includes(lowerQuery)) || 
+    (p.description && p.description.toLowerCase().includes(lowerQuery)) ||
     (Array.isArray(p.technologies) && p.technologies.some(t => t.toLowerCase().includes(lowerQuery)))
   );
 });
 
 const filteredSkills = computed(() => {
+  if (!skills.value) return [];
   if (!searchQuery.value) return skills.value;
   const lowerQuery = searchQuery.value.toLowerCase();
   return skills.value.filter(s => 
-    s.name.toLowerCase().includes(lowerQuery) || 
-    s.category.toLowerCase().includes(lowerQuery)
+    (s.name && s.name.toLowerCase().includes(lowerQuery)) || 
+    (s.category && s.category.toLowerCase().includes(lowerQuery))
   );
 });
 
 // Messages State
 const messages = ref([]);
 const filteredMessages = computed(() => {
+  if (!messages.value) return [];
   if (!searchQuery.value) return messages.value;
   const lowerQuery = searchQuery.value.toLowerCase();
   return messages.value.filter(m => 
-    m.name.toLowerCase().includes(lowerQuery) || 
-    m.email.toLowerCase().includes(lowerQuery) || 
-    m.subject.toLowerCase().includes(lowerQuery)
+    (m.name && m.name.toLowerCase().includes(lowerQuery)) || 
+    (m.email && m.email.toLowerCase().includes(lowerQuery)) || 
+    (m.subject && m.subject.toLowerCase().includes(lowerQuery))
   );
 });
 const showMessageModal = ref(false);
