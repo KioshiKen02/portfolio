@@ -4,6 +4,9 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -18,6 +21,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->report(function (\Throwable $e) {
             if (php_sapi_name() === 'cli' || env('LOG_CHANNEL') === 'stderr') {
                 file_put_contents('php://stderr', "Exception: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n");
+            }
+        });
+
+        // Force JSON response for authentication errors in API
+        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, Request $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Unauthenticated.'
+                ], 401);
             }
         });
     })->create();
