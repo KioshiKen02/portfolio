@@ -981,7 +981,8 @@ const showProfileConfirmPassword = ref(false);
 
 function setToken(token) {
   window.localStorage.setItem('access_token', token);
-  axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+  // Ensure the header is set immediately on the global instance
+  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 }
 
 function clearToken() {
@@ -995,8 +996,9 @@ async function fetchCurrentUser() {
     user.value = data;
     profileForm.name = data.name;
     profileForm.email = data.email;
-    await loadData();
-  } catch {
+    await loadData(); // Only load data AFTER user is confirmed
+  } catch (error) {
+    console.error('Fetch user failed:', error);
     handleLogout();
   }
 }
@@ -1091,23 +1093,27 @@ function removeSettingField(index) {
 }
 
 async function loadData() {
-  // Only load if we have a user
   if (!user.value) return;
-  
-  const results = await Promise.allSettled([
-    axios.get('/admin/projects'),
-    axios.get('/admin/skills'),
-    axios.get('/admin/contacts'),
-    axios.get('/admin/settings')
-  ]);
 
-  const [pRes, sRes, mRes, setRes] = results;
+  try {
+    const results = await Promise.allSettled([
+      axios.get('/admin/projects'),
+      axios.get('/admin/skills'),
+      axios.get('/admin/contacts'),
+      axios.get('/admin/settings')
+    ]);
 
-  if (pRes.status === 'fulfilled') projects.value = pRes.value.data.data || pRes.value.data;
-  if (sRes.status === 'fulfilled') skills.value = sRes.value.data.data || sRes.value.data;
-  if (mRes.status === 'fulfilled') messages.value = mRes.value.data.data || mRes.value.data;
-  if (setRes.status === 'fulfilled') {
-      settings.value = setRes.value.data.data || setRes.value.data;
+    const [pRes, sRes, mRes, setRes] = results;
+
+    if (pRes.status === 'fulfilled') projects.value = pRes.value.data.data || pRes.value.data;
+    if (sRes.status === 'fulfilled') skills.value = sRes.value.data.data || sRes.value.data;
+    if (mRes.status === 'fulfilled') messages.value = mRes.value.data.data || mRes.value.data;
+    if (setRes.status === 'fulfilled') {
+        settings.value = setRes.value.data.data || setRes.value.data;
+    }
+  } catch (error) {
+    console.error('Data load failed:', error);
+    addToast('Failed to load dashboard data', 'error');
   }
 }
 
