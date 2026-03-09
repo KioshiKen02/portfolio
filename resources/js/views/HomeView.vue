@@ -528,6 +528,7 @@ async function handleContactSubmit() {
 
 function projectImageUrl(project) {
   if (!project || !project.image) return '';
+  if (project.image.startsWith('http')) return project.image;
   return `/images/projects/${project.image}`;
 }
 
