@@ -67,6 +67,12 @@ class ProjectController extends Controller
             // Get the URL
             $url = \Illuminate\Support\Facades\Storage::disk($disk)->url($path);
             
+            // Fix for Supabase: Ensure URL is clean
+            // Sometimes Storage::url() returns a double-slash or missing protocol depending on config
+            if ($disk === 'supabase' && !str_starts_with($url, 'http')) {
+                 $url = env('SUPABASE_URL') . '/' . $path;
+            }
+
             return response()->json(['url' => $url]);
         }
 
