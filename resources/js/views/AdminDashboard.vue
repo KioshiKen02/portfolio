@@ -1031,6 +1031,9 @@ async function handleLogout() {
   try { await axios.post('/auth/logout'); } catch {}
   clearToken();
   user.value = null;
+  loginState.value = 'idle'; // Reset login state
+  loginForm.email = '';      // Clear form
+  loginForm.password = '';
   // Clear sensitive data on logout
   projects.value = [];
   skills.value = [];
@@ -1088,21 +1091,23 @@ function removeSettingField(index) {
 }
 
 async function loadData() {
+  // Only load if we have a user
+  if (!user.value) return;
+  
   const results = await Promise.allSettled([
-    axios.get('/projects'),
-    axios.get('/skills'),
+    axios.get('/admin/projects'),
+    axios.get('/admin/skills'),
     axios.get('/admin/contacts'),
     axios.get('/admin/settings')
   ]);
 
   const [pRes, sRes, mRes, setRes] = results;
 
-  if (pRes.status === 'fulfilled') projects.value = pRes.value.data;
-  if (sRes.status === 'fulfilled') skills.value = sRes.value.data;
-  if (mRes.status === 'fulfilled') messages.value = mRes.value.data.data;
-  
+  if (pRes.status === 'fulfilled') projects.value = pRes.value.data.data || pRes.value.data;
+  if (sRes.status === 'fulfilled') skills.value = sRes.value.data.data || sRes.value.data;
+  if (mRes.status === 'fulfilled') messages.value = mRes.value.data.data || mRes.value.data;
   if (setRes.status === 'fulfilled') {
-     settings.value = setRes.value.data;
+      settings.value = setRes.value.data.data || setRes.value.data;
   }
 }
 
