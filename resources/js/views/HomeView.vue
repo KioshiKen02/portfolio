@@ -1,11 +1,38 @@
 <template>
-  <div class="bg-white text-slate-900 dark:bg-slate-950 dark:text-white transition-colors duration-300">
+  <div class="relative isolate min-h-screen text-slate-900 dark:text-white transition-colors duration-300">
+    <div class="pointer-events-none fixed inset-0 -z-10">
+      <div class="absolute inset-0 bg-scene" :class="`bg-scene-${sceneIndex}`" :style="{ opacity: 1 - sceneT }"></div>
+      <div class="absolute inset-0 bg-scene" :class="`bg-scene-${sceneNextIndex}`" :style="{ opacity: sceneT }"></div>
+      <div class="absolute inset-0 bg-scene-noise"></div>
+      <div class="absolute inset-0 bg-scene-vignette"></div>
+    </div>
+
+    <div
+      class="fixed left-1/2 top-6 z-40 w-[min(92vw,640px)] -translate-x-1/2 transition duration-500"
+      :class="navVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'"
+    >
+      <nav class="flex items-center justify-between rounded-full border border-slate-200/60 bg-white/70 px-2 py-2 shadow-lg backdrop-blur dark:border-slate-800/70 dark:bg-slate-950/60">
+        <button
+          v-for="item in navItems"
+          :key="item.id"
+          type="button"
+          class="group relative flex-1 rounded-full px-3 py-2 text-xs font-semibold tracking-wide text-slate-600 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 dark:text-slate-300"
+          :class="activeSection === item.id ? 'text-slate-900 dark:text-white' : 'hover:text-slate-900 dark:hover:text-white'"
+          :aria-current="activeSection === item.id ? 'page' : undefined"
+          @click="scrollToSection(item.id)"
+        >
+          <span class="relative z-10">{{ item.label }}</span>
+          <span
+            class="absolute inset-0 rounded-full bg-slate-900/5 opacity-0 transition duration-300 dark:bg-white/10"
+            :class="activeSection === item.id ? 'opacity-100' : 'group-hover:opacity-100'"
+          ></span>
+        </button>
+      </nav>
+    </div>
 
     <!-- Hero Section -->
-    <section class="relative flex min-h-screen items-center overflow-hidden pt-20 pb-16">
-      <div
-        class="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-100 via-white to-white dark:from-slate-900 dark:via-slate-950 dark:to-slate-950 opacity-40">
-      </div>
+    <section ref="heroSection" class="section-hero relative flex min-h-screen items-center overflow-hidden pt-20 pb-16">
+      <div class="pointer-events-none absolute inset-0 -z-10 hero-shine"></div>
 
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
         <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
@@ -114,7 +141,7 @@
     </section>
 
     <!-- About Section -->
-    <section id="about" class="py-24 bg-slate-50 dark:bg-slate-900/50">
+    <section ref="aboutSection" id="about" class="section-block py-24 scroll-mt-28">
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
         <div class="grid gap-16 md:grid-cols-2">
           <div v-fade-slide-up>
@@ -174,7 +201,7 @@
     </section>
 
     <!-- Projects Section -->
-    <section id="projects" class="py-24 bg-white dark:bg-slate-950">
+    <section ref="projectsSection" id="projects" class="section-block py-24 scroll-mt-28">
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
         <div class="mb-16 md:flex md:items-end md:justify-between" v-fade-slide-up>
           <div class="max-w-xl">
@@ -207,9 +234,17 @@
             <p class="text-slate-500">No projects to display currently.</p>
           </div>
 
-          <article v-for="project in projects" :key="project.id"
-            class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:shadow-lg dark:border-slate-800 dark:bg-slate-900"
-            v-fade-slide-up>
+          <article
+            v-for="project in projects"
+            :key="project.id"
+            class="group flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-slate-200/70 bg-white/70 shadow-sm transition duration-500 hover:-translate-y-1 hover:shadow-xl focus-within:shadow-xl dark:border-slate-800/70 dark:bg-slate-950/40 backdrop-blur"
+            role="button"
+            tabindex="0"
+            v-fade-slide-up
+            @click="openProject(project)"
+            @keydown.enter.prevent="openProject(project)"
+            @keydown.space.prevent="openProject(project)"
+          >
             <div class="relative aspect-video overflow-hidden bg-slate-100 dark:bg-slate-800">
               <img v-if="project.image" :src="projectImageUrl(project)" :alt="project.title"
                 class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
@@ -237,11 +272,11 @@
               </p>
 
               <div class="mt-6 flex items-center gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <a v-if="project.url" :href="project.url" target="_blank"
+                <a v-if="project.url" :href="project.url" target="_blank" @click.stop
                   class="text-sm font-semibold text-slate-900 hover:underline dark:text-white">
                   Live Demo
                 </a>
-                <a v-if="project.github_url" :href="project.github_url" target="_blank"
+                <a v-if="project.github_url" :href="project.github_url" target="_blank" @click.stop
                   class="text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
                   Source Code
                 </a>
@@ -253,7 +288,7 @@
     </section>
 
     <!-- Skills Section -->
-    <section id="skills" class="py-24 bg-slate-50 dark:bg-slate-900/50">
+    <section ref="skillsSection" id="skills" class="section-block py-24 scroll-mt-28">
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
         <div class="mb-12" v-fade-slide-up>
           <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Technical Arsenal
@@ -318,7 +353,7 @@
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="py-24 bg-white dark:bg-slate-950">
+    <section ref="contactSection" id="contact" class="section-block py-24 scroll-mt-28">
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
         <div class="grid gap-16 lg:grid-cols-2">
           <div v-fade-slide-up>
@@ -407,11 +442,121 @@
         </div>
       </div>
     </section>
+
+    <Transition name="project-modal">
+      <div
+        v-if="projectModalOpen"
+        class="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center"
+        @click.self="closeProjectModal"
+      >
+        <div class="absolute inset-0 bg-slate-950/40 backdrop-blur-sm transition-opacity"></div>
+
+        <div
+          ref="projectModalEl"
+          class="relative w-full max-w-4xl overflow-hidden rounded-2xl border border-slate-200/70 bg-white/90 shadow-2xl backdrop-blur dark:border-slate-800/70 dark:bg-slate-950/80"
+          role="dialog"
+          aria-modal="true"
+          :aria-label="selectedProject?.title ? `${selectedProject.title} details` : 'Project details'"
+          tabindex="-1"
+        >
+          <div class="flex items-start justify-between gap-6 border-b border-slate-100/70 px-6 py-5 dark:border-slate-800/70">
+            <div class="min-w-0">
+              <h3 class="truncate text-xl font-bold text-slate-900 dark:text-white">{{ selectedProject?.title }}</h3>
+              <p v-if="selectedProject?.type" class="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
+                {{ String(selectedProject.type).charAt(0).toUpperCase() + String(selectedProject.type).slice(1) }}
+              </p>
+            </div>
+            <button
+              type="button"
+              class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-white"
+              aria-label="Close"
+              @click="closeProjectModal"
+            >
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="grid gap-8 p-6 lg:grid-cols-5">
+            <div class="lg:col-span-3">
+              <div class="overflow-hidden rounded-xl border border-slate-200/70 bg-slate-50 dark:border-slate-800/70 dark:bg-slate-900/40">
+                <div class="relative aspect-video">
+                  <img
+                    v-if="selectedProjectPrimaryImage"
+                    :src="selectedProjectPrimaryImage"
+                    :alt="selectedProject?.title || 'Project image'"
+                    class="h-full w-full object-cover"
+                  />
+                  <div v-else class="flex h-full items-center justify-center text-slate-400">
+                    <svg class="h-14 w-14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="selectedProjectImages.length > 1" class="mt-4 grid grid-cols-5 gap-3">
+                <button
+                  v-for="(img, idx) in selectedProjectImages"
+                  :key="`${img}-${idx}`"
+                  type="button"
+                  class="group relative overflow-hidden rounded-lg border border-slate-200/70 bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 dark:border-slate-800/70 dark:bg-slate-900/40"
+                  :class="idx === selectedProjectImageIndex ? 'ring-2 ring-indigo-500/50' : ''"
+                  @click="selectedProjectImageIndex = idx"
+                >
+                  <img :src="img" :alt="`Preview ${idx + 1}`" class="h-16 w-full object-cover transition duration-300 group-hover:scale-105" />
+                </button>
+              </div>
+            </div>
+
+            <div class="lg:col-span-2">
+              <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                {{ selectedProject?.description || 'No description available.' }}
+              </p>
+
+              <div v-if="selectedProjectTechnologies.length" class="mt-6">
+                <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tech Stack</h4>
+                <div class="mt-3 flex flex-wrap gap-2">
+                  <span
+                    v-for="tag in selectedProjectTechnologies"
+                    :key="tag"
+                    class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  >
+                    {{ tag }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="mt-8 flex flex-wrap gap-3">
+                <a
+                  v-if="selectedProject?.url"
+                  :href="selectedProject.url"
+                  target="_blank"
+                  class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+                >
+                  Open Live Demo
+                </a>
+                <a
+                  v-if="selectedProject?.github_url"
+                  :href="selectedProject.github_url"
+                  target="_blank"
+                  class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-white dark:hover:bg-slate-900"
+                >
+                  View Source Code
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import axios from 'axios';
 
 const projects = ref([]);
@@ -419,6 +564,113 @@ const skills = ref([]);
 const loadingProjects = ref(false);
 const loadingSkills = ref(false);
 const settings = ref(window.AppConfig?.settings || {});
+
+const heroSection = ref(null);
+const aboutSection = ref(null);
+const projectsSection = ref(null);
+const skillsSection = ref(null);
+const contactSection = ref(null);
+
+const navItems = [
+  { id: 'about', label: 'About' },
+  { id: 'projects', label: 'Projects' },
+  { id: 'skills', label: 'Skills' },
+  { id: 'contact', label: 'Contact' },
+];
+
+const activeSection = ref('about');
+const navVisible = ref(false);
+
+const sceneIndex = ref(0);
+const sceneNextIndex = ref(0);
+const sceneT = ref(0);
+const sectionAnchors = ref([]);
+let scrollRaf = 0;
+let resizeRaf = 0;
+let activeObserver = null;
+
+function getSectionElements() {
+  return [
+    { id: 'hero', el: heroSection.value },
+    { id: 'about', el: aboutSection.value },
+    { id: 'projects', el: projectsSection.value },
+    { id: 'skills', el: skillsSection.value },
+    { id: 'contact', el: contactSection.value },
+  ].filter(s => s.el);
+}
+
+function recalcAnchors() {
+  const sections = getSectionElements();
+  sectionAnchors.value = sections.map(s => ({
+    id: s.id,
+    top: s.el.offsetTop,
+  }));
+}
+
+function updateScrollEffects() {
+  scrollRaf = 0;
+  const y = window.scrollY || 0;
+  navVisible.value = y > 40;
+
+  const anchors = sectionAnchors.value;
+  if (anchors.length < 2) return;
+
+  const center = y + window.innerHeight * 0.55;
+  let idx = 0;
+  for (let i = 0; i < anchors.length - 1; i++) {
+    if (center >= anchors[i].top && center < anchors[i + 1].top) {
+      idx = i;
+      break;
+    }
+    if (center >= anchors[anchors.length - 1].top) {
+      idx = anchors.length - 1;
+    }
+  }
+
+  const from = anchors[idx];
+  const to = anchors[Math.min(idx + 1, anchors.length - 1)];
+  const denom = Math.max(1, to.top - from.top);
+  const t = idx === anchors.length - 1 ? 0 : Math.min(1, Math.max(0, (center - from.top) / denom));
+
+  const map = ['hero', 'about', 'projects', 'skills', 'contact'];
+  const currentScene = Math.max(0, Math.min(map.length - 1, map.indexOf(from.id)));
+  const nextScene = Math.max(0, Math.min(map.length - 1, map.indexOf(to.id)));
+  sceneIndex.value = currentScene === -1 ? 0 : currentScene;
+  sceneNextIndex.value = nextScene === -1 ? 0 : nextScene;
+  sceneT.value = t;
+}
+
+function onScroll() {
+  if (scrollRaf) return;
+  scrollRaf = window.requestAnimationFrame(updateScrollEffects);
+}
+
+function onResize() {
+  if (resizeRaf) return;
+  resizeRaf = window.requestAnimationFrame(() => {
+    resizeRaf = 0;
+    recalcAnchors();
+    updateScrollEffects();
+  });
+}
+
+function setupActiveSectionObserver() {
+  if (activeObserver) activeObserver.disconnect();
+  const sections = getSectionElements().filter(s => s.id !== 'hero');
+  if (!sections.length) return;
+
+  activeObserver = new IntersectionObserver(
+    (entries) => {
+      const visible = entries
+        .filter(e => e.isIntersecting)
+        .sort((a, b) => (b.intersectionRatio || 0) - (a.intersectionRatio || 0))[0];
+      if (visible?.target?.id) activeSection.value = visible.target.id;
+    },
+    { root: null, threshold: [0.2, 0.35, 0.5], rootMargin: '-20% 0px -55% 0px' }
+  );
+
+  sections.forEach(s => activeObserver.observe(s.el));
+}
 
 const form = reactive({
   name: '',
@@ -532,6 +784,90 @@ function projectImageUrl(project) {
   return `/images/projects/${project.image}`;
 }
 
+const projectModalOpen = ref(false);
+const selectedProject = ref(null);
+const selectedProjectImageIndex = ref(0);
+const projectModalEl = ref(null);
+let restoreOverflow = null;
+let lastFocused = null;
+
+function lockScroll() {
+  if (restoreOverflow) return;
+  const docEl = document.documentElement;
+  const prev = docEl.style.overflow;
+  restoreOverflow = () => {
+    docEl.style.overflow = prev;
+    restoreOverflow = null;
+  };
+  docEl.style.overflow = 'hidden';
+}
+
+function unlockScroll() {
+  if (restoreOverflow) restoreOverflow();
+}
+
+function openProject(project) {
+  selectedProject.value = project;
+  selectedProjectImageIndex.value = 0;
+  projectModalOpen.value = true;
+}
+
+function closeProjectModal() {
+  projectModalOpen.value = false;
+}
+
+const selectedProjectTechnologies = computed(() => {
+  if (!selectedProject.value) return [];
+  return normalizedTechnologies(selectedProject.value);
+});
+
+const selectedProjectImages = computed(() => {
+  const p = selectedProject.value;
+  if (!p) return [];
+  const candidates = [];
+  if (Array.isArray(p.images)) candidates.push(...p.images);
+  if (Array.isArray(p.gallery)) candidates.push(...p.gallery);
+  if (p.image) candidates.push(p.image);
+  const normalized = candidates
+    .filter(Boolean)
+    .map((img) => (typeof img === 'string' ? img : ''))
+    .filter(Boolean)
+    .map((img) => (img.startsWith('http') ? img : `/images/projects/${img}`));
+  return Array.from(new Set(normalized));
+});
+
+const selectedProjectPrimaryImage = computed(() => {
+  const images = selectedProjectImages.value;
+  return images[selectedProjectImageIndex.value] || images[0] || '';
+});
+
+function onProjectModalKeydown(e) {
+  if (e.key === 'Escape') closeProjectModal();
+  if (e.key === 'ArrowRight' && selectedProjectImages.value.length > 1) {
+    selectedProjectImageIndex.value = (selectedProjectImageIndex.value + 1) % selectedProjectImages.value.length;
+  }
+  if (e.key === 'ArrowLeft' && selectedProjectImages.value.length > 1) {
+    selectedProjectImageIndex.value =
+      (selectedProjectImageIndex.value - 1 + selectedProjectImages.value.length) % selectedProjectImages.value.length;
+  }
+}
+
+watch(projectModalOpen, async (open) => {
+  if (open) {
+    lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    lockScroll();
+    await nextTick();
+    projectModalEl.value?.focus();
+    window.addEventListener('keydown', onProjectModalKeydown, { passive: true });
+  } else {
+    window.removeEventListener('keydown', onProjectModalKeydown);
+    unlockScroll();
+    await nextTick();
+    lastFocused?.focus?.();
+    lastFocused = null;
+  }
+});
+
 async function loadProjects() {
   loadingProjects.value = true;
   try {
@@ -541,6 +877,10 @@ async function loadProjects() {
     projects.value = [];
   } finally {
     loadingProjects.value = false;
+    requestAnimationFrame(() => {
+      recalcAnchors();
+      updateScrollEffects();
+    });
   }
 }
 
@@ -559,9 +899,190 @@ async function loadSkills() {
 onMounted(() => {
   loadProjects();
   loadSkills();
+
+  recalcAnchors();
+  setupActiveSectionObserver();
+  updateScrollEffects();
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onResize, { passive: true });
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', onScroll);
+  window.removeEventListener('resize', onResize);
+  window.removeEventListener('keydown', onProjectModalKeydown);
+  if (scrollRaf) window.cancelAnimationFrame(scrollRaf);
+  if (resizeRaf) window.cancelAnimationFrame(resizeRaf);
+  if (activeObserver) activeObserver.disconnect();
+  unlockScroll();
 });
 </script>
 
 <style scoped>
-/* No extra styles needed, utilizing Tailwind CSS exclusively */
+.bg-scene {
+  transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity;
+}
+
+.bg-scene-noise {
+  opacity: 0.12;
+  mix-blend-mode: overlay;
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.16) 0, rgba(255, 255, 255, 0) 55%),
+    radial-gradient(circle at 90% 30%, rgba(255, 255, 255, 0.10) 0, rgba(255, 255, 255, 0) 60%),
+    radial-gradient(circle at 40% 90%, rgba(255, 255, 255, 0.10) 0, rgba(255, 255, 255, 0) 60%);
+}
+
+.bg-scene-vignette {
+  background: radial-gradient(1200px 700px at 50% 10%, rgba(255, 255, 255, 0) 25%, rgba(2, 6, 23, 0.20) 100%);
+  opacity: 0.35;
+}
+
+.bg-scene-0 {
+  background:
+    radial-gradient(1200px 700px at 10% 10%, rgba(99, 102, 241, 0.35) 0%, rgba(255, 255, 255, 0) 60%),
+    radial-gradient(1000px 600px at 90% 20%, rgba(16, 185, 129, 0.22) 0%, rgba(255, 255, 255, 0) 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 1) 70%, rgba(255, 255, 255, 1) 100%);
+}
+
+.bg-scene-1 {
+  background:
+    radial-gradient(1000px 700px at 20% 20%, rgba(14, 165, 233, 0.26) 0%, rgba(255, 255, 255, 0) 62%),
+    radial-gradient(1000px 700px at 80% 40%, rgba(168, 85, 247, 0.20) 0%, rgba(255, 255, 255, 0) 62%),
+    linear-gradient(180deg, rgba(248, 250, 252, 1) 0%, rgba(255, 255, 255, 1) 70%, rgba(248, 250, 252, 1) 100%);
+}
+
+.bg-scene-2 {
+  background:
+    radial-gradient(1100px 700px at 10% 30%, rgba(244, 114, 182, 0.18) 0%, rgba(255, 255, 255, 0) 65%),
+    radial-gradient(1200px 800px at 90% 10%, rgba(99, 102, 241, 0.25) 0%, rgba(255, 255, 255, 0) 65%),
+    linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(241, 245, 249, 1) 70%, rgba(255, 255, 255, 1) 100%);
+}
+
+.bg-scene-3 {
+  background:
+    radial-gradient(1000px 700px at 20% 10%, rgba(16, 185, 129, 0.22) 0%, rgba(255, 255, 255, 0) 62%),
+    radial-gradient(1200px 800px at 80% 40%, rgba(14, 165, 233, 0.22) 0%, rgba(255, 255, 255, 0) 62%),
+    linear-gradient(180deg, rgba(248, 250, 252, 1) 0%, rgba(255, 255, 255, 1) 70%, rgba(248, 250, 252, 1) 100%);
+}
+
+.bg-scene-4 {
+  background:
+    radial-gradient(1000px 700px at 15% 20%, rgba(251, 191, 36, 0.14) 0%, rgba(255, 255, 255, 0) 65%),
+    radial-gradient(1200px 800px at 85% 25%, rgba(244, 63, 94, 0.18) 0%, rgba(255, 255, 255, 0) 65%),
+    linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(241, 245, 249, 1) 70%, rgba(255, 255, 255, 1) 100%);
+}
+
+.dark .bg-scene-vignette {
+  background: radial-gradient(1200px 700px at 50% 10%, rgba(2, 6, 23, 0) 20%, rgba(2, 6, 23, 0.85) 100%);
+  opacity: 0.75;
+}
+
+.dark .bg-scene-0 {
+  background:
+    radial-gradient(1200px 700px at 10% 10%, rgba(99, 102, 241, 0.24) 0%, rgba(2, 6, 23, 0) 60%),
+    radial-gradient(1000px 600px at 90% 20%, rgba(16, 185, 129, 0.16) 0%, rgba(2, 6, 23, 0) 60%),
+    linear-gradient(180deg, rgba(2, 6, 23, 1) 0%, rgba(2, 6, 23, 1) 100%);
+}
+
+.dark .bg-scene-1 {
+  background:
+    radial-gradient(1000px 700px at 20% 20%, rgba(14, 165, 233, 0.18) 0%, rgba(2, 6, 23, 0) 62%),
+    radial-gradient(1000px 700px at 80% 40%, rgba(168, 85, 247, 0.16) 0%, rgba(2, 6, 23, 0) 62%),
+    linear-gradient(180deg, rgba(2, 6, 23, 1) 0%, rgba(2, 6, 23, 1) 100%);
+}
+
+.dark .bg-scene-2 {
+  background:
+    radial-gradient(1100px 700px at 10% 30%, rgba(244, 114, 182, 0.14) 0%, rgba(2, 6, 23, 0) 65%),
+    radial-gradient(1200px 800px at 90% 10%, rgba(99, 102, 241, 0.18) 0%, rgba(2, 6, 23, 0) 65%),
+    linear-gradient(180deg, rgba(2, 6, 23, 1) 0%, rgba(2, 6, 23, 1) 100%);
+}
+
+.dark .bg-scene-3 {
+  background:
+    radial-gradient(1000px 700px at 20% 10%, rgba(16, 185, 129, 0.16) 0%, rgba(2, 6, 23, 0) 62%),
+    radial-gradient(1200px 800px at 80% 40%, rgba(14, 165, 233, 0.16) 0%, rgba(2, 6, 23, 0) 62%),
+    linear-gradient(180deg, rgba(2, 6, 23, 1) 0%, rgba(2, 6, 23, 1) 100%);
+}
+
+.dark .bg-scene-4 {
+  background:
+    radial-gradient(1000px 700px at 15% 20%, rgba(251, 191, 36, 0.10) 0%, rgba(2, 6, 23, 0) 65%),
+    radial-gradient(1200px 800px at 85% 25%, rgba(244, 63, 94, 0.12) 0%, rgba(2, 6, 23, 0) 65%),
+    linear-gradient(180deg, rgba(2, 6, 23, 1) 0%, rgba(2, 6, 23, 1) 100%);
+}
+
+.section-block {
+  position: relative;
+}
+
+.section-block::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  z-index: -1;
+}
+
+.dark .section-block::before {
+  background: rgba(2, 6, 23, 0.35);
+}
+
+.section-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(900px 600px at 20% 20%, rgba(255, 255, 255, 0.40) 0%, rgba(255, 255, 255, 0) 60%);
+  z-index: -1;
+}
+
+.dark .section-hero::before {
+  background: radial-gradient(900px 600px at 20% 20%, rgba(255, 255, 255, 0.08) 0%, rgba(2, 6, 23, 0) 60%);
+}
+
+.hero-shine {
+  background:
+    radial-gradient(800px 500px at 70% 30%, rgba(99, 102, 241, 0.14) 0%, rgba(255, 255, 255, 0) 60%),
+    radial-gradient(800px 500px at 30% 70%, rgba(16, 185, 129, 0.12) 0%, rgba(255, 255, 255, 0) 60%);
+  opacity: 0.9;
+}
+
+.project-modal-enter-active,
+.project-modal-leave-active {
+  transition: opacity 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.project-modal-enter-from,
+.project-modal-leave-to {
+  opacity: 0;
+}
+
+.project-modal-enter-active [role="dialog"],
+.project-modal-leave-active [role="dialog"] {
+  transition: transform 340ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.project-modal-enter-from [role="dialog"] {
+  transform: translateY(16px) scale(0.985);
+  opacity: 0;
+}
+
+.project-modal-leave-to [role="dialog"] {
+  transform: translateY(18px) scale(0.985);
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-scene,
+  .project-modal-enter-active,
+  .project-modal-leave-active,
+  .project-modal-enter-active [role="dialog"],
+  .project-modal-leave-active [role="dialog"] {
+    transition: none !important;
+  }
+}
 </style>
