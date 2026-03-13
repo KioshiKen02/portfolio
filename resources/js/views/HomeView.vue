@@ -57,20 +57,28 @@
               crafting high-performance Laravel backends, reactive Vue.js interfaces, and cross-platform Flutter apps.
             </p>
 
-            <div class="flex flex-wrap gap-4">
-              <button @click="scrollToSection('projects')"
-                class="group relative inline-flex items-center justify-center overflow-hidden rounded-[var(--radius-button)] bg-[var(--color-brand)] px-8 py-4 font-medium text-white shadow-lg transition-all hover:bg-[var(--color-brand-hover)] hover:shadow-xl hover:-translate-y-0.5 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
-                View Selected Work
-                <svg class="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </button>
-              <button @click="scrollToSection('contact')"
-                class="inline-flex items-center justify-center rounded-[var(--radius-button)] border border-slate-200 bg-white px-8 py-4 font-medium text-slate-900 transition-all hover:bg-slate-50 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:text-white dark:hover:bg-slate-900">
-                Contact Me
-              </button>
-              <ResumeDownloadButton :url="resumeDownloadUrl" filename="melvin-rey-c-tambis-resume.pdf" />
+            <div class="w-full max-w-xl">
+              <div class="flex flex-wrap items-center justify-center gap-3">
+                <ResumeDownloadButton :url="resumeDownloadUrl" filename="melvin-rey-c-tambis-resume.pdf" />
+                
+                <button
+                  @click="scrollToSection('projects')"
+                  class="group relative inline-flex items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-[var(--radius-button)] bg-[var(--color-brand)] px-4 py-3 text-xs font-semibold text-white shadow-lg transition-all hover:bg-[var(--color-brand-hover)] hover:shadow-xl hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 sm:px-6 sm:py-3.5 sm:text-sm dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+                >
+                  View Selected Work
+                  <svg class="hidden h-4 w-4 transition-transform group-hover:translate-x-1 sm:inline-flex" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </button>
+               
+                <button
+                  @click="scrollToSection('contact')"
+                  class="inline-flex items-center justify-center whitespace-nowrap rounded-[var(--radius-button)] border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-900 transition-all hover:bg-slate-50 hover:border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 sm:px-6 sm:py-3.5 sm:text-sm dark:border-slate-800 dark:bg-slate-950 dark:text-white dark:hover:bg-slate-900"
+                >
+                  Contact Me
+                </button>
+              </div>
             </div>
           </div>
 
