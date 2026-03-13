@@ -35,8 +35,10 @@ class ContactController extends Controller
     }
 
     // Admin: Show a single contact
-    public function show(Contact $contact)
+    public function show($id)
     {
+        $contact = Contact::findOrFail($id);
+
         if ($contact->status === 'new') {
             $contact->update([
                 'status' => 'read',
@@ -81,8 +83,10 @@ class ContactController extends Controller
     }
 
     // Admin: Reply to a contact
-    public function reply(Request $request, Contact $contact)
+    public function reply(Request $request, $id)
     {
+        $contact = Contact::findOrFail($id);
+
         $request->validate([
             'reply_message' => 'required|string',
         ]);
@@ -103,8 +107,9 @@ class ContactController extends Controller
     }
 
     // Admin: Delete a contact
-    public function destroy(Contact $contact)
+    public function destroy($id)
     {
+        $contact = Contact::findOrFail($id);
         $contact->delete();
         return response()->json(['message' => 'Message deleted.']);
     }

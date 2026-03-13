@@ -22,6 +22,8 @@ Route::middleware('auth:api')->group(function () {
         Route::apiResource('skills', SkillController::class);
         Route::apiResource('settings', SettingController::class);
         Route::get('contacts', [ContactController::class, 'index']);
+        Route::get('contacts/{id}', [ContactController::class, 'show']);
+        Route::post('contacts/{id}/reply', [ContactController::class, 'reply']);
         Route::delete('contacts/{id}', [ContactController::class, 'destroy']);
     });
 });

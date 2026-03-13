@@ -55,14 +55,20 @@ class ProjectController extends Controller
     {
         $request->validate([
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'folder' => 'nullable|string',
         ]);
 
         if ($request->hasFile('image')) {
             // Determine disk based on environment
             $disk = env('FILESYSTEM_DISK', 'public');
+
+            $folder = $request->input('folder', 'projects');
+            if (!in_array($folder, ['projects', 'profile'], true)) {
+                $folder = 'projects';
+            }
             
             // Store the file
-            $path = $request->file('image')->store('projects', $disk);
+            $path = $request->file('image')->store($folder, $disk);
             
             // Get the URL
             $url = \Illuminate\Support\Facades\Storage::disk($disk)->url($path);

@@ -28,7 +28,15 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        // Removed the View::composer call completely for now to isolate the error.
-        // We will re-add it once the application is stable.
+        $settings = [];
+        try {
+            if (Schema::hasTable('settings')) {
+                $settings = Setting::query()->pluck('value', 'key')->toArray();
+            }
+        } catch (\Throwable $e) {
+            $settings = [];
+        }
+
+        View::share('settings', $settings);
     }
 }

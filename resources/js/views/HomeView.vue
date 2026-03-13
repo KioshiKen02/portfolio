@@ -173,7 +173,19 @@
             </div>
           </div>
 
-          <div class="grid gap-6" v-fade-slide-up>
+          <div class="space-y-6" v-fade-slide-up>
+            <div class="mx-auto w-full max-w-sm">
+              <ProfilePicture
+                :is-dark="isDarkTheme"
+                :alt="`${settings.site_author || 'Profile'} photo`"
+                :light-default-src="profilePicture.lightDefault"
+                :light-hover-src="profilePicture.lightHover"
+                :dark-default-src="profilePicture.darkDefault"
+                :dark-hover-src="profilePicture.darkHover"
+              />
+            </div>
+
+            <div class="grid gap-6">
             <div
               class="group rounded-2xl bg-white p-8 shadow-sm transition hover:shadow-md dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
               <h3 class="text-xl font-bold text-slate-900 dark:text-white">Backend Systems</h3>
@@ -194,6 +206,7 @@
               <p class="mt-2 text-slate-600 dark:text-slate-400">
                 Native-feel Android and iOS applications using Flutter's powerful rendering engine.
               </p>
+            </div>
             </div>
           </div>
         </div>
@@ -558,12 +571,28 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import axios from 'axios';
+import ProfilePicture from '../components/ProfilePicture.vue';
 
 const projects = ref([]);
 const skills = ref([]);
 const loadingProjects = ref(false);
 const loadingSkills = ref(false);
 const settings = ref(window.AppConfig?.settings || {});
+
+const isDarkTheme = ref(false);
+let themeObserver = null;
+
+function syncThemeState() {
+  isDarkTheme.value = document.documentElement.classList.contains('dark');
+}
+
+const profilePicture = computed(() => {
+  const lightDefault = settings.value?.profile_picture_light_default || '/logo.svg';
+  const lightHover = settings.value?.profile_picture_light_hover || lightDefault;
+  const darkDefault = settings.value?.profile_picture_dark_default || lightDefault;
+  const darkHover = settings.value?.profile_picture_dark_hover || darkDefault;
+  return { lightDefault, lightHover, darkDefault, darkHover };
+});
 
 const heroSection = ref(null);
 const aboutSection = ref(null);
@@ -900,6 +929,10 @@ onMounted(() => {
   loadProjects();
   loadSkills();
 
+  syncThemeState();
+  themeObserver = new MutationObserver(() => syncThemeState());
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
   recalcAnchors();
   setupActiveSectionObserver();
   updateScrollEffects();
@@ -912,6 +945,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', onScroll);
   window.removeEventListener('resize', onResize);
   window.removeEventListener('keydown', onProjectModalKeydown);
+  if (themeObserver) themeObserver.disconnect();
   if (scrollRaf) window.cancelAnimationFrame(scrollRaf);
   if (resizeRaf) window.cancelAnimationFrame(resizeRaf);
   if (activeObserver) activeObserver.disconnect();

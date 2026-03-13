@@ -497,6 +497,82 @@
                  </button>
               </div>
 
+              <div class="card overflow-hidden mb-6">
+                <div class="border-b border-slate-100 px-6 py-4 dark:border-slate-800">
+                  <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Profile Pictures</h2>
+                  <p class="text-sm text-slate-500">Upload four variants for light/dark and hover states.</p>
+                </div>
+                <div class="p-6 grid gap-6 sm:grid-cols-2">
+                  <div v-for="variant in profilePictureVariants" :key="variant.key" class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-start justify-between gap-3">
+                      <div>
+                        <div class="text-sm font-semibold text-slate-900 dark:text-white">{{ variant.label }}</div>
+                        <div class="text-xs text-slate-500">{{ variant.hint }}</div>
+                      </div>
+                      <div v-if="profilePictureState[variant.key].uploading" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                        Uploading {{ profilePictureState[variant.key].progress }}%
+                      </div>
+                    </div>
+
+                    <div class="mt-4 grid grid-cols-[84px_1fr] gap-4 items-center">
+                      <div class="h-20 w-20 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800">
+                        <img
+                          v-if="profilePicturePreviewUrl(variant.key)"
+                          :src="profilePicturePreviewUrl(variant.key)"
+                          alt=""
+                          class="h-full w-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                          @error="profilePictureState[variant.key].previewError = true"
+                        />
+                        <div v-else class="flex h-full w-full items-center justify-center text-slate-400">
+                          <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        </div>
+                      </div>
+
+                      <div>
+                        <input
+                          :ref="el => setProfilePictureInput(variant.key, el)"
+                          type="file"
+                          class="hidden"
+                          accept="image/png, image/jpeg, image/webp"
+                          @change="onProfilePictureSelected($event, variant.key)"
+                        />
+
+                        <div class="flex flex-wrap gap-2">
+                          <button type="button" class="btn-secondary" @click="triggerProfilePictureFile(variant.key)">
+                            Choose Image
+                          </button>
+                          <button
+                            type="button"
+                            class="btn-primary"
+                            :disabled="!profilePictureState[variant.key].file || profilePictureState[variant.key].uploading"
+                            @click="uploadProfilePicture(variant.key)"
+                          >
+                            Upload
+                          </button>
+                          <button
+                            type="button"
+                            class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 transition-colors"
+                            :disabled="profilePictureState[variant.key].uploading"
+                            @click="clearProfilePicture(variant.key)"
+                          >
+                            Clear
+                          </button>
+                        </div>
+
+                        <p v-if="profilePictureState[variant.key].error" class="mt-2 text-xs font-medium text-rose-600">
+                          {{ profilePictureState[variant.key].error }}
+                        </p>
+                        <p v-else class="mt-2 text-xs text-slate-500">
+                          JPG/PNG/WebP up to 5MB.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div class="card overflow-hidden">
                 <div class="border-b border-slate-100 px-6 py-4 dark:border-slate-800 flex justify-between items-center">
                    <div>
@@ -1174,6 +1250,152 @@ async function handleLogout() {
 const settings = ref([]);
 const settingsLoading = ref(false);
 
+const PROFILE_PICTURE_KEYS = {
+  lightDefault: 'profile_picture_light_default',
+  lightHover: 'profile_picture_light_hover',
+  darkDefault: 'profile_picture_dark_default',
+  darkHover: 'profile_picture_dark_hover',
+};
+
+const profilePictureVariants = [
+  { key: 'lightDefault', label: 'Light Default', hint: 'Light mode, idle', settingKey: PROFILE_PICTURE_KEYS.lightDefault },
+  { key: 'lightHover', label: 'Light Hover', hint: 'Light mode, hover', settingKey: PROFILE_PICTURE_KEYS.lightHover },
+  { key: 'darkDefault', label: 'Dark Default', hint: 'Dark mode, idle', settingKey: PROFILE_PICTURE_KEYS.darkDefault },
+  { key: 'darkHover', label: 'Dark Hover', hint: 'Dark mode, hover', settingKey: PROFILE_PICTURE_KEYS.darkHover },
+];
+
+const profilePictureState = reactive({
+  lightDefault: { file: null, preview: '', progress: 0, uploading: false, error: '', previewError: false },
+  lightHover: { file: null, preview: '', progress: 0, uploading: false, error: '', previewError: false },
+  darkDefault: { file: null, preview: '', progress: 0, uploading: false, error: '', previewError: false },
+  darkHover: { file: null, preview: '', progress: 0, uploading: false, error: '', previewError: false },
+});
+
+const profilePictureInputs = {};
+
+function setProfilePictureInput(key, el) {
+  if (el) profilePictureInputs[key] = el;
+}
+
+function triggerProfilePictureFile(key) {
+  profilePictureInputs[key]?.click?.();
+}
+
+function getSettingByKey(key) {
+  return settings.value.find(s => s.key === key);
+}
+
+function ensureSetting(key, defaults) {
+  const existing = getSettingByKey(key);
+  if (existing) {
+    if (!existing.type && defaults.type) existing.type = defaults.type;
+    if (!existing.group && defaults.group) existing.group = defaults.group;
+    return existing;
+  }
+  const created = { key, value: '', type: defaults.type || 'text', group: defaults.group || 'general' };
+  settings.value.push(created);
+  return created;
+}
+
+function ensureProfilePictureSettings() {
+  profilePictureVariants.forEach(v => ensureSetting(v.settingKey, { type: 'url', group: 'profile' }));
+}
+
+function profilePicturePreviewUrl(variantKey) {
+  const variant = profilePictureVariants.find(v => v.key === variantKey);
+  if (!variant) return '';
+  const st = profilePictureState[variantKey];
+  if (st.previewError) return '';
+  if (st.preview) return st.preview;
+  const val = getSettingByKey(variant.settingKey)?.value || '';
+  return typeof val === 'string' ? val : '';
+}
+
+function onProfilePictureSelected(event, variantKey) {
+  const input = event.target;
+  const file = input?.files?.[0];
+  const st = profilePictureState[variantKey];
+  st.error = '';
+  st.previewError = false;
+  st.progress = 0;
+
+  if (!file) return;
+
+  const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  if (!validTypes.includes(file.type)) {
+    st.error = 'Invalid file type. Use JPG, PNG, or WebP.';
+    input.value = '';
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    st.error = 'File is too large. Max 5MB.';
+    input.value = '';
+    return;
+  }
+
+  st.file = file;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    st.preview = e.target?.result || '';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function uploadProfilePicture(variantKey) {
+  const variant = profilePictureVariants.find(v => v.key === variantKey);
+  if (!variant) return;
+  const st = profilePictureState[variantKey];
+  if (!st.file || st.uploading) return;
+
+  st.uploading = true;
+  st.error = '';
+  st.progress = 0;
+
+  try {
+    const formData = new FormData();
+    formData.append('image', st.file);
+    formData.append('folder', 'profile');
+
+    const { data } = await axios.post('/admin/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (evt) => {
+        const total = evt.total || 0;
+        if (!total) return;
+        st.progress = Math.round((evt.loaded / total) * 100);
+      },
+    });
+
+    ensureSetting(variant.settingKey, { type: 'url', group: 'profile' }).value = data.url;
+    st.preview = data.url;
+    st.file = null;
+    st.progress = 100;
+    addToast('Profile picture uploaded. Saving settings...', 'success');
+    await saveSettings();
+  } catch (e) {
+    st.error = e.response?.data?.message || 'Upload failed.';
+  } finally {
+    st.uploading = false;
+    const input = profilePictureInputs[variantKey];
+    if (input) input.value = '';
+  }
+}
+
+function clearProfilePicture(variantKey) {
+  const variant = profilePictureVariants.find(v => v.key === variantKey);
+  if (!variant) return;
+  const st = profilePictureState[variantKey];
+  st.error = '';
+  st.previewError = false;
+  st.progress = 0;
+  st.preview = '';
+  st.file = null;
+  const setting = getSettingByKey(variant.settingKey);
+  if (setting) setting.value = '';
+  const input = profilePictureInputs[variantKey];
+  if (input) input.value = '';
+}
+
 // --- Settings Functions ---
 async function loadSettings() {
   settingsLoading.value = true;
@@ -1189,6 +1411,7 @@ async function loadSettings() {
           { key: 'github_url', value: '', type: 'url', group: 'social' },
        ];
     }
+    ensureProfilePictureSettings();
   } catch {
     addToast('Failed to load settings.', 'error');
   } finally {
@@ -1236,6 +1459,7 @@ async function loadData() {
     if (mRes.status === 'fulfilled') messages.value = mRes.value.data.data || mRes.value.data;
     if (setRes.status === 'fulfilled') {
         settings.value = setRes.value.data.data || setRes.value.data;
+        ensureProfilePictureSettings();
     }
   } catch (error) {
     console.error('Data load failed:', error);
