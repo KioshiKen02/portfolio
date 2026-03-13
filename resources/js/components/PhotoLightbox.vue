@@ -5,12 +5,12 @@
       class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/70 backdrop-blur-sm"
       @click.self="emit('close')"
     >
-      <div class="absolute inset-0"></div>
+      <div class="absolute inset-0 pointer-events-none"></div>
 
       <div class="relative h-[92vh] w-[94vw] max-w-6xl">
         <button
           type="button"
-          class="fixed right-4 top-4 z-[10000] rounded-xl bg-white/10 p-2 text-white backdrop-blur transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+          class="fixed right-4 top-4 z-[10000] rounded-xl border border-white/15 bg-slate-950/40 p-2 text-white backdrop-blur transition hover:bg-slate-950/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
           aria-label="Close"
           @click="emit('close')"
         >

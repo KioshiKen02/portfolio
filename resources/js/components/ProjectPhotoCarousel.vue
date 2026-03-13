@@ -18,7 +18,7 @@
     <div v-else class="absolute inset-0">
       <div class="absolute inset-0 bg-slate-200/60 dark:bg-slate-800/60" :class="loaded[current] ? 'opacity-0' : 'opacity-100 animate-pulse'" style="transition: opacity 300ms ease"></div>
       <img
-        :src="images[current]"
+        :src="currentSrc()"
         :alt="altText(current)"
         loading="lazy"
         decoding="async"
@@ -26,7 +26,7 @@
         :class="loaded[current] ? 'opacity-100' : 'opacity-0'"
         style="transition: opacity 420ms cubic-bezier(0.22, 1, 0.36, 1)"
         @load="markLoaded(current)"
-        @error="markLoaded(current)"
+        @error="onImgError(current)"
       />
     </div>
 
@@ -58,11 +58,14 @@ const props = defineProps({
   images: { type: Array, default: () => [] },
   title: { type: String, default: 'Project' },
   autoplayMs: { type: Number, default: 3600 },
+  fallbackSrc: { type: String, default: '/logo.svg' },
 });
 
 const current = ref(0);
 const paused = ref(false);
 const loaded = ref({});
+const srcOverride = ref({});
+const retries = ref({});
 let timer = 0;
 
 const reducedMotion = typeof window !== 'undefined'
@@ -75,6 +78,16 @@ function altText(idx) {
 
 function markLoaded(idx) {
   loaded.value = { ...loaded.value, [idx]: true };
+}
+
+function cacheBust(url, n) {
+  if (!url) return '';
+  const sep = url.includes('?') ? '&' : '?';
+  return `${url}${sep}retry=${n}`;
+}
+
+function currentSrc() {
+  return srcOverride.value[current.value] || props.images[current.value] || '';
 }
 
 function goTo(idx) {
@@ -121,17 +134,41 @@ function onPointerUp() {
   swiping = false;
 }
 
+function onImgError(idx) {
+  const base = props.images[idx] || '';
+  const count = Number(retries.value[idx] || 0);
+
+  if (!base) {
+    srcOverride.value = { ...srcOverride.value, [idx]: props.fallbackSrc };
+    markLoaded(idx);
+    return;
+  }
+
+  if (count < 2) {
+    const nextCount = count + 1;
+    retries.value = { ...retries.value, [idx]: nextCount };
+    window.setTimeout(() => {
+      srcOverride.value = { ...srcOverride.value, [idx]: cacheBust(base, Date.now()) };
+    }, nextCount === 1 ? 400 : 900);
+    return;
+  }
+
+  srcOverride.value = { ...srcOverride.value, [idx]: props.fallbackSrc };
+  markLoaded(idx);
+}
+
 watch(
   () => props.images,
   () => {
     current.value = 0;
     loaded.value = {};
+    srcOverride.value = {};
+    retries.value = {};
     start();
   },
-  { deep: true }
+  { deep: false }
 );
 
 onMounted(() => start());
 onBeforeUnmount(() => stop());
 </script>
-

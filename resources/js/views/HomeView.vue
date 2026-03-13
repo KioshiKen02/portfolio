@@ -264,7 +264,7 @@
             @keydown.space.prevent="openProject(project)"
           >
             <div class="relative aspect-video overflow-hidden bg-slate-100 dark:bg-slate-800">
-              <ProjectPhotoCarousel :images="projectPhotoUrls(project)" :title="project.title" />
+              <ProjectPhotoCarousel :images="project.photo_urls || []" :title="project.title" />
             </div>
 
             <div class="flex flex-1 flex-col p-6">
@@ -1006,7 +1006,11 @@ async function loadProjects() {
   loadingProjects.value = true;
   try {
     const { data } = await axios.get('/projects');
-    projects.value = Array.isArray(data) ? data : [];
+    const raw = Array.isArray(data) ? data : [];
+    projects.value = raw.map((p) => ({
+      ...p,
+      photo_urls: projectPhotoUrls(p),
+    }));
   } catch {
     projects.value = [];
   } finally {
