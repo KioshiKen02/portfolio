@@ -25,7 +25,7 @@ class AdminUploadTest extends TestCase
     {
         Storage::fake('public');
 
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_admin' => true]);
         $token = auth('api')->login($user);
 
         $file = UploadedFile::fake()->image('avatar.png', 512, 512);
@@ -42,4 +42,3 @@ class AdminUploadTest extends TestCase
         $this->assertNotEmpty($files);
     }
 }
-

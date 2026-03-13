@@ -29,9 +29,9 @@
                   {{ item.title }}
                 </div>
                 <div class="mt-1 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400">
-                  <span class="truncate">{{ item.company }}</span>
-                  <span class="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-700"></span>
-                  <span>{{ item.range }}</span>
+                  <span v-if="item.company" class="truncate">{{ item.company }}</span>
+                  <span v-if="item.company && item.range" class="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-700"></span>
+                  <span v-if="item.range">{{ item.range }}</span>
                 </div>
               </div>
               <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">
@@ -41,6 +41,16 @@
 
             <Transition name="timeline">
               <div v-if="openIndex === idx" class="mt-4 border-t border-slate-100 pt-4 dark:border-slate-800">
+                <p v-if="item.description" class="mb-3 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                  {{ item.description }}
+                </p>
+
+                <div v-if="item.media_url" class="mb-4 overflow-hidden rounded-xl border border-slate-200/70 dark:border-slate-800/70">
+                  <div class="relative aspect-video bg-slate-100 dark:bg-slate-800">
+                    <img :src="item.media_url" :alt="item.media_alt || item.title" class="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
+                  </div>
+                </div>
+
                 <ul class="space-y-2 text-sm text-slate-700 dark:text-slate-300">
                   <li v-for="(b, bIdx) in item.bullets" :key="`${idx}-${bIdx}`" class="flex gap-2">
                     <span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-indigo-500/70"></span>
@@ -95,4 +105,3 @@ function toggle(idx) {
   }
 }
 </style>
-

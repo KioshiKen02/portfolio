@@ -105,6 +105,17 @@
       </div>
     </div>
 
+    <div v-else-if="user && !user.is_admin" class="flex min-h-[calc(100vh-var(--header-height))] items-center justify-center bg-slate-50 p-6 dark:bg-slate-950">
+      <div class="w-full max-w-lg rounded-[var(--radius-card)] border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Admin Access Required</h1>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Your account is authenticated but does not have administrator privileges.</p>
+        <div class="mt-6 flex gap-3">
+          <button type="button" class="btn-secondary" @click="handleLogout">Sign Out</button>
+          <button type="button" class="btn-primary" @click="fetchCurrentUser">Retry</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Admin Dashboard Layout -->
     <div v-else class="flex min-h-[calc(100vh-var(--header-height))] bg-slate-50 dark:bg-slate-950 relative">
       
@@ -481,6 +492,265 @@
                       </tr>
                     </tbody>
                   </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Timeline Management -->
+            <div v-if="currentTab === 'timeline'" class="max-w-5xl animate-fade-in space-y-6">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Timeline</h1>
+                  <p class="mt-1 text-sm text-slate-500">Create and manage experience entries shown on the About section.</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                  <button type="button" class="btn-secondary" @click="openTimelineAudit">
+                    View Audit Log
+                  </button>
+                  <button type="button" class="btn-primary" @click="toggleTimelineCreate">
+                    {{ showTimelineCreate ? 'Hide Form' : 'New Entry' }}
+                  </button>
+                </div>
+              </div>
+
+              <div v-if="showTimelineCreate" class="card overflow-hidden">
+                <div class="border-b border-slate-100 px-6 py-4 dark:border-slate-800">
+                  <div class="flex items-center justify-between gap-4">
+                    <div>
+                      <h2 class="text-lg font-semibold text-slate-900 dark:text-white">New Timeline Entry</h2>
+                      <p class="text-sm text-slate-500">Fill in details and preview before saving.</p>
+                    </div>
+                    <button type="button" class="btn-secondary" @click="openTimelinePreview('create')">
+                      Preview
+                    </button>
+                  </div>
+                </div>
+
+                <form class="p-6 space-y-5" @submit.prevent="createTimelineEntry">
+                  <div class="grid gap-5 md:grid-cols-2">
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Title</label>
+                      <input v-model.trim="timelineDraft.title" type="text" class="input-field" @input="validateTimelineDraft(timelineDraftErrors)">
+                      <p v-if="timelineDraftErrors.title" class="mt-1 text-xs text-rose-600">{{ timelineDraftErrors.title }}</p>
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Organization</label>
+                      <input v-model.trim="timelineDraft.organization" type="text" class="input-field" @input="validateTimelineDraft(timelineDraftErrors)">
+                      <p v-if="timelineDraftErrors.organization" class="mt-1 text-xs text-rose-600">{{ timelineDraftErrors.organization }}</p>
+                    </div>
+                  </div>
+
+                  <div class="grid gap-5 md:grid-cols-2">
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Start Date/Time</label>
+                      <input v-model="timelineDraft.starts_at" type="datetime-local" class="input-field" @input="validateTimelineDraft(timelineDraftErrors)">
+                      <p v-if="timelineDraftErrors.starts_at" class="mt-1 text-xs text-rose-600">{{ timelineDraftErrors.starts_at }}</p>
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">End Date/Time (Optional)</label>
+                      <input v-model="timelineDraft.ends_at" type="datetime-local" class="input-field" @input="validateTimelineDraft(timelineDraftErrors)">
+                      <p v-if="timelineDraftErrors.ends_at" class="mt-1 text-xs text-rose-600">{{ timelineDraftErrors.ends_at }}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Description</label>
+                    <textarea v-model.trim="timelineDraft.description" rows="3" class="input-field" @input="validateTimelineDraft(timelineDraftErrors)"></textarea>
+                    <p v-if="timelineDraftErrors.description" class="mt-1 text-xs text-rose-600">{{ timelineDraftErrors.description }}</p>
+                  </div>
+
+                  <div>
+                    <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Key Responsibilities (one per line)</label>
+                    <textarea v-model="timelineDraft.responsibilitiesText" rows="4" class="input-field font-mono text-sm" @input="validateTimelineDraft(timelineDraftErrors)"></textarea>
+                    <div class="mt-1 flex items-center justify-between text-xs text-slate-500">
+                      <span>Used for bullet points in the timeline.</span>
+                      <span v-if="timelineDraftResponsibilitiesCount > 0">{{ timelineDraftResponsibilitiesCount }} items</span>
+                    </div>
+                    <p v-if="timelineDraftErrors.responsibilities" class="mt-1 text-xs text-rose-600">{{ timelineDraftErrors.responsibilities }}</p>
+                  </div>
+
+                  <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+                    <div class="flex items-start justify-between gap-4">
+                      <div>
+                        <div class="text-sm font-semibold text-slate-900 dark:text-white">Optional Media</div>
+                        <div class="text-xs text-slate-500">Upload an image (JPG/PNG/WebP up to 5MB).</div>
+                      </div>
+                      <div v-if="timelineDraftUpload.uploading" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                        Uploading {{ timelineDraftUpload.progress }}%
+                      </div>
+                    </div>
+                    <div class="mt-4 grid gap-4 sm:grid-cols-[112px_1fr] sm:items-center">
+                      <div class="h-24 w-28 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800">
+                        <img
+                          v-if="timelineDraft.media_url"
+                          :src="timelineDraft.media_url"
+                          alt=""
+                          class="h-full w-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                          @error="timelineDraft.media_url = ''"
+                        />
+                        <div v-else class="flex h-full w-full items-center justify-center text-slate-400">
+                          <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        </div>
+                      </div>
+                      <div>
+                        <input ref="timelineDraftMediaInput" type="file" class="hidden" accept="image/png, image/jpeg, image/webp" @change="onTimelineMediaSelected($event, 'draft')">
+                        <div class="flex flex-wrap gap-2">
+                          <button type="button" class="btn-secondary" @click="timelineDraftMediaInput?.click()">Choose Image</button>
+                          <button type="button" class="btn-primary" :disabled="!timelineDraftUpload.file || timelineDraftUpload.uploading" @click="uploadTimelineMedia('draft')">Upload</button>
+                          <button type="button" class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 transition-colors" @click="clearTimelineMedia('draft')">Clear</button>
+                        </div>
+                        <p v-if="timelineDraftUpload.error" class="mt-2 text-xs font-medium text-rose-600">{{ timelineDraftUpload.error }}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex flex-wrap items-center justify-end gap-3 pt-2">
+                    <button type="button" class="btn-secondary" @click="resetTimelineDraft">Reset</button>
+                    <button type="submit" class="btn-primary" :disabled="timelineSaving">Save Entry</button>
+                  </div>
+                </form>
+              </div>
+
+              <div class="card overflow-hidden">
+                <div class="border-b border-slate-100 px-6 py-4 dark:border-slate-800 flex items-center justify-between">
+                  <div>
+                    <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Entries</h2>
+                    <p class="text-sm text-slate-500">Inline edit entries directly in this view.</p>
+                  </div>
+                  <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    {{ timelineEntries.length }} total
+                  </div>
+                </div>
+
+                <div class="p-6">
+                  <div v-if="timelineLoading" class="text-sm text-slate-500">Loading timeline entries...</div>
+                  <div v-else-if="timelineEntries.length === 0" class="text-sm text-slate-500">No timeline entries yet.</div>
+
+                  <ol v-else class="relative pl-6">
+                    <div class="absolute left-[11px] top-1 bottom-1 w-px bg-slate-200 dark:bg-slate-800"></div>
+
+                    <li v-for="entry in timelineEntries" :key="entry.id" class="relative pb-5 last:pb-0">
+                      <div class="absolute left-[5px] top-3 h-3 w-3 rounded-full border-2 border-indigo-500 bg-white shadow-sm dark:bg-slate-950"></div>
+
+                      <div class="card px-5 py-4">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div class="min-w-0">
+                            <div class="flex flex-wrap items-center gap-2">
+                              <div class="text-sm font-semibold text-slate-900 dark:text-white">
+                                {{ entry.title }}
+                              </div>
+                              <span v-if="entry.organization" class="text-xs font-semibold text-slate-500">• {{ entry.organization }}</span>
+                            </div>
+                            <div class="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                              {{ formatTimelineRange(entry) }}
+                            </div>
+                          </div>
+                          <div class="flex flex-wrap items-center gap-2">
+                            <button type="button" class="btn-secondary px-4 py-2 text-sm" @click="openTimelinePreview(entry.id)">Preview</button>
+                            <button type="button" class="btn-secondary px-4 py-2 text-sm" @click="toggleTimelineEdit(entry)">Edit</button>
+                            <button type="button" class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50 dark:border-slate-700 dark:bg-slate-950 dark:text-rose-400 dark:hover:bg-rose-900/20 transition-colors" @click="requestDeleteTimeline(entry)">Delete</button>
+                          </div>
+                        </div>
+
+                        <div v-if="timelineEditId !== entry.id" class="mt-4 space-y-3">
+                          <p v-if="entry.description" class="text-sm text-slate-700 dark:text-slate-300">{{ entry.description }}</p>
+                          <div v-if="entry.media_url" class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
+                            <img :src="entry.media_url" :alt="entry.media_alt || ''" class="h-40 w-full object-cover" loading="lazy" decoding="async" @error="onTimelineImageError(entry)">
+                          </div>
+                          <ul v-if="Array.isArray(entry.responsibilities) && entry.responsibilities.length" class="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+                            <li v-for="(b, idx) in entry.responsibilities" :key="`${entry.id}-${idx}`" class="flex gap-2">
+                              <span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-indigo-500/70"></span>
+                              <span class="leading-relaxed">{{ b }}</span>
+                            </li>
+                          </ul>
+                        </div>
+
+                        <form v-else class="mt-4 space-y-4" @submit.prevent="saveTimelineEdit">
+                          <div class="grid gap-5 md:grid-cols-2">
+                            <div>
+                              <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Title</label>
+                              <input v-model.trim="timelineEdit.title" type="text" class="input-field" @input="validateTimelineEdit">
+                              <p v-if="timelineEditErrors.title" class="mt-1 text-xs text-rose-600">{{ timelineEditErrors.title }}</p>
+                            </div>
+                            <div>
+                              <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Organization</label>
+                              <input v-model.trim="timelineEdit.organization" type="text" class="input-field" @input="validateTimelineEdit">
+                              <p v-if="timelineEditErrors.organization" class="mt-1 text-xs text-rose-600">{{ timelineEditErrors.organization }}</p>
+                            </div>
+                          </div>
+
+                          <div class="grid gap-5 md:grid-cols-2">
+                            <div>
+                              <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Start Date/Time</label>
+                              <input v-model="timelineEdit.starts_at" type="datetime-local" class="input-field" @input="validateTimelineEdit">
+                              <p v-if="timelineEditErrors.starts_at" class="mt-1 text-xs text-rose-600">{{ timelineEditErrors.starts_at }}</p>
+                            </div>
+                            <div>
+                              <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">End Date/Time (Optional)</label>
+                              <input v-model="timelineEdit.ends_at" type="datetime-local" class="input-field" @input="validateTimelineEdit">
+                              <p v-if="timelineEditErrors.ends_at" class="mt-1 text-xs text-rose-600">{{ timelineEditErrors.ends_at }}</p>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Description</label>
+                            <textarea v-model.trim="timelineEdit.description" rows="3" class="input-field" @input="validateTimelineEdit"></textarea>
+                          </div>
+
+                          <div>
+                            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Key Responsibilities (one per line)</label>
+                            <textarea v-model="timelineEdit.responsibilitiesText" rows="4" class="input-field font-mono text-sm" @input="validateTimelineEdit"></textarea>
+                            <p v-if="timelineEditErrors.responsibilities" class="mt-1 text-xs text-rose-600">{{ timelineEditErrors.responsibilities }}</p>
+                          </div>
+
+                          <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+                            <div class="flex items-start justify-between gap-4">
+                              <div>
+                                <div class="text-sm font-semibold text-slate-900 dark:text-white">Optional Media</div>
+                                <div class="text-xs text-slate-500">Upload an image (JPG/PNG/WebP up to 5MB).</div>
+                              </div>
+                              <div v-if="timelineEditUpload.uploading" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                                Uploading {{ timelineEditUpload.progress }}%
+                              </div>
+                            </div>
+                            <div class="mt-4 grid gap-4 sm:grid-cols-[112px_1fr] sm:items-center">
+                              <div class="h-24 w-28 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800">
+                                <img
+                                  v-if="timelineEdit.media_url"
+                                  :src="timelineEdit.media_url"
+                                  alt=""
+                                  class="h-full w-full object-cover"
+                                  loading="lazy"
+                                  decoding="async"
+                                  @error="timelineEdit.media_url = ''"
+                                />
+                                <div v-else class="flex h-full w-full items-center justify-center text-slate-400">
+                                  <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                </div>
+                              </div>
+                              <div>
+                                <input ref="timelineEditMediaInput" type="file" class="hidden" accept="image/png, image/jpeg, image/webp" @change="onTimelineMediaSelected($event, 'edit')">
+                                <div class="flex flex-wrap gap-2">
+                                  <button type="button" class="btn-secondary" @click="timelineEditMediaInput?.click()">Choose Image</button>
+                                  <button type="button" class="btn-primary" :disabled="!timelineEditUpload.file || timelineEditUpload.uploading" @click="uploadTimelineMedia('edit')">Upload</button>
+                                  <button type="button" class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 transition-colors" @click="clearTimelineMedia('edit')">Clear</button>
+                                </div>
+                                <p v-if="timelineEditUpload.error" class="mt-2 text-xs font-medium text-rose-600">{{ timelineEditUpload.error }}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div class="flex flex-wrap items-center justify-end gap-3 pt-1">
+                            <button type="button" class="btn-secondary" @click="cancelTimelineEdit">Cancel</button>
+                            <button type="button" class="btn-secondary" @click="openTimelinePreview('edit')">Preview</button>
+                            <button type="submit" class="btn-primary" :disabled="timelineSaving">Save Changes</button>
+                          </div>
+                        </form>
+                      </div>
+                    </li>
+                  </ol>
                 </div>
               </div>
             </div>
@@ -935,6 +1205,78 @@
       </div>
     </div>
 
+    <!-- Timeline Preview Modal -->
+    <div v-if="showTimelinePreview" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-fade-in" role="dialog" aria-modal="true">
+      <div class="w-full max-w-2xl rounded-2xl bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white">Preview</h3>
+          <button @click="closeTimelinePreview" class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200" aria-label="Close preview">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+        <div class="p-6">
+          <div class="card p-5">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div class="min-w-0">
+                <div class="text-sm font-semibold text-slate-900 dark:text-white">{{ timelinePreviewEntry.title || 'Untitled' }}</div>
+                <div class="mt-1 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400">
+                  <span v-if="timelinePreviewEntry.organization">{{ timelinePreviewEntry.organization }}</span>
+                  <span v-if="timelinePreviewEntry.organization" class="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-700"></span>
+                  <span>{{ formatTimelineRange(timelinePreviewEntry) }}</span>
+                </div>
+              </div>
+            </div>
+            <p v-if="timelinePreviewEntry.description" class="mt-4 text-sm text-slate-700 dark:text-slate-300">{{ timelinePreviewEntry.description }}</p>
+            <div v-if="timelinePreviewEntry.media_url" class="mt-4 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
+              <img :src="timelinePreviewEntry.media_url" :alt="timelinePreviewEntry.media_alt || ''" class="h-52 w-full object-cover" loading="lazy" decoding="async" @error="timelinePreviewEntry.media_url = ''">
+            </div>
+            <ul v-if="Array.isArray(timelinePreviewEntry.responsibilities) && timelinePreviewEntry.responsibilities.length" class="mt-4 space-y-2 text-sm text-slate-700 dark:text-slate-300">
+              <li v-for="(b, idx) in timelinePreviewEntry.responsibilities" :key="`prev-${idx}`" class="flex gap-2">
+                <span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-indigo-500/70"></span>
+                <span class="leading-relaxed">{{ b }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline Audit Modal -->
+    <div v-if="showTimelineAuditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-fade-in" role="dialog" aria-modal="true">
+      <div class="w-full max-w-3xl rounded-2xl bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white">Timeline Audit Log</h3>
+          <button @click="showTimelineAuditModal = false" class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200" aria-label="Close audit log">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+        <div class="p-6">
+          <div v-if="timelineAuditLoading" class="text-sm text-slate-500">Loading audit log...</div>
+          <div v-else-if="timelineAuditLogs.length === 0" class="text-sm text-slate-500">No audit entries yet.</div>
+          <div v-else class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-50 text-slate-500 dark:bg-slate-800/50 dark:text-slate-400">
+                <tr>
+                  <th class="px-4 py-3 font-medium">Action</th>
+                  <th class="px-4 py-3 font-medium">Entry</th>
+                  <th class="px-4 py-3 font-medium">Admin</th>
+                  <th class="px-4 py-3 font-medium">Time</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                <tr v-for="log in timelineAuditLogs" :key="log.id">
+                  <td class="px-4 py-3 font-semibold text-slate-900 dark:text-white">{{ String(log.action).toUpperCase() }}</td>
+                  <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ log.entry?.title || 'Deleted entry' }}</td>
+                  <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ log.user?.name || 'Unknown' }}</td>
+                  <td class="px-4 py-3 text-slate-500">{{ new Date(log.created_at).toLocaleString() }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Delete Confirmation Modal -->
     <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-desc">
       <div class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
@@ -943,9 +1285,9 @@
              <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
           </div>
         </div>
-        <h3 id="modal-title" class="mb-2 text-center text-xl font-bold text-slate-900 dark:text-white">Delete Message?</h3>
+        <h3 id="modal-title" class="mb-2 text-center text-xl font-bold text-slate-900 dark:text-white">{{ deleteModalTitle }}</h3>
         <p id="modal-desc" class="mb-6 text-center text-sm text-slate-500 dark:text-slate-400">
-          Are you sure you want to delete this message? This action cannot be undone.
+          {{ deleteModalDescription }}
         </p>
         <div class="grid grid-cols-2 gap-3">
           <button 
@@ -998,6 +1340,7 @@ const SkillIcon = createIcon('M13 10V3L4 14h7v7l9-11h-7z');
 const MessageIcon = createIcon('M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z');
 const UserIcon = createIcon('M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z');
 const SettingsIcon = createIcon('M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z');
+const TimelineIcon = createIcon('M4 6h16M4 12h10M4 18h16M16 10l2 2 4-4');
 const SuccessIcon = createIcon('M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'text-emerald-500');
 const ErrorIcon = createIcon('M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'text-rose-500');
 
@@ -1006,6 +1349,7 @@ const tabs = [
   { id: 'projects', label: 'Projects', icon: shallowRef(ProjectIcon) },
   { id: 'skills', label: 'Skills', icon: shallowRef(SkillIcon) },
   { id: 'messages', label: 'Messages', icon: shallowRef(MessageIcon) },
+  { id: 'timeline', label: 'Timeline', icon: shallowRef(TimelineIcon) },
   { id: 'settings', label: 'Site Settings', icon: shallowRef(SettingsIcon) },
   { id: 'profile', label: 'Profile', icon: shallowRef(UserIcon) },
 ];
@@ -1087,6 +1431,379 @@ const showMessageModal = ref(false);
 const selectedMessage = ref(null);
 const replyMessage = ref('');
 const sendingReply = ref(false);
+
+const timelineEntries = ref([]);
+const timelineLoading = ref(false);
+const showTimelineCreate = ref(false);
+const timelineSaving = ref(false);
+
+const timelineDraft = reactive({
+  title: '',
+  organization: '',
+  description: '',
+  starts_at: '',
+  ends_at: '',
+  responsibilitiesText: '',
+  media_url: '',
+  media_type: 'image',
+  media_alt: '',
+  sort_order: 0,
+});
+
+const timelineDraftErrors = reactive({});
+const timelineDraftUpload = reactive({ file: null, progress: 0, uploading: false, error: '', previewUrl: '' });
+const timelineDraftMediaInput = ref(null);
+
+const timelineEditId = ref(null);
+const timelineEdit = reactive({
+  id: null,
+  title: '',
+  organization: '',
+  description: '',
+  starts_at: '',
+  ends_at: '',
+  responsibilitiesText: '',
+  media_url: '',
+  media_type: 'image',
+  media_alt: '',
+  sort_order: 0,
+});
+
+const timelineEditErrors = reactive({});
+const timelineEditUpload = reactive({ file: null, progress: 0, uploading: false, error: '', previewUrl: '' });
+const timelineEditMediaInput = ref(null);
+
+const showTimelinePreview = ref(false);
+const timelinePreviewEntry = reactive({});
+const showTimelineAuditModal = ref(false);
+const timelineAuditLogs = ref([]);
+const timelineAuditLoading = ref(false);
+
+const timelineDraftResponsibilitiesCount = computed(() => parseResponsibilities(timelineDraft.responsibilitiesText).length);
+
+const deleteModalTitle = computed(() => {
+  if (!itemToDelete.value) return 'Delete?';
+  if (itemToDelete.value.type === 'timeline') return 'Delete Timeline Entry?';
+  return 'Delete Message?';
+});
+
+const deleteModalDescription = computed(() => {
+  if (!itemToDelete.value) return 'This action cannot be undone.';
+  if (itemToDelete.value.type === 'timeline') return 'Are you sure you want to delete this timeline entry? This action cannot be undone.';
+  return 'Are you sure you want to delete this message? This action cannot be undone.';
+});
+
+function toggleTimelineCreate() {
+  showTimelineCreate.value = !showTimelineCreate.value;
+}
+
+function formatTimelineRange(entry) {
+  const start = entry?.starts_at ? new Date(entry.starts_at) : null;
+  const end = entry?.ends_at ? new Date(entry.ends_at) : null;
+  const fmt = new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short' });
+  const startText = start && !isNaN(start.getTime()) ? fmt.format(start) : '—';
+  const endText = end && !isNaN(end.getTime()) ? fmt.format(end) : 'Present';
+  return `${startText} — ${endText}`;
+}
+
+function toSqlDateTime(value) {
+  if (!value) return null;
+  if (typeof value !== 'string') return null;
+  return value.includes('T') ? `${value.replace('T', ' ')}:00` : value;
+}
+
+function fromApiToLocalInput(value) {
+  if (!value) return '';
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return '';
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function parseResponsibilities(text) {
+  return String(text || '')
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
+}
+
+function validateTimelineDraft(targetErrors) {
+  const errors = {};
+  if (!timelineDraft.title.trim()) errors.title = 'Title is required.';
+  if (!timelineDraft.starts_at) errors.starts_at = 'Start date/time is required.';
+  if (timelineDraft.ends_at && timelineDraft.starts_at && new Date(timelineDraft.ends_at) < new Date(timelineDraft.starts_at)) {
+    errors.ends_at = 'End date/time must be after the start date/time.';
+  }
+  const resp = parseResponsibilities(timelineDraft.responsibilitiesText);
+  if (resp.length === 0) errors.responsibilities = 'Add at least one responsibility.';
+  Object.keys(targetErrors).forEach((k) => delete targetErrors[k]);
+  Object.entries(errors).forEach(([k, v]) => (targetErrors[k] = v));
+  return Object.keys(errors).length === 0;
+}
+
+function validateTimelineEdit() {
+  const errors = {};
+  if (!timelineEdit.title.trim()) errors.title = 'Title is required.';
+  if (!timelineEdit.starts_at) errors.starts_at = 'Start date/time is required.';
+  if (timelineEdit.ends_at && timelineEdit.starts_at && new Date(timelineEdit.ends_at) < new Date(timelineEdit.starts_at)) {
+    errors.ends_at = 'End date/time must be after the start date/time.';
+  }
+  const resp = parseResponsibilities(timelineEdit.responsibilitiesText);
+  if (resp.length === 0) errors.responsibilities = 'Add at least one responsibility.';
+  Object.keys(timelineEditErrors).forEach((k) => delete timelineEditErrors[k]);
+  Object.entries(errors).forEach(([k, v]) => (timelineEditErrors[k] = v));
+  return Object.keys(errors).length === 0;
+}
+
+function resetTimelineDraft() {
+  timelineDraft.title = '';
+  timelineDraft.organization = '';
+  timelineDraft.description = '';
+  timelineDraft.starts_at = '';
+  timelineDraft.ends_at = '';
+  timelineDraft.responsibilitiesText = '';
+  timelineDraft.media_url = '';
+  timelineDraft.media_alt = '';
+  timelineDraft.sort_order = 0;
+  Object.keys(timelineDraftErrors).forEach((k) => delete timelineDraftErrors[k]);
+  clearTimelineMedia('draft');
+}
+
+function clearTimelineMedia(mode) {
+  const upload = mode === 'edit' ? timelineEditUpload : timelineDraftUpload;
+  const entry = mode === 'edit' ? timelineEdit : timelineDraft;
+  if (upload.previewUrl) URL.revokeObjectURL(upload.previewUrl);
+  upload.file = null;
+  upload.progress = 0;
+  upload.uploading = false;
+  upload.error = '';
+  upload.previewUrl = '';
+  entry.media_url = '';
+}
+
+function onTimelineMediaSelected(event, mode) {
+  const file = event?.target?.files?.[0];
+  const upload = mode === 'edit' ? timelineEditUpload : timelineDraftUpload;
+  const entry = mode === 'edit' ? timelineEdit : timelineDraft;
+  upload.error = '';
+  upload.file = null;
+  upload.progress = 0;
+
+  if (!file) return;
+  const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  if (!validTypes.includes(file.type)) {
+    upload.error = 'Invalid file type. Use JPG, PNG, or WebP.';
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    upload.error = 'File is too large. Max 5MB.';
+    return;
+  }
+
+  if (upload.previewUrl) URL.revokeObjectURL(upload.previewUrl);
+  upload.previewUrl = URL.createObjectURL(file);
+  upload.file = file;
+  entry.media_url = upload.previewUrl;
+}
+
+async function uploadTimelineMedia(mode) {
+  const upload = mode === 'edit' ? timelineEditUpload : timelineDraftUpload;
+  const entry = mode === 'edit' ? timelineEdit : timelineDraft;
+  if (!upload.file || upload.uploading) return;
+  upload.uploading = true;
+  upload.error = '';
+  upload.progress = 0;
+
+  try {
+    const formData = new FormData();
+    formData.append('image', upload.file);
+    formData.append('folder', 'timeline');
+
+    const { data } = await axios.post('/admin/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (evt) => {
+        const total = evt.total || 0;
+        if (!total) return;
+        upload.progress = Math.round((evt.loaded / total) * 100);
+      },
+    });
+
+    if (upload.previewUrl) URL.revokeObjectURL(upload.previewUrl);
+    upload.previewUrl = '';
+    upload.file = null;
+    entry.media_url = data.url;
+    upload.progress = 100;
+  } catch (e) {
+    upload.error = e.response?.data?.message || 'Upload failed.';
+  } finally {
+    upload.uploading = false;
+    const input = mode === 'edit' ? timelineEditMediaInput.value : timelineDraftMediaInput.value;
+    if (input) input.value = '';
+  }
+}
+
+async function loadTimeline() {
+  timelineLoading.value = true;
+  try {
+    const { data } = await axios.get('/admin/timeline');
+    timelineEntries.value = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+  } catch (e) {
+    addToast('Failed to load timeline entries.', 'error');
+  } finally {
+    timelineLoading.value = false;
+  }
+}
+
+async function createTimelineEntry() {
+  if (!validateTimelineDraft(timelineDraftErrors)) return;
+  timelineSaving.value = true;
+  try {
+    const payload = {
+      title: timelineDraft.title.trim(),
+      organization: timelineDraft.organization.trim() || null,
+      description: timelineDraft.description.trim() || null,
+      starts_at: toSqlDateTime(timelineDraft.starts_at),
+      ends_at: toSqlDateTime(timelineDraft.ends_at),
+      responsibilities: parseResponsibilities(timelineDraft.responsibilitiesText),
+      media_url: timelineDraft.media_url || null,
+      media_type: timelineDraft.media_url ? 'image' : null,
+      media_alt: timelineDraft.media_alt || null,
+      sort_order: Number(timelineDraft.sort_order || 0),
+    };
+    await axios.post('/admin/timeline', payload);
+    addToast('Timeline entry created.', 'success');
+    resetTimelineDraft();
+    showTimelineCreate.value = false;
+    await loadTimeline();
+  } catch (e) {
+    if (e.response?.status === 422) addToast('Please fix the validation errors.', 'error');
+    else addToast('Failed to create timeline entry.', 'error');
+  } finally {
+    timelineSaving.value = false;
+  }
+}
+
+function toggleTimelineEdit(entry) {
+  if (timelineEditId.value === entry.id) {
+    cancelTimelineEdit();
+    return;
+  }
+  timelineEditId.value = entry.id;
+  timelineEdit.id = entry.id;
+  timelineEdit.title = entry.title || '';
+  timelineEdit.organization = entry.organization || '';
+  timelineEdit.description = entry.description || '';
+  timelineEdit.starts_at = fromApiToLocalInput(entry.starts_at);
+  timelineEdit.ends_at = fromApiToLocalInput(entry.ends_at);
+  timelineEdit.responsibilitiesText = Array.isArray(entry.responsibilities) ? entry.responsibilities.join('\n') : '';
+  timelineEdit.media_url = entry.media_url || '';
+  timelineEdit.media_alt = entry.media_alt || '';
+  timelineEdit.sort_order = Number(entry.sort_order || 0);
+  Object.keys(timelineEditErrors).forEach((k) => delete timelineEditErrors[k]);
+  timelineEditUpload.file = null;
+  timelineEditUpload.progress = 0;
+  timelineEditUpload.uploading = false;
+  timelineEditUpload.error = '';
+  if (timelineEditUpload.previewUrl) URL.revokeObjectURL(timelineEditUpload.previewUrl);
+  timelineEditUpload.previewUrl = '';
+}
+
+function cancelTimelineEdit() {
+  timelineEditId.value = null;
+  timelineEdit.id = null;
+  Object.keys(timelineEditErrors).forEach((k) => delete timelineEditErrors[k]);
+  clearTimelineMedia('edit');
+}
+
+async function saveTimelineEdit() {
+  if (!timelineEditId.value) return;
+  if (!validateTimelineEdit()) return;
+  timelineSaving.value = true;
+  try {
+    const payload = {
+      title: timelineEdit.title.trim(),
+      organization: timelineEdit.organization.trim() || null,
+      description: timelineEdit.description.trim() || null,
+      starts_at: toSqlDateTime(timelineEdit.starts_at),
+      ends_at: toSqlDateTime(timelineEdit.ends_at),
+      responsibilities: parseResponsibilities(timelineEdit.responsibilitiesText),
+      media_url: timelineEdit.media_url || null,
+      media_type: timelineEdit.media_url ? 'image' : null,
+      media_alt: timelineEdit.media_alt || null,
+      sort_order: Number(timelineEdit.sort_order || 0),
+    };
+    const { data } = await axios.put(`/admin/timeline/${timelineEditId.value}`, payload);
+    const updated = data?.data || data;
+    timelineEntries.value = timelineEntries.value.map((e) => (e.id === updated.id ? updated : e));
+    addToast('Timeline entry updated.', 'success');
+    cancelTimelineEdit();
+  } catch (e) {
+    if (e.response?.status === 422) addToast('Please fix the validation errors.', 'error');
+    else addToast('Failed to update timeline entry.', 'error');
+  } finally {
+    timelineSaving.value = false;
+  }
+}
+
+function requestDeleteTimeline(entry) {
+  itemToDelete.value = { id: entry.id, type: 'timeline', label: entry.title };
+  showDeleteModal.value = true;
+}
+
+function onTimelineImageError(entry) {
+  entry.media_url = '';
+}
+
+function openTimelinePreview(source) {
+  let entry = null;
+  if (source === 'create') {
+    entry = {
+      title: timelineDraft.title,
+      organization: timelineDraft.organization,
+      description: timelineDraft.description,
+      starts_at: timelineDraft.starts_at ? new Date(toSqlDateTime(timelineDraft.starts_at)).toISOString() : null,
+      ends_at: timelineDraft.ends_at ? new Date(toSqlDateTime(timelineDraft.ends_at)).toISOString() : null,
+      responsibilities: parseResponsibilities(timelineDraft.responsibilitiesText),
+      media_url: timelineDraft.media_url,
+      media_alt: timelineDraft.media_alt,
+    };
+  } else if (source === 'edit') {
+    entry = {
+      title: timelineEdit.title,
+      organization: timelineEdit.organization,
+      description: timelineEdit.description,
+      starts_at: timelineEdit.starts_at ? new Date(toSqlDateTime(timelineEdit.starts_at)).toISOString() : null,
+      ends_at: timelineEdit.ends_at ? new Date(toSqlDateTime(timelineEdit.ends_at)).toISOString() : null,
+      responsibilities: parseResponsibilities(timelineEdit.responsibilitiesText),
+      media_url: timelineEdit.media_url,
+      media_alt: timelineEdit.media_alt,
+    };
+  } else {
+    entry = timelineEntries.value.find((e) => e.id === source);
+  }
+
+  if (!entry) return;
+  Object.keys(timelinePreviewEntry).forEach((k) => delete timelinePreviewEntry[k]);
+  Object.entries(entry).forEach(([k, v]) => (timelinePreviewEntry[k] = v));
+  showTimelinePreview.value = true;
+}
+
+function closeTimelinePreview() {
+  showTimelinePreview.value = false;
+}
+
+async function openTimelineAudit() {
+  showTimelineAuditModal.value = true;
+  timelineAuditLoading.value = true;
+  try {
+    const { data } = await axios.get('/admin/timeline-audit');
+    timelineAuditLogs.value = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+  } catch {
+    addToast('Failed to load audit log.', 'error');
+  } finally {
+    timelineAuditLoading.value = false;
+  }
+}
 
 // Project Modal State
 const showProjectModal = ref(false);
@@ -1473,14 +2190,16 @@ async function loadData() {
   if (!user.value) return;
 
   try {
+    timelineLoading.value = true;
     const results = await Promise.allSettled([
       axios.get('/admin/projects'),
       axios.get('/admin/skills'),
       axios.get('/admin/contacts'),
-      axios.get('/admin/settings')
+      axios.get('/admin/settings'),
+      axios.get('/admin/timeline')
     ]);
 
-    const [pRes, sRes, mRes, setRes] = results;
+    const [pRes, sRes, mRes, setRes, tRes] = results;
 
     if (pRes.status === 'fulfilled') projects.value = pRes.value.data.data || pRes.value.data;
     if (sRes.status === 'fulfilled') skills.value = sRes.value.data.data || sRes.value.data;
@@ -1489,9 +2208,14 @@ async function loadData() {
         settings.value = setRes.value.data.data || setRes.value.data;
         ensureProfilePictureSettings();
     }
+    if (tRes.status === 'fulfilled') {
+        timelineEntries.value = tRes.value.data.data || tRes.value.data || [];
+    }
   } catch (error) {
     console.error('Data load failed:', error);
     addToast('Failed to load dashboard data', 'error');
+  } finally {
+    timelineLoading.value = false;
   }
 }
 
@@ -1553,6 +2277,11 @@ async function confirmDelete() {
       if (selectedMessage.value && selectedMessage.value.id === id) {
         closeMessageModal();
       }
+    } else if (type === 'timeline') {
+      await axios.delete(`/admin/timeline/${id}`);
+      timelineEntries.value = timelineEntries.value.filter(e => e.id !== id);
+      addToast('Timeline entry deleted.', 'success');
+      if (timelineEditId.value === id) cancelTimelineEdit();
     }
   } catch {
     addToast('Failed to delete item.', 'error');

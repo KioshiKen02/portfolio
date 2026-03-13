@@ -141,39 +141,47 @@
     </section>
 
     <!-- About Section -->
-    <section ref="aboutSection" id="about" class="section-block py-24 scroll-mt-28">
+    <section ref="aboutSection" id="about" class="section-block py-16 md:py-20 scroll-mt-28">
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
-        <div class="grid gap-16 md:grid-cols-2">
-          <div v-fade-slide-up>
-            <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-              Engineering with purpose.
-            </h2>
-            <div class="mt-6 space-y-6 text-lg text-slate-600 dark:text-slate-400">
-              <p>
-                I don't just write code; I solve problems. With a background in Computer Engineering, I approach every
-                project with a focus on efficiency, security, and scalability.
-              </p>
-              <p>
-                My expertise spans the entire development lifecycle—from database schema design to frontend state
-                management and mobile app deployment. I build tools that businesses rely on.
-              </p>
+        <div class="grid gap-10 md:grid-cols-12 md:items-start">
+          <div class="md:col-span-7 space-y-6" v-fade-slide-up>
+            <div>
+              <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+                Engineering with purpose.
+              </h2>
+              <div class="mt-4 space-y-4 text-base leading-relaxed text-slate-600 dark:text-slate-400">
+                <p>
+                  I don't just write code; I solve problems. With a background in Computer Engineering, I approach every
+                  project with a focus on efficiency, security, and scalability.
+                </p>
+                <p>
+                  My expertise spans the entire development lifecycle—from database schema design to frontend state
+                  management and mobile app deployment. I build tools that businesses rely on.
+                </p>
+              </div>
             </div>
 
-            <div class="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800">
-              <div class="grid grid-cols-2 gap-8">
+            <div class="card p-5">
+              <div class="grid grid-cols-2 gap-6">
                 <div>
-                  <span class="block text-3xl font-bold text-slate-900 dark:text-white">2+</span>
-                  <span class="text-sm font-medium text-slate-500">Years Experience</span>
+                  <span class="block text-2xl font-bold text-slate-900 dark:text-white">2+</span>
+                  <span class="text-sm font-semibold text-slate-500">Years Experience</span>
                 </div>
                 <div>
-                  <span class="block text-3xl font-bold text-slate-900 dark:text-white">10+</span>
-                  <span class="text-sm font-medium text-slate-500">Projects Delivered</span>
+                  <span class="block text-2xl font-bold text-slate-900 dark:text-white">10+</span>
+                  <span class="text-sm font-semibold text-slate-500">Projects Delivered</span>
                 </div>
               </div>
             </div>
+
+            <ExperienceTimeline
+              title="Timeline"
+              subtitle="Professional experience and key responsibilities."
+              :items="experienceItems"
+            />
           </div>
 
-          <div class="space-y-6" v-fade-slide-up>
+          <div class="md:col-span-5 space-y-6" v-fade-slide-up>
             <div class="mx-auto w-full max-w-sm">
               <ProfilePicture
                 :is-dark="isDarkTheme"
@@ -185,28 +193,25 @@
               />
             </div>
 
-            <div class="grid gap-6">
-            <div
-              class="group rounded-2xl bg-white p-8 shadow-sm transition hover:shadow-md dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-              <h3 class="text-xl font-bold text-slate-900 dark:text-white">Backend Systems</h3>
-              <p class="mt-2 text-slate-600 dark:text-slate-400">
-                Robust RESTful APIs, complex database relationships, and secure authentication using Laravel.
-              </p>
-            </div>
-            <div
-              class="group rounded-2xl bg-white p-8 shadow-sm transition hover:shadow-md dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-              <h3 class="text-xl font-bold text-slate-900 dark:text-white">Frontend Architecture</h3>
-              <p class="mt-2 text-slate-600 dark:text-slate-400">
-                Responsive, accessible, and performant interfaces built with Vue.js and Tailwind CSS.
-              </p>
-            </div>
-            <div
-              class="group rounded-2xl bg-white p-8 shadow-sm transition hover:shadow-md dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-              <h3 class="text-xl font-bold text-slate-900 dark:text-white">Mobile Development</h3>
-              <p class="mt-2 text-slate-600 dark:text-slate-400">
-                Native-feel Android and iOS applications using Flutter's powerful rendering engine.
-              </p>
-            </div>
+            <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-1">
+              <div class="card p-5 hover:-translate-y-0.5">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Backend Systems</h3>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                  Robust RESTful APIs, complex database relationships, and secure authentication using Laravel.
+                </p>
+              </div>
+              <div class="card p-5 hover:-translate-y-0.5">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Frontend Architecture</h3>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                  Responsive, accessible, and performant interfaces built with Vue.js and Tailwind CSS.
+                </p>
+              </div>
+              <div class="card p-5 hover:-translate-y-0.5 sm:col-span-2 md:col-span-1">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Mobile Development</h3>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                  Native-feel Android and iOS applications using Flutter's powerful rendering engine.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -577,6 +582,7 @@ import axios from 'axios';
 import ProfilePicture from '../components/ProfilePicture.vue';
 import ProjectPhotoCarousel from '../components/ProjectPhotoCarousel.vue';
 import PhotoLightbox from '../components/PhotoLightbox.vue';
+import ExperienceTimeline from '../components/ExperienceTimeline.vue';
 
 const projects = ref([]);
 const skills = ref([]);
@@ -598,6 +604,48 @@ const profilePicture = computed(() => {
   const darkHover = settings.value?.profile_picture_dark_hover || darkDefault;
   return { lightDefault, lightHover, darkDefault, darkHover };
 });
+
+const experienceItems = ref([]);
+const loadingTimeline = ref(false);
+
+function formatExperienceRange(startsAt, endsAt) {
+  const start = startsAt ? new Date(startsAt) : null;
+  const end = endsAt ? new Date(endsAt) : null;
+  const fmt = new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short' });
+  const startText = start && !isNaN(start.getTime()) ? fmt.format(start) : '—';
+  const endText = end && !isNaN(end.getTime()) ? fmt.format(end) : 'Present';
+  return `${startText} — ${endText}`;
+}
+
+async function loadTimeline() {
+  loadingTimeline.value = true;
+  try {
+    const { data } = await axios.get('/timeline');
+    const entries = Array.isArray(data) ? data : [];
+    experienceItems.value = entries
+      .slice()
+      .sort((a, b) => {
+        const ao = Number(a.sort_order || 0);
+        const bo = Number(b.sort_order || 0);
+        if (ao !== bo) return ao - bo;
+        return new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime();
+      })
+      .map((e) => ({
+        id: e.id,
+        title: e.title,
+        company: e.organization || '',
+        range: formatExperienceRange(e.starts_at, e.ends_at),
+        description: e.description || '',
+        bullets: Array.isArray(e.responsibilities) ? e.responsibilities : [],
+        media_url: e.media_url || '',
+        media_alt: e.media_alt || '',
+      }));
+  } catch {
+    experienceItems.value = [];
+  } finally {
+    loadingTimeline.value = false;
+  }
+}
 
 const heroSection = ref(null);
 const aboutSection = ref(null);
@@ -949,6 +997,7 @@ async function loadSkills() {
 onMounted(() => {
   loadProjects();
   loadSkills();
+  loadTimeline();
 
   syncThemeState();
   themeObserver = new MutationObserver(() => syncThemeState());

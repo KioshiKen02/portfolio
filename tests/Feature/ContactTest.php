@@ -33,7 +33,7 @@ class ContactTest extends TestCase
 
     public function test_admin_can_view_messages()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_admin' => true]);
         $token = JWTAuth::fromUser($user);
 
         Contact::factory()->count(3)->create();
@@ -49,7 +49,7 @@ class ContactTest extends TestCase
     {
         Mail::fake();
 
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_admin' => true]);
         $token = JWTAuth::fromUser($user);
 
         $contact = Contact::factory()->create();

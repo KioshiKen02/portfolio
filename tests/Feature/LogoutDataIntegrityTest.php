@@ -18,6 +18,7 @@ class LogoutDataIntegrityTest extends TestCase
         $user = User::factory()->create([
             'email' => 'test@example.com',
             'password' => bcrypt('password'),
+            'is_admin' => true,
         ]);
 
         // 2. Login

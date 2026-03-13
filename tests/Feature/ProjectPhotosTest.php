@@ -14,7 +14,7 @@ class ProjectPhotosTest extends TestCase
     #[Test]
     public function admin_can_create_project_with_five_images()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_admin' => true]);
         $token = auth('api')->login($user);
 
         $payload = [
@@ -42,7 +42,7 @@ class ProjectPhotosTest extends TestCase
     #[Test]
     public function project_images_require_minimum_five_when_provided()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_admin' => true]);
         $token = auth('api')->login($user);
 
         $payload = [
@@ -63,4 +63,3 @@ class ProjectPhotosTest extends TestCase
         $res->assertStatus(422);
     }
 }
-

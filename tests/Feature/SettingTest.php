@@ -15,7 +15,7 @@ class SettingTest extends TestCase
     #[Test]
     public function admin_can_view_settings()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_admin' => true]);
         $token = auth('api')->login($user);
 
         Setting::create(['key' => 'site_title', 'value' => 'My Portfolio']);
@@ -30,7 +30,7 @@ class SettingTest extends TestCase
     #[Test]
     public function admin_can_update_settings()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_admin' => true]);
         $token = auth('api')->login($user);
 
         Setting::create(['key' => 'site_title', 'value' => 'Old Title']);
@@ -54,7 +54,7 @@ class SettingTest extends TestCase
     #[Test]
     public function admin_can_save_profile_picture_urls()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_admin' => true]);
         $token = auth('api')->login($user);
 
         $payload = [
@@ -76,7 +76,7 @@ class SettingTest extends TestCase
     #[Test]
     public function url_settings_reject_invalid_values()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_admin' => true]);
         $token = auth('api')->login($user);
 
         $payload = [

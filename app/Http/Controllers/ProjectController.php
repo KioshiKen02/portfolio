@@ -67,7 +67,7 @@ class ProjectController extends Controller
             $disk = env('FILESYSTEM_DISK', 'public');
 
             $folder = $request->input('folder', 'projects');
-            if (!in_array($folder, ['projects', 'profile'], true)) {
+            if (!in_array($folder, ['projects', 'profile', 'timeline'], true)) {
                 $folder = 'projects';
             }
             
