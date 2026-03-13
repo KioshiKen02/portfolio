@@ -435,17 +435,7 @@
                 </div>
                 <div>
                   <h3 class="font-semibold text-slate-900 dark:text-white">Resume</h3>
-                  <a
-                    v-if="settings.resume_url"
-                    :href="settings.resume_url"
-                    target="_blank"
-                    class="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-                  >
-                    {{ settings.resume_url.startsWith('/') ? settings.resume_url : 'Open resume' }}
-                  </a>
-                  <div v-else class="text-slate-500 dark:text-slate-500 text-sm">
-                    Set resume_url in Site Settings
-                  </div>
+                  <ResumeDownloadButton :url="resumeDownloadUrl" filename="melvin-rey-c-tambis-resume.pdf" />
                 </div>
               </div>
             </div>
@@ -627,6 +617,7 @@ import ProfilePicture from '../components/ProfilePicture.vue';
 import ProjectPhotoCarousel from '../components/ProjectPhotoCarousel.vue';
 import PhotoLightbox from '../components/PhotoLightbox.vue';
 import ExperienceTimeline from '../components/ExperienceTimeline.vue';
+import ResumeDownloadButton from '../components/ResumeDownloadButton.vue';
 
 const projects = ref([]);
 const skills = ref([]);
@@ -651,6 +642,7 @@ const profilePicture = computed(() => {
 
 const experienceItems = ref([]);
 const loadingTimeline = ref(false);
+const resumeDownloadUrl = computed(() => settings.value?.resume_url || '/resume/melvin-rey-c-tambis-resume.pdf');
 
 function formatExperienceRange(startsAt, endsAt) {
   const start = startsAt ? new Date(startsAt) : null;
