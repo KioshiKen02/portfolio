@@ -70,6 +70,7 @@
                 class="inline-flex items-center justify-center rounded-[var(--radius-button)] border border-slate-200 bg-white px-8 py-4 font-medium text-slate-900 transition-all hover:bg-slate-50 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:text-white dark:hover:bg-slate-900">
                 Contact Me
               </button>
+              <ResumeDownloadButton :url="resumeDownloadUrl" filename="melvin-rey-c-tambis-resume.pdf" />
             </div>
           </div>
 
@@ -424,18 +425,6 @@
                   <div v-else class="text-slate-500 dark:text-slate-500 text-sm">
                     Set linkedin_url in Site Settings
                   </div>
-                </div>
-              </div>
-              <div class="flex items-start gap-4">
-                <div class="rounded-lg bg-slate-100 p-3 text-slate-900 dark:bg-slate-800 dark:text-white">
-                  <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M12 10v6m0 0l-3-3m3 3l3-3M4 4h16v4H4V4z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 class="font-semibold text-slate-900 dark:text-white">Resume</h3>
-                  <ResumeDownloadButton :url="resumeDownloadUrl" filename="melvin-rey-c-tambis-resume.pdf" />
                 </div>
               </div>
             </div>

@@ -1,7 +1,7 @@
 <template>
   <button
     type="button"
-    class="inline-flex items-center justify-center gap-2 rounded-[var(--radius-button)] bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition hover:bg-indigo-500 hover:shadow-xl hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+    class="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-[var(--radius-button)] bg-[var(--color-brand)] px-8 py-4 font-medium text-white shadow-lg transition-all hover:bg-[var(--color-brand-hover)] hover:shadow-xl hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
     :disabled="!url"
     @click="download"
   >
@@ -30,4 +30,3 @@ function download() {
   a.remove();
 }
 </script>
-
