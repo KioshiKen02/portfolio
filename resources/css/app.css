@@ -61,4 +61,8 @@ body {
     .input-field {
         @apply block w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-indigo-500;
     }
+
+    .input-field::placeholder {
+        @apply text-slate-400 dark:text-slate-400;
+    }
 }

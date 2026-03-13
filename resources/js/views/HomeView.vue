@@ -404,6 +404,50 @@
                     class="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">{{ (settings.github_url || 'github.com/KioshiKen02').replace(/^https?:\/\//, '') }}</a>
                 </div>
               </div>
+              <div class="flex items-start gap-4">
+                <div class="rounded-lg bg-slate-100 p-3 text-slate-900 dark:bg-slate-800 dark:text-white">
+                  <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M16 8a6 6 0 01-12 0 6 6 0 0112 0zM2 20a8 8 0 0116 0" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-slate-900 dark:text-white">LinkedIn</h3>
+                  <a
+                    v-if="settings.linkedin_url"
+                    :href="settings.linkedin_url"
+                    target="_blank"
+                    class="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                  >
+                    {{ String(settings.linkedin_url).replace(/^https?:\/\//, '') }}
+                  </a>
+                  <div v-else class="text-slate-500 dark:text-slate-500 text-sm">
+                    Set linkedin_url in Site Settings
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <div class="rounded-lg bg-slate-100 p-3 text-slate-900 dark:bg-slate-800 dark:text-white">
+                  <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 10v6m0 0l-3-3m3 3l3-3M4 4h16v4H4V4z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-slate-900 dark:text-white">Resume</h3>
+                  <a
+                    v-if="settings.resume_url"
+                    :href="settings.resume_url"
+                    target="_blank"
+                    class="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                  >
+                    {{ settings.resume_url.startsWith('/') ? settings.resume_url : 'Open resume' }}
+                  </a>
+                  <div v-else class="text-slate-500 dark:text-slate-500 text-sm">
+                    Set resume_url in Site Settings
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

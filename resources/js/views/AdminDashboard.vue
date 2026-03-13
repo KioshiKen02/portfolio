@@ -762,8 +762,9 @@
                  <button 
                    @click="saveSettings" 
                    class="btn-primary"
+                    :disabled="settingsLoading"
                  >
-                   Save Changes
+                   {{ settingsLoading ? 'Loading...' : 'Save Changes' }}
                  </button>
               </div>
 
@@ -849,23 +850,58 @@
                       <h2 class="text-lg font-semibold text-slate-900 dark:text-white">General Settings</h2>
                       <p class="text-sm text-slate-500">Manage global site configuration variables.</p>
                    </div>
-                   <button @click="settings.push({ key: '', value: '', type: 'text', group: 'general' })" class="text-sm text-indigo-600 font-medium hover:underline">+ Add Field</button>
                 </div>
                 
                 <div class="p-6 space-y-6">
-                   <div v-if="settings.length === 0" class="text-center py-8 text-slate-500">
+                   <div v-if="settingsLoading" class="grid gap-4">
+                      <div v-for="n in 4" :key="n" class="h-16 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800/60"></div>
+                   </div>
+
+                   <div v-else-if="generalSettings.length === 0" class="text-center py-8 text-slate-500">
                       No settings found. Add one to get started.
                    </div>
                    
-                   <div v-for="(setting, index) in settings" :key="index" class="flex gap-4 items-start group border-b border-slate-50 pb-6 last:border-0 last:pb-0 dark:border-slate-800">
+                   <div v-for="(setting, index) in generalSettings" :key="`${setting.key}-${index}`" class="flex gap-4 items-start group border-b border-slate-50 pb-6 last:border-0 last:pb-0 dark:border-slate-800">
                       <div class="w-1/3">
                          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Key</label>
-                         <input v-model="setting.key" type="text" class="input-field font-mono text-sm" placeholder="e.g. site_title">
+                         <input v-model="setting.key" type="text" class="input-field font-mono text-sm" placeholder="e.g. site_title" :title="getSettingHint(setting.key)" @input="validateSetting(setting)">
                       </div>
                       <div class="flex-1">
                          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Value</label>
-                         <textarea v-if="setting.type === 'textarea'" v-model="setting.value" rows="3" class="input-field text-sm"></textarea>
-                         <input v-else v-model="setting.value" :type="setting.type" class="input-field text-sm">
+                         <textarea
+                           v-if="setting.type === 'textarea' || setting.type === 'json'"
+                           v-model="setting.value"
+                           rows="3"
+                           class="input-field text-sm"
+                           :placeholder="getSettingExample(setting.key)"
+                           :aria-describedby="getSettingHint(setting.key) ? `hint-${setting.key}-${index}` : null"
+                           @input="validateSetting(setting)"
+                         ></textarea>
+                         <div v-else-if="setting.type === 'boolean'" class="flex items-center gap-3 rounded-lg border border-slate-300 bg-white px-4 py-2.5 dark:border-slate-700 dark:bg-slate-800">
+                           <input
+                             :id="`bool-${setting.key}-${index}`"
+                             type="checkbox"
+                             class="h-4 w-4 accent-indigo-600"
+                             :checked="String(setting.value).toLowerCase() === 'true'"
+                             @change="setting.value = $event.target.checked ? 'true' : 'false'; validateSetting(setting)"
+                           >
+                           <label :for="`bool-${setting.key}-${index}`" class="text-sm font-medium text-slate-700 dark:text-slate-300">
+                             {{ String(setting.value).toLowerCase() === 'true' ? 'Enabled' : 'Disabled' }}
+                           </label>
+                         </div>
+                         <input
+                           v-else
+                           v-model="setting.value"
+                           :type="setting.type"
+                           class="input-field text-sm"
+                           :placeholder="getSettingExample(setting.key)"
+                           :aria-describedby="getSettingHint(setting.key) ? `hint-${setting.key}-${index}` : null"
+                           @input="validateSetting(setting)"
+                         >
+                         <p v-if="settingsErrors[setting.key]" class="mt-1 text-xs font-medium text-rose-600">{{ settingsErrors[setting.key] }}</p>
+                         <p v-else-if="getSettingHint(setting.key)" :id="`hint-${setting.key}-${index}`" class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                           {{ getSettingHint(setting.key) }}
+                         </p>
                       </div>
                       <div class="w-28">
                          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Type</label>
@@ -874,10 +910,62 @@
                             <option value="textarea">Long Text</option>
                             <option value="email">Email</option>
                             <option value="url">URL</option>
+                            <option value="boolean">Boolean</option>
+                            <option value="json">JSON</option>
                          </select>
                       </div>
                       <div class="pt-6">
-                         <button @click="settings.splice(index, 1)" class="p-2 text-slate-400 hover:text-rose-500 transition-colors" title="Remove Field">
+                         <button @click="settings.splice(settings.findIndex(s => s === setting), 1)" class="p-2 text-slate-400 hover:text-rose-500 transition-colors" title="Remove Field">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                         </button>
+                      </div>
+                   </div>
+                </div>
+              </div>
+
+              <div class="card overflow-hidden mt-6">
+                <div class="border-b border-slate-100 px-6 py-4 dark:border-slate-800 flex justify-between items-center">
+                   <div>
+                      <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Social Links</h2>
+                      <p class="text-sm text-slate-500">External URLs used across the site.</p>
+                   </div>
+                </div>
+                <div class="p-6 space-y-6">
+                   <div v-if="settingsLoading" class="grid gap-4">
+                      <div v-for="n in 2" :key="n" class="h-16 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800/60"></div>
+                   </div>
+                   <div v-else-if="socialSettings.length === 0" class="text-center py-8 text-slate-500">
+                      No social settings found. Add one to get started.
+                   </div>
+                   <div v-for="(setting, index) in socialSettings" :key="`${setting.key}-${index}`" class="flex gap-4 items-start group border-b border-slate-50 pb-6 last:border-0 last:pb-0 dark:border-slate-800">
+                      <div class="w-1/3">
+                         <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Key</label>
+                         <input v-model="setting.key" type="text" class="input-field font-mono text-sm" placeholder="e.g. github_url" :title="getSettingHint(setting.key)" @input="validateSetting(setting)">
+                      </div>
+                      <div class="flex-1">
+                         <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Value</label>
+                         <input
+                           v-model="setting.value"
+                           type="url"
+                           class="input-field text-sm"
+                           :placeholder="getSettingExample(setting.key)"
+                           :aria-describedby="getSettingHint(setting.key) ? `hint-social-${setting.key}-${index}` : null"
+                           @input="validateSetting(setting)"
+                         >
+                         <p v-if="settingsErrors[setting.key]" class="mt-1 text-xs font-medium text-rose-600">{{ settingsErrors[setting.key] }}</p>
+                         <p v-else-if="getSettingHint(setting.key)" :id="`hint-social-${setting.key}-${index}`" class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                           {{ getSettingHint(setting.key) }}
+                         </p>
+                      </div>
+                      <div class="w-28">
+                         <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Type</label>
+                         <select v-model="setting.type" class="input-field text-sm py-2">
+                            <option value="url">URL</option>
+                            <option value="text">Text</option>
+                         </select>
+                      </div>
+                      <div class="pt-6">
+                         <button @click="settings.splice(settings.findIndex(s => s === setting), 1)" class="p-2 text-slate-400 hover:text-rose-500 transition-colors" title="Remove Field">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                          </button>
                       </div>
@@ -1311,8 +1399,9 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref, shallowRef, watch, h } from 'vue';
+import { computed, onMounted, reactive, ref, watch, h } from 'vue';
 import axios from 'axios';
+import { getSettingExample, getSettingHint, isValidEmailSetting, isValidJsonSetting, isValidUrlSetting, normalizeSettingsForForm } from '../utils/settingsHydration';
 
 // Helper to create functional icon components
 const createIcon = (d, baseClasses = '') => ({
@@ -1345,13 +1434,13 @@ const SuccessIcon = createIcon('M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 
 const ErrorIcon = createIcon('M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'text-rose-500');
 
 const tabs = [
-  { id: 'dashboard', label: 'Dashboard', icon: shallowRef(DashboardIcon) },
-  { id: 'projects', label: 'Projects', icon: shallowRef(ProjectIcon) },
-  { id: 'skills', label: 'Skills', icon: shallowRef(SkillIcon) },
-  { id: 'messages', label: 'Messages', icon: shallowRef(MessageIcon) },
-  { id: 'timeline', label: 'Timeline', icon: shallowRef(TimelineIcon) },
-  { id: 'settings', label: 'Site Settings', icon: shallowRef(SettingsIcon) },
-  { id: 'profile', label: 'Profile', icon: shallowRef(UserIcon) },
+  { id: 'dashboard', label: 'Dashboard', icon: DashboardIcon },
+  { id: 'projects', label: 'Projects', icon: ProjectIcon },
+  { id: 'skills', label: 'Skills', icon: SkillIcon },
+  { id: 'messages', label: 'Messages', icon: MessageIcon },
+  { id: 'timeline', label: 'Timeline', icon: TimelineIcon },
+  { id: 'settings', label: 'Site Settings', icon: SettingsIcon },
+  { id: 'profile', label: 'Profile', icon: UserIcon },
 ];
 
 // Layout State
@@ -2142,21 +2231,97 @@ function clearProfilePicture(variantKey) {
 }
 
 // --- Settings Functions ---
+const SETTINGS_SCHEMA = [
+  { key: 'site_title', type: 'text', group: 'general' },
+  { key: 'site_description', type: 'text', group: 'general' },
+  { key: 'site_author', type: 'text', group: 'general' },
+  { key: 'site_logo', type: 'url', group: 'general' },
+  { key: 'resume_url', type: 'url', group: 'general' },
+  { key: 'contact_email', type: 'email', group: 'general' },
+  { key: 'linkedin_url', type: 'url', group: 'social' },
+  { key: 'github_url', type: 'url', group: 'social' },
+];
+
+const settingsErrors = reactive({});
+const settingsDirty = ref(false);
+
+const generalSettings = computed(() => settings.value.filter(s => (s.group || 'general') === 'general'));
+const socialSettings = computed(() => settings.value.filter(s => (s.group || 'general') === 'social'));
+
+watch(settings, () => {
+  settingsDirty.value = true;
+}, { deep: true });
+
+function setSettingError(setting, message) {
+  const k = setting?.key || `__idx_${settings.value.indexOf(setting)}`;
+  if (!message) delete settingsErrors[k];
+  else settingsErrors[k] = message;
+}
+
+function validateSetting(setting) {
+  if (!setting || !setting.key) return true;
+
+  if (setting.type === 'url') {
+    if (!isValidUrlSetting(setting.value)) {
+      setSettingError(setting, 'Invalid URL. Use an absolute URL or a relative path starting with /.');
+      return false;
+    }
+  }
+
+  if (setting.type === 'email') {
+    if (!isValidEmailSetting(setting.value)) {
+      setSettingError(setting, 'Invalid email address.');
+      return false;
+    }
+  }
+
+  if (setting.type === 'json') {
+    if (!isValidJsonSetting(setting.value)) {
+      setSettingError(setting, 'Invalid JSON.');
+      return false;
+    }
+  }
+
+  if (setting.type === 'boolean') {
+    const v = String(setting.value ?? '').toLowerCase();
+    if (v !== 'true' && v !== 'false') {
+      setSettingError(setting, 'Boolean must be true or false.');
+      return false;
+    }
+  }
+
+  setSettingError(setting, '');
+  return true;
+}
+
+function validateAllSettings() {
+  Object.keys(settingsErrors).forEach((k) => delete settingsErrors[k]);
+  let ok = true;
+  settings.value.forEach((s) => {
+    if (!s.key) return;
+    const valid = validateSetting(s);
+    if (!valid) ok = false;
+  });
+  return ok;
+}
+
+function hydrateSettings(raw) {
+  const normalized = normalizeSettingsForForm(raw, SETTINGS_SCHEMA);
+  settings.value = normalized.map((s) => ({
+    key: s.key,
+    value: s.value ?? '',
+    type: s.type ?? 'text',
+    group: s.group ?? 'general',
+  }));
+  ensureProfilePictureSettings();
+  settingsDirty.value = false;
+}
+
 async function loadSettings() {
   settingsLoading.value = true;
   try {
     const { data } = await axios.get('/admin/settings');
-    settings.value = data;
-    // Ensure default groups exist if empty
-    if (settings.value.length === 0) {
-       settings.value = [
-          { key: 'site_title', value: '', type: 'text', group: 'general' },
-          { key: 'contact_email', value: '', type: 'email', group: 'general' },
-          { key: 'linkedin_url', value: '', type: 'url', group: 'social' },
-          { key: 'github_url', value: '', type: 'url', group: 'social' },
-       ];
-    }
-    ensureProfilePictureSettings();
+    hydrateSettings(data);
   } catch {
     addToast('Failed to load settings.', 'error');
   } finally {
@@ -2166,8 +2331,13 @@ async function loadSettings() {
 
 async function saveSettings() {
   try {
+    if (!validateAllSettings()) {
+      addToast('Please fix the validation errors before saving.', 'error');
+      return;
+    }
     await axios.post('/admin/settings', { settings: settings.value });
     addToast('Settings saved successfully.', 'success');
+    settingsDirty.value = false;
   } catch {
     addToast('Failed to save settings.', 'error');
   }
@@ -2205,8 +2375,7 @@ async function loadData() {
     if (sRes.status === 'fulfilled') skills.value = sRes.value.data.data || sRes.value.data;
     if (mRes.status === 'fulfilled') messages.value = mRes.value.data.data || mRes.value.data;
     if (setRes.status === 'fulfilled') {
-        settings.value = setRes.value.data.data || setRes.value.data;
-        ensureProfilePictureSettings();
+        if (!settingsDirty.value) hydrateSettings(setRes.value.data.data || setRes.value.data);
     }
     if (tRes.status === 'fulfilled') {
         timelineEntries.value = tRes.value.data.data || tRes.value.data || [];
