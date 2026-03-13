@@ -1,23 +1,24 @@
 <template>
-  <Transition name="lightbox">
-    <div
-      v-if="open"
-      class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/70 backdrop-blur-sm"
-      @click.self="emit('close')"
-    >
-      <div class="absolute inset-0 pointer-events-none"></div>
+  <Teleport to="body">
+    <Transition name="lightbox">
+      <div
+        v-if="open"
+        class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/70 backdrop-blur-sm"
+        @click.self="emit('close')"
+      >
+        <div class="absolute inset-0 pointer-events-none"></div>
 
-      <div class="relative h-[92vh] w-[94vw] max-w-6xl">
-        <button
-          type="button"
-          class="fixed right-4 top-4 z-[10000] rounded-xl border border-white/15 bg-slate-950/40 p-2 text-white backdrop-blur transition hover:bg-slate-950/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
-          aria-label="Close"
-          @click="emit('close')"
-        >
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        <div class="relative h-[92vh] w-[94vw] max-w-6xl">
+          <button
+            type="button"
+            class="fixed right-4 top-4 z-[10000] rounded-xl border border-white/15 bg-slate-950/40 p-2 text-white backdrop-blur transition hover:bg-slate-950/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+            aria-label="Close"
+            @click="emit('close')"
+          >
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
 
         <button
           v-if="images.length > 1"
@@ -77,8 +78,9 @@
           />
         </div>
       </div>
-    </div>
-  </Transition>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup>
