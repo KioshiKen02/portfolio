@@ -13,6 +13,7 @@ class Project extends Model
         'title',
         'description',
         'image',
+        'images',
         'url',
         'github_url',
         'type',
@@ -23,6 +24,7 @@ class Project extends Model
     {
         return [
             'technologies' => 'array',
+            'images' => 'array',
         ];
     }
 }

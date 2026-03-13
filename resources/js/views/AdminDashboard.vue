@@ -751,52 +751,73 @@
           </div>
           
           <div>
-            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Project Image</label>
+            <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Project Photos <span class="text-slate-400 font-normal">(5–20 images)</span></label>
             <div 
-              class="relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              class="relative flex flex-col items-center justify-center w-full min-h-56 border-2 border-dashed rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
               :class="[
-                dragActive ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' : 'border-slate-300 dark:border-slate-700',
-                uploadError ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : ''
+                photosDragActive ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' : 'border-slate-300 dark:border-slate-700',
+                photosError ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : ''
               ]"
-              @dragenter.prevent="dragActive = true"
-              @dragleave.prevent="dragActive = false"
+              @dragenter.prevent="photosDragActive = true"
+              @dragleave.prevent="photosDragActive = false"
               @dragover.prevent
-              @drop.prevent="handleDrop"
-              @click="$refs.fileInput.click()"
+              @drop.prevent="handlePhotosDrop"
+              @click="$refs.photosInput.click()"
             >
               <input 
-                ref="fileInput"
+                ref="photosInput"
                 type="file" 
                 class="hidden" 
                 accept="image/png, image/jpeg, image/webp"
-                @change="handleFileSelect"
+                multiple
+                @change="handlePhotosSelect"
               >
               
-              <div v-if="projectForm.image_preview" class="absolute inset-0 w-full h-full">
-                <img :src="projectForm.image_preview" class="w-full h-full object-contain rounded-lg p-2" alt="Preview">
-                <button 
-                  @click.stop="removeImage"
-                  class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                  title="Remove image"
-                >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+              <div v-if="projectForm.images_preview.length" class="w-full p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                    {{ projectForm.images_preview.length }} / 20 selected
+                  </div>
+                  <button
+                    type="button"
+                    class="text-xs font-semibold text-rose-600 hover:underline"
+                    @click.stop="clearAllPhotos"
+                  >
+                    Clear all
+                  </button>
+                </div>
+                <div class="grid grid-cols-3 gap-3 sm:grid-cols-4">
+                  <div v-for="(img, idx) in projectForm.images_preview" :key="`${img}-${idx}`" class="relative overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800">
+                    <img :src="img" :alt="`Project photo ${idx + 1}`" class="h-20 w-full object-cover" loading="lazy" decoding="async" />
+                    <button
+                      type="button"
+                      class="absolute top-1 right-1 rounded-full bg-slate-900/70 p-1 text-white hover:bg-slate-900"
+                      title="Remove"
+                      @click.stop="removePhotoAt(idx)"
+                    >
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="mt-4 text-center text-xs text-slate-500">
+                  Click or drop more images to add (minimum 5).
+                </div>
               </div>
 
-              <div v-else class="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+              <div v-else class="flex flex-col items-center justify-center pt-8 pb-8 text-center">
                 <svg class="w-8 h-8 mb-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                 <p class="mb-2 text-sm text-slate-500 dark:text-slate-400">
                   <span class="font-semibold">Click to upload</span> or drag and drop
                 </p>
-                <p class="text-xs text-slate-500 dark:text-slate-400">PNG, JPG or WebP (MAX. 5MB)</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">PNG, JPG or WebP (max 5MB each)</p>
               </div>
               
               <!-- Progress Bar -->
-              <div v-if="uploadProgress > 0 && uploadProgress < 100" class="absolute bottom-0 left-0 w-full h-1 bg-slate-200 rounded-b-lg overflow-hidden">
-                <div class="h-full bg-indigo-500 transition-all duration-300" :style="{ width: uploadProgress + '%' }"></div>
+              <div v-if="photosUploading && photosUploadProgress >= 0" class="absolute bottom-0 left-0 w-full h-1 bg-slate-200 rounded-b-lg overflow-hidden">
+                <div class="h-full bg-indigo-500 transition-all duration-300" :style="{ width: photosUploadProgress + '%' }"></div>
               </div>
             </div>
-            <p v-if="uploadError" class="mt-2 text-sm text-red-500">{{ uploadError }}</p>
+            <p v-if="photosError" class="mt-2 text-sm text-red-500">{{ photosError }}</p>
           </div>
           <div class="grid gap-5 sm:grid-cols-2">
              <div>
@@ -1074,18 +1095,20 @@ const projectForm = reactive({
   title: '',
   description: '',
   image: '',
-  image_preview: '',
-  image_file: null,
+  images: [],
+  images_preview: [],
+  images_files: [],
+  images_object_urls: [],
   url: '',
   github_url: '',
   type: 'web',
   technologies: '',
 });
 
-// Image Upload State
-const dragActive = ref(false);
-const uploadProgress = ref(0);
-const uploadError = ref('');
+const photosDragActive = ref(false);
+const photosUploadProgress = ref(0);
+const photosUploading = ref(false);
+const photosError = ref('');
 
 function getProjectImageUrl(imagePath) {
   if (!imagePath) return '';
@@ -1093,69 +1116,74 @@ function getProjectImageUrl(imagePath) {
   return `/images/projects/${imagePath}`;
 }
 
-// --- Image Upload Functions ---
-function handleFileSelect(event) {
-  const file = event.target.files[0];
-  processFile(file);
+function handlePhotosSelect(event) {
+  const files = Array.from(event.target.files || []);
+  addPhotos(files);
 }
 
-function handleDrop(event) {
-  dragActive.value = false;
-  const file = event.dataTransfer.files[0];
-  processFile(file);
+function handlePhotosDrop(event) {
+  photosDragActive.value = false;
+  const files = Array.from(event.dataTransfer.files || []);
+  addPhotos(files);
 }
 
-function processFile(file) {
-  if (!file) return;
+function addPhotos(files) {
+  photosError.value = '';
+  photosUploadProgress.value = 0;
 
-  // Reset states
-  uploadError.value = '';
-  uploadProgress.value = 0;
+  if (!files.length) return;
 
-  // Validation
   const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-  if (!validTypes.includes(file.type)) {
-    uploadError.value = 'Invalid file type. Please upload JPG, PNG or WebP.';
-    return;
-  }
+  const maxSize = 5 * 1024 * 1024;
 
-  if (file.size > 5 * 1024 * 1024) { // 5MB
-    uploadError.value = 'File is too large. Maximum size is 5MB.';
-    return;
-  }
-
-  // Preview
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    projectForm.image_preview = e.target.result;
-  };
-  reader.readAsDataURL(file);
-
-  // Store file for upload
-  projectForm.image_file = file;
-  
-  // Simulate upload progress
-  simulateProgress();
-}
-
-function simulateProgress() {
-  const interval = setInterval(() => {
-    if (uploadProgress.value >= 100) {
-      clearInterval(interval);
-    } else {
-      uploadProgress.value += 10;
+  const nextFiles = [];
+  for (const file of files) {
+    if (!validTypes.includes(file.type)) {
+      photosError.value = 'Invalid file type. Use JPG, PNG, or WebP.';
+      return;
     }
-  }, 100);
+    if (file.size > maxSize) {
+      photosError.value = 'File is too large. Max 5MB per image.';
+      return;
+    }
+    nextFiles.push(file);
+  }
+
+  if (projectForm.images_files.length + nextFiles.length > 20) {
+    photosError.value = 'Maximum 20 images per project.';
+    return;
+  }
+
+  nextFiles.forEach((file) => {
+    const url = URL.createObjectURL(file);
+    projectForm.images_object_urls.push(url);
+    projectForm.images_files.push(file);
+    projectForm.images_preview.push(url);
+  });
 }
 
-function removeImage() {
-  projectForm.image = '';
-  projectForm.image_preview = '';
-  projectForm.image_file = null;
-  uploadProgress.value = 0;
-  // Reset input value so same file can be selected again
-  const input = document.querySelector('input[type="file"]');
-  if (input) input.value = '';
+function removePhotoAt(index) {
+  const preview = projectForm.images_preview[index];
+  const objIndex = projectForm.images_object_urls.indexOf(preview);
+  if (objIndex !== -1) {
+    URL.revokeObjectURL(projectForm.images_object_urls[objIndex]);
+    projectForm.images_object_urls.splice(objIndex, 1);
+    projectForm.images_files.splice(objIndex, 1);
+  }
+  projectForm.images_preview.splice(index, 1);
+  if (Array.isArray(projectForm.images) && projectForm.images.length) {
+    projectForm.images.splice(index, 1);
+  }
+}
+
+function clearAllPhotos() {
+  projectForm.images_object_urls.forEach((u) => URL.revokeObjectURL(u));
+  projectForm.images_object_urls = [];
+  projectForm.images_files = [];
+  projectForm.images_preview = [];
+  projectForm.images = [];
+  photosError.value = '';
+  photosUploadProgress.value = 0;
 }
 
 // Skill Modal State
@@ -1538,14 +1566,17 @@ async function confirmDelete() {
 // --- Project Functions ---
 
 function openProjectModal(project = null) {
+  clearAllPhotos();
   editingProject.value = project;
   if (project) {
     projectForm.title = project.title;
     projectForm.description = project.description;
     projectForm.image = project.image;
-    // Handle existing image for preview
-    projectForm.image_preview = getProjectImageUrl(project.image); 
-    projectForm.image_file = null;
+    projectForm.images = Array.isArray(project.images) ? [...project.images] : [];
+    if (!projectForm.images.length && project.image) projectForm.images = [project.image];
+    projectForm.images_preview = projectForm.images.map(getProjectImageUrl);
+    projectForm.images_files = [];
+    projectForm.images_object_urls = [];
     projectForm.url = project.url;
     projectForm.github_url = project.github_url;
     projectForm.type = project.type;
@@ -1560,15 +1591,18 @@ function openProjectModal(project = null) {
     // Reset form
     Object.keys(projectForm).forEach(k => projectForm[k] = '');
     projectForm.type = 'web'; // Reset default
-    projectForm.image_file = null;
-    projectForm.image_preview = '';
-    uploadProgress.value = 0;
-    uploadError.value = '';
+    projectForm.images = [];
+    projectForm.images_preview = [];
+    projectForm.images_files = [];
+    projectForm.images_object_urls = [];
+    photosUploadProgress.value = 0;
+    photosError.value = '';
   }
   showProjectModal.value = true;
 }
 
 function closeProjectModal() {
+  clearAllPhotos();
   showProjectModal.value = false;
   editingProject.value = null;
 }
@@ -1581,29 +1615,44 @@ async function saveProject() {
       techs = projectForm.technologies.split(',').map(t => t.trim()).filter(Boolean);
     }
 
-    // Handle file upload if present
-    let imagePath = projectForm.image;
-    if (projectForm.image_file) {
+    photosError.value = '';
+    photosUploading.value = true;
+    photosUploadProgress.value = 0;
+
+    const existingImages = Array.isArray(projectForm.images) ? [...projectForm.images] : [];
+    const newFiles = Array.isArray(projectForm.images_files) ? projectForm.images_files : [];
+    const uploaded = [];
+
+    for (let i = 0; i < newFiles.length; i++) {
+      const file = newFiles[i];
       const formData = new FormData();
-      formData.append('image', projectForm.image_file);
-      
-      try {
-        const { data } = await axios.post('/admin/upload', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-        imagePath = data.url;
-      } catch (uploadError) {
-        console.error('Upload failed:', uploadError);
-        throw new Error('Image upload failed');
-      }
+      formData.append('image', file);
+      formData.append('folder', 'projects');
+
+      const { data } = await axios.post('/admin/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (evt) => {
+          const total = evt.total || 0;
+          const fileT = total ? Math.min(1, evt.loaded / total) : 0;
+          const overall = ((i + fileT) / Math.max(1, newFiles.length)) * 100;
+          photosUploadProgress.value = Math.round(overall);
+        }
+      });
+      uploaded.push(data.url);
     }
 
-    const payload = { ...projectForm, technologies: techs, image: imagePath };
-    // Remove temporary fields
-    delete payload.image_preview;
-    delete payload.image_file;
+    const finalImages = [...existingImages, ...uploaded].slice(0, 20);
+    if (finalImages.length < 5) {
+      photosError.value = 'Please upload at least 5 project photos.';
+      return;
+    }
+
+    const imagePath = finalImages[0] || projectForm.image;
+
+    const payload = { ...projectForm, technologies: techs, image: imagePath, images: finalImages };
+    delete payload.images_preview;
+    delete payload.images_files;
+    delete payload.images_object_urls;
 
     if (editingProject.value) {
       await axios.put(`/admin/projects/${editingProject.value.id}`, payload);
@@ -1617,6 +1666,9 @@ async function saveProject() {
     closeProjectModal();
   } catch (e) {
     addToast('Failed to save project.', 'error');
+  } finally {
+    photosUploading.value = false;
+    photosUploadProgress.value = 0;
   }
 }
 

@@ -259,14 +259,7 @@
             @keydown.space.prevent="openProject(project)"
           >
             <div class="relative aspect-video overflow-hidden bg-slate-100 dark:bg-slate-800">
-              <img v-if="project.image" :src="projectImageUrl(project)" :alt="project.title"
-                class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-              <div v-else class="flex h-full items-center justify-center text-slate-400">
-                <svg class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
+              <ProjectPhotoCarousel :images="projectPhotoUrls(project)" :title="project.title" />
             </div>
 
             <div class="flex flex-1 flex-col p-6">
@@ -493,34 +486,35 @@
 
           <div class="grid gap-8 p-6 lg:grid-cols-5">
             <div class="lg:col-span-3">
-              <div class="overflow-hidden rounded-xl border border-slate-200/70 bg-slate-50 dark:border-slate-800/70 dark:bg-slate-900/40">
-                <div class="relative aspect-video">
-                  <img
-                    v-if="selectedProjectPrimaryImage"
-                    :src="selectedProjectPrimaryImage"
-                    :alt="selectedProject?.title || 'Project image'"
-                    class="h-full w-full object-cover"
-                  />
-                  <div v-else class="flex h-full items-center justify-center text-slate-400">
-                    <svg class="h-14 w-14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div v-if="selectedProjectImages.length > 1" class="mt-4 grid grid-cols-5 gap-3">
+              <div v-if="selectedProjectImages.length" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <button
                   v-for="(img, idx) in selectedProjectImages"
                   :key="`${img}-${idx}`"
                   type="button"
-                  class="group relative overflow-hidden rounded-lg border border-slate-200/70 bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 dark:border-slate-800/70 dark:bg-slate-900/40"
-                  :class="idx === selectedProjectImageIndex ? 'ring-2 ring-indigo-500/50' : ''"
-                  @click="selectedProjectImageIndex = idx"
+                  class="group relative overflow-hidden rounded-xl border border-slate-200/70 bg-slate-50 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 dark:border-slate-800/70 dark:bg-slate-900/40"
+                  @click="openLightbox(idx)"
                 >
-                  <img :src="img" :alt="`Preview ${idx + 1}`" class="h-16 w-full object-cover transition duration-300 group-hover:scale-105" />
+                  <div class="relative aspect-video">
+                    <div class="absolute inset-0 bg-slate-200/70 dark:bg-slate-800/70" :class="galleryLoaded[idx] ? 'opacity-0' : 'opacity-100 animate-pulse'" style="transition: opacity 260ms ease"></div>
+                    <img
+                      :src="img"
+                      :alt="`${selectedProject?.title || 'Project'} photo ${idx + 1}`"
+                      loading="lazy"
+                      decoding="async"
+                      class="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                      :class="galleryLoaded[idx] ? 'opacity-100' : 'opacity-0'"
+                      style="transition-property: opacity, transform"
+                      @load="galleryLoaded[idx] = true"
+                      @error="galleryLoaded[idx] = true"
+                    />
+                  </div>
                 </button>
+              </div>
+              <div v-else class="flex h-56 items-center justify-center rounded-xl border border-slate-200/70 bg-slate-50 text-slate-400 dark:border-slate-800/70 dark:bg-slate-900/40">
+                <svg class="h-14 w-14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
               </div>
             </div>
 
@@ -565,6 +559,15 @@
         </div>
       </div>
     </Transition>
+
+    <PhotoLightbox
+      :open="lightboxOpen"
+      :images="selectedProjectImages"
+      :index="lightboxIndex"
+      :title="selectedProject?.title || 'Project'"
+      @close="lightboxOpen = false"
+      @update:index="lightboxIndex = $event"
+    />
   </div>
 </template>
 
@@ -572,6 +575,8 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import axios from 'axios';
 import ProfilePicture from '../components/ProfilePicture.vue';
+import ProjectPhotoCarousel from '../components/ProjectPhotoCarousel.vue';
+import PhotoLightbox from '../components/PhotoLightbox.vue';
 
 const projects = ref([]);
 const skills = ref([]);
@@ -809,14 +814,34 @@ async function handleContactSubmit() {
 
 function projectImageUrl(project) {
   if (!project || !project.image) return '';
-  if (project.image.startsWith('http')) return project.image;
-  return `/images/projects/${project.image}`;
+  return normalizeImageUrl(project.image);
+}
+
+function normalizeImageUrl(path) {
+  if (!path || typeof path !== 'string') return '';
+  if (path.startsWith('http')) return path;
+  return `/images/projects/${path}`;
+}
+
+function projectPhotoUrls(project) {
+  if (!project) return [];
+  const candidates = [];
+  if (Array.isArray(project.images)) candidates.push(...project.images);
+  if (project.image) candidates.push(project.image);
+  const normalized = candidates
+    .filter(Boolean)
+    .map((img) => (typeof img === 'string' ? img : ''))
+    .filter(Boolean)
+    .map(normalizeImageUrl);
+  return Array.from(new Set(normalized));
 }
 
 const projectModalOpen = ref(false);
 const selectedProject = ref(null);
-const selectedProjectImageIndex = ref(0);
 const projectModalEl = ref(null);
+const galleryLoaded = ref([]);
+const lightboxOpen = ref(false);
+const lightboxIndex = ref(0);
 let restoreOverflow = null;
 let lastFocused = null;
 
@@ -837,12 +862,19 @@ function unlockScroll() {
 
 function openProject(project) {
   selectedProject.value = project;
-  selectedProjectImageIndex.value = 0;
+  galleryLoaded.value = [];
+  lightboxOpen.value = false;
+  lightboxIndex.value = 0;
   projectModalOpen.value = true;
 }
 
 function closeProjectModal() {
   projectModalOpen.value = false;
+}
+
+function openLightbox(idx) {
+  lightboxIndex.value = idx;
+  lightboxOpen.value = true;
 }
 
 const selectedProjectTechnologies = computed(() => {
@@ -861,24 +893,12 @@ const selectedProjectImages = computed(() => {
     .filter(Boolean)
     .map((img) => (typeof img === 'string' ? img : ''))
     .filter(Boolean)
-    .map((img) => (img.startsWith('http') ? img : `/images/projects/${img}`));
+    .map(normalizeImageUrl);
   return Array.from(new Set(normalized));
-});
-
-const selectedProjectPrimaryImage = computed(() => {
-  const images = selectedProjectImages.value;
-  return images[selectedProjectImageIndex.value] || images[0] || '';
 });
 
 function onProjectModalKeydown(e) {
   if (e.key === 'Escape') closeProjectModal();
-  if (e.key === 'ArrowRight' && selectedProjectImages.value.length > 1) {
-    selectedProjectImageIndex.value = (selectedProjectImageIndex.value + 1) % selectedProjectImages.value.length;
-  }
-  if (e.key === 'ArrowLeft' && selectedProjectImages.value.length > 1) {
-    selectedProjectImageIndex.value =
-      (selectedProjectImageIndex.value - 1 + selectedProjectImages.value.length) % selectedProjectImages.value.length;
-  }
 }
 
 watch(projectModalOpen, async (open) => {
@@ -890,6 +910,7 @@ watch(projectModalOpen, async (open) => {
     window.addEventListener('keydown', onProjectModalKeydown, { passive: true });
   } else {
     window.removeEventListener('keydown', onProjectModalKeydown);
+    lightboxOpen.value = false;
     unlockScroll();
     await nextTick();
     lastFocused?.focus?.();
