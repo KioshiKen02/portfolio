@@ -117,23 +117,7 @@
 
               <!-- Code Content -->
               <div class="p-5 overflow-x-auto">
-                <pre class="font-mono text-sm leading-relaxed">
-<span class="text-pink-400">class</span> <span class="text-yellow-200">MelvinTambis</span> <span class="text-pink-400">extends</span> <span class="text-indigo-300">SystemProgrammer</span>
-<span class="text-slate-500">{</span>
-    <span class="text-pink-400">public</span> <span class="text-indigo-300">$stack</span> <span class="text-slate-500">=</span> <span class="text-slate-500">[</span>
-        <span class="text-emerald-300">'Laravel'</span><span class="text-slate-500">,</span>
-        <span class="text-emerald-300">'Vue.js'</span><span class="text-slate-500">,</span>
-        <span class="text-emerald-300">'Flutter'</span>
-    <span class="text-slate-500">];</span>
-
-    <span class="text-pink-400">public</span> <span class="text-pink-400">function</span> <span class="text-blue-300">handle</span><span class="text-slate-500">()</span>
-    <span class="text-slate-500">{</span>
-        <span class="text-purple-300">$this</span><span class="text-slate-500">-></span><span class="text-blue-300">architectScalableSystems</span><span class="text-slate-500">();</span>
-        <span class="text-purple-300">$this</span><span class="text-slate-500">-></span><span class="text-blue-300">deliverCleanCode</span><span class="text-slate-500">();</span>
-        
-        <span class="text-pink-400">return</span> <span class="text-emerald-300">"High Performance"</span><span class="text-slate-500">;</span>
-    <span class="text-slate-500">}</span>
-<span class="text-slate-500">}</span></pre>
+                <AnimatedCodeBlock :lines="heroCodeLines" :line-delay-ms="55" />
               </div>
             </div>
 
@@ -626,6 +610,7 @@ import PhotoLightbox from '../components/PhotoLightbox.vue';
 import ExperienceTimeline from '../components/ExperienceTimeline.vue';
 import ResumeDownloadButton from '../components/ResumeDownloadButton.vue';
 import TypewriterText from '../components/TypewriterText.vue';
+import AnimatedCodeBlock from '../components/AnimatedCodeBlock.vue';
 
 const projects = ref([]);
 const skills = ref([]);
@@ -659,6 +644,25 @@ const heroEntered = ref(false);
 function enterHero() {
   heroEntered.value = true;
 }
+
+const heroCodeLines = [
+  "<span class='text-pink-400'>class</span> <span class='text-yellow-200'>MelvinTambis</span> <span class='text-pink-400'>extends</span> <span class='text-indigo-300'>SystemProgrammer</span>",
+  "<span class='text-slate-500'>{</span>",
+  "    <span class='text-pink-400'>public</span> <span class='text-indigo-300'>$stack</span> <span class='text-slate-500'>=</span> <span class='text-slate-500'>[</span>",
+  "        <span class='text-emerald-300'>'Laravel'</span><span class='text-slate-500'>,</span>",
+  "        <span class='text-emerald-300'>'Vue.js'</span><span class='text-slate-500'>,</span>",
+  "        <span class='text-emerald-300'>'Flutter'</span>",
+  "    <span class='text-slate-500'>];</span>",
+  "",
+  "    <span class='text-pink-400'>public</span> <span class='text-pink-400'>function</span> <span class='text-blue-300'>handle</span><span class='text-slate-500'>()</span>",
+  "    <span class='text-slate-500'>{</span>",
+  "        <span class='text-purple-300'>$this</span><span class='text-slate-500'>-></span><span class='text-blue-300'>architectScalableSystems</span><span class='text-slate-500'>();</span>",
+  "        <span class='text-purple-300'>$this</span><span class='text-slate-500'>-></span><span class='text-blue-300'>deliverCleanCode</span><span class='text-slate-500'>();</span>",
+  "        ",
+  "        <span class='text-pink-400'>return</span> <span class='text-emerald-300'>\"High Performance\"</span><span class='text-slate-500'>;</span>",
+  "    <span class='text-slate-500'>}</span>",
+  "<span class='text-slate-500'>}</span>",
+];
 
 function formatExperienceRange(startsAt, endsAt) {
   const start = startsAt ? new Date(startsAt) : null;
