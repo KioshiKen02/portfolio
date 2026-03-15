@@ -18,23 +18,10 @@ describe('RotatingTypewriter', () => {
     expect(wrapper.find('.rtw-reserve').exists()).toBe(true);
   });
 
-  it('splits a long phrase into exactly two lines', () => {
-    const measureTextFn = (s) => String(s).length * 10;
+  it('does not force explicit line breaks', () => {
     const wrapper = mount(RotatingTypewriter, {
-      props: {
-        phrases: ['Building scalable digital systems.'],
-        disabled: true,
-        reserveSpace: true,
-        testWidthPx: 180,
-        baseFontSizePx: 20,
-        measureTextFn,
-      },
+      props: { phrases: ['Building scalable digital systems.'], disabled: true, reserveSpace: true },
     });
-
-    const line1 = wrapper.find('.rtw-live .rtw-line1').text().trim();
-    const line2 = wrapper.find('.rtw-live .rtw-line2').text().trim();
-    expect(line1.length).toBeGreaterThan(0);
-    expect(line2.length).toBeGreaterThan(0);
-    expect(wrapper.html()).toContain('<br');
+    expect(wrapper.html()).not.toContain('<br');
   });
 });
