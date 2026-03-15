@@ -36,11 +36,7 @@
 
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
         <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
-          <div
-            class="space-y-8 transition-all duration-700 will-change-transform"
-            :class="heroEntered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'"
-            v-fade-slide-up
-          >
+          <div class="space-y-8" v-motion="{ reveal: { delayMs: 60, y: 18 } }">
             <div
               class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
               <span class="relative flex h-2 w-2">
@@ -92,10 +88,12 @@
             </div>
           </div>
 
-          <div class="hidden lg:block relative w-full max-w-lg mx-auto" v-fade-slide-up>
+          <div class="hidden lg:block relative w-full max-w-lg mx-auto" v-motion="{ reveal: { delayMs: 140, y: 18 }, parallax: { speed: 0.06, max: 18 } }">
             <!-- Background Glow -->
             <div
-              class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-2xl opacity-20 blur-2xl dark:opacity-30">
+              class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-2xl opacity-20 blur-2xl dark:opacity-30"
+              v-motion="{ reveal: false, parallax: { speed: 0.12, max: 28 } }"
+            >
             </div>
 
             <!-- Code Window -->
@@ -156,7 +154,7 @@
     <section ref="aboutSection" id="about" class="section-block py-16 md:py-20 scroll-mt-28">
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
         <div class="grid gap-10 md:grid-cols-12 md:items-start">
-          <div class="md:col-span-7 space-y-6" v-fade-slide-up>
+          <div class="md:col-span-7 space-y-6" v-motion="{ reveal: { delayMs: 80 } }">
             <div>
               <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
                 Engineering with purpose.
@@ -193,7 +191,7 @@
             />
           </div>
 
-          <div class="md:col-span-5 space-y-6" v-fade-slide-up>
+          <div class="md:col-span-5 space-y-6" v-motion="{ reveal: { delayMs: 140 } }">
             <div class="mx-auto w-full max-w-sm">
               <ProfilePicture
                 :is-dark="isDarkTheme"
@@ -233,7 +231,7 @@
     <!-- Projects Section -->
     <section ref="projectsSection" id="projects" class="section-block py-24 scroll-mt-28">
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
-        <div class="mb-16 md:flex md:items-end md:justify-between" v-fade-slide-up>
+        <div class="mb-16 md:flex md:items-end md:justify-between" v-motion="{ reveal: { delayMs: 80 } }">
           <div class="max-w-xl">
             <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Selected Work</h2>
             <p class="mt-4 text-lg text-slate-600 dark:text-slate-400">
@@ -265,12 +263,12 @@
           </div>
 
           <article
-            v-for="project in projects"
+            v-for="(project, idx) in projects"
             :key="project.id"
             class="group flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-slate-200/70 bg-white/70 shadow-sm transition duration-500 hover:-translate-y-1 hover:shadow-xl focus-within:shadow-xl dark:border-slate-800/70 dark:bg-slate-950/40 backdrop-blur"
             role="button"
             tabindex="0"
-            v-fade-slide-up
+            v-motion="{ reveal: { delayMs: 80 + idx * 90, y: 18 } }"
             @click="openProject(project)"
             @keydown.enter.prevent="openProject(project)"
             @keydown.space.prevent="openProject(project)"
@@ -313,7 +311,7 @@
     <!-- Skills Section -->
     <section ref="skillsSection" id="skills" class="section-block py-24 scroll-mt-28">
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
-        <div class="mb-12" v-fade-slide-up>
+        <div class="mb-12" v-motion="{ reveal: { delayMs: 80 } }">
           <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Technical Arsenal
           </h2>
         </div>
@@ -321,7 +319,7 @@
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <!-- Manual Highlight Cards -->
           <div class="rounded-xl bg-white p-6 shadow-sm dark:bg-slate-900 border border-slate-100 dark:border-slate-800"
-            v-fade-slide-up>
+            v-motion="{ reveal: { delayMs: 60 } }">
             <h3 class="font-bold text-slate-900 dark:text-white mb-2">Backend</h3>
             <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400 list-disc pl-5">
               <li>Laravel Framework</li>
@@ -332,7 +330,7 @@
             </ul>
           </div>
           <div class="rounded-xl bg-white p-6 shadow-sm dark:bg-slate-900 border border-slate-100 dark:border-slate-800"
-            v-fade-slide-up>
+            v-motion="{ reveal: { delayMs: 140 } }">
             <h3 class="font-bold text-slate-900 dark:text-white mb-2">Frontend</h3>
             <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400 list-disc pl-5">
               <li>Vue.js 3</li>
@@ -343,7 +341,7 @@
             </ul>
           </div>
           <div class="rounded-xl bg-white p-6 shadow-sm dark:bg-slate-900 border border-slate-100 dark:border-slate-800"
-            v-fade-slide-up>
+            v-motion="{ reveal: { delayMs: 220 } }">
             <h3 class="font-bold text-slate-900 dark:text-white mb-2">Mobile</h3>
             <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400 list-disc pl-5">
               <li>Flutter</li>
@@ -353,7 +351,7 @@
             </ul>
           </div>
           <div class="rounded-xl bg-white p-6 shadow-sm dark:bg-slate-900 border border-slate-100 dark:border-slate-800"
-            v-fade-slide-up>
+            v-motion="{ reveal: { delayMs: 300 } }">
             <h3 class="font-bold text-slate-900 dark:text-white mb-2">Tools</h3>
             <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400 list-disc pl-5">
               <li>Git & GitHub</li>
@@ -379,7 +377,7 @@
     <section ref="contactSection" id="contact" class="section-block py-24 scroll-mt-28">
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
         <div class="grid gap-16 lg:grid-cols-2">
-          <div v-fade-slide-up>
+          <div v-motion="{ reveal: { delayMs: 80 } }">
             <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
               Let's work together.
             </h2>
@@ -441,7 +439,7 @@
             </div>
           </div>
 
-          <div class="card p-8" v-fade-slide-up>
+          <div class="card p-8" v-motion="{ reveal: { delayMs: 140 } }">
             <form @submit.prevent="handleContactSubmit" class="space-y-4">
               <div>
                 <label for="name" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Name</label>
@@ -648,12 +646,6 @@ const resumeDownloadUrl = computed(() => settings.value?.resume_url || '/resume/
 const heroTitleText = computed(() => `${settings.value?.site_title || 'Building scalable'}\ndigital systems.`);
 const heroAuthor = computed(() => settings.value?.site_author || 'Melvin Rey C Tambis');
 const heroRole = computed(() => settings.value?.site_description || 'System Programmer');
-const heroEntered = ref(false);
-
-function enterHero() {
-  heroEntered.value = true;
-}
-
 const heroCodeText =
 `class MelvinTambis extends SystemProgrammer
 {
@@ -1066,7 +1058,6 @@ onMounted(() => {
   loadProjects();
   loadSkills();
   loadTimeline();
-  requestAnimationFrame(() => enterHero());
 
   syncThemeState();
   themeObserver = new MutationObserver(() => syncThemeState());

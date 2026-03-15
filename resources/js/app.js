@@ -3,6 +3,7 @@ import '../css/app.css';
 import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
+import { motionDirective } from './directives/motion';
 
 function resolveInitialTheme() {
     const stored = window.localStorage.getItem('theme');
@@ -38,33 +39,6 @@ const app = createApp(App);
 
 app.use(router);
 
-app.directive('fade-slide-up', {
-    mounted(el) {
-        el.classList.add(
-            'opacity-0',
-            'translate-y-4',
-            'transition-all',
-            'duration-700',
-            'ease-out'
-        );
-
-        const observer = new IntersectionObserver(
-            entries => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        el.classList.remove('opacity-0', 'translate-y-4');
-                        el.classList.add('opacity-100', 'translate-y-0');
-                        observer.unobserve(el);
-                    }
-                });
-            },
-            {
-                threshold: 0.2,
-            }
-        );
-
-        observer.observe(el);
-    },
-});
+app.directive('motion', motionDirective);
 
 app.mount('#app');
