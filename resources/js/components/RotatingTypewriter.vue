@@ -1,6 +1,6 @@
   <template>
   <span ref="root" class="rtw-root relative z-10 block max-w-full align-baseline" :style="rootStyle">
-    <span ref="measure" aria-hidden="true" class="rtw-measure whitespace-normal break-words">{{ visible || reserveText }}</span>
+    <span ref="measure" aria-hidden="true" class="rtw-measure whitespace-normal break-words">{{ visible || '\u00A0' }}</span>
 
     <span class="rtw-live absolute inset-0">
       <span class="whitespace-normal break-words">{{ visible }}</span>
@@ -20,7 +20,7 @@ const props = defineProps({
   startDelayMs: { type: Number, default: 120 },
   loop: { type: Boolean, default: true },
   disabled: { type: Boolean, default: false },
-  minHeightEm: { type: Number, default: 1.2 },
+  minHeightEm: { type: Number, default: 0 },
   resizeDurationMs: { type: Number, default: 220 },
   measureHeightFn: { type: Function, default: null },
 });
@@ -271,7 +271,9 @@ watch(
   visibility: hidden;
   pointer-events: none;
   position: absolute;
-  inset: 0;
+  left: 0;
+  top: 0;
+  width: 100%;
 }
 
 .rtw-cursor {

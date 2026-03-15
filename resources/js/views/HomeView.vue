@@ -55,7 +55,6 @@
                 :pause-ms="650"
                 :start-delay-ms="140"
                 :loop="true"
-                :reserve-space="true"
               />
             </h1>
             
