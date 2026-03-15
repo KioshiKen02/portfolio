@@ -1,10 +1,10 @@
 <template>
-  <span class="relative inline-flex items-center">
+  <span class="relative inline-block">
     <span v-if="animate" class="sr-only">{{ text }}</span>
 
     <span
       v-if="!animate"
-      class="inline-flex"
+      class="inline-block"
     >
       <template v-if="hasTwoLines">
         <span>{{ line1Full }}</span>
@@ -19,14 +19,28 @@
     <span
       v-else
       aria-hidden="true"
-      class="inline-flex transition-opacity"
+      class="inline-block transition-opacity"
       :class="fading ? 'opacity-0' : 'opacity-100'"
       :style="{ transitionDuration: `${fadeDurationMs}ms` }"
     >
       <template v-if="hasTwoLines">
-        <span>{{ line1Typed }}</span>
+        <span>
+          {{ line1Typed }}
+          <span
+            v-if="animate && !typedHasNewline"
+            class="ml-0.5 inline-block w-[1ch] text-current"
+            :class="cursorClass"
+          >|</span>
+        </span>
         <br />
-        <span :class="secondaryClass">{{ line2Typed }}</span>
+        <span :class="secondaryClass">
+          {{ line2Typed }}
+          <span
+            v-if="animate && typedHasNewline"
+            class="ml-0.5 inline-block w-[1ch] text-current"
+            :class="cursorClass"
+          >|</span>
+        </span>
       </template>
       <template v-else>
         {{ typed }}
@@ -34,7 +48,7 @@
     </span>
 
     <span
-      v-if="animate"
+      v-if="animate && !hasTwoLines"
       aria-hidden="true"
       class="ml-0.5 inline-block w-[1ch] text-current transition-opacity"
       :class="[fading ? 'opacity-0' : 'opacity-100', cursorClass]"
@@ -69,6 +83,7 @@ const animate = computed(() => {
 });
 
 const hasTwoLines = computed(() => String(props.text || '').includes('\n'));
+const typedHasNewline = computed(() => String(typed.value || '').includes('\n'));
 
 const line1Full = computed(() => {
   const full = String(props.text || '');
