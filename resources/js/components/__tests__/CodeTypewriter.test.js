@@ -31,5 +31,25 @@ describe('CodeTypewriter', () => {
     });
     expect(wrapper.find('.ctw-reserve').exists()).toBe(true);
   });
-});
 
+  it('highlights tokens while typing', async () => {
+    vi.useFakeTimers();
+    const wrapper = mount(CodeTypewriter, {
+      props: {
+        text: 'public $x = \"hi\";',
+        startDelayMs: 0,
+        minCharDelayMs: 10,
+        maxCharDelayMs: 10,
+        newlineDelayMs: 10,
+        randomizeDelays: false,
+        loop: false,
+      },
+    });
+
+    await vi.advanceTimersByTimeAsync(10 * 20);
+    expect(wrapper.html()).toContain('text-pink-400');
+    expect(wrapper.html()).toContain('text-purple-300');
+    expect(wrapper.html()).toContain('text-emerald-300');
+    vi.useRealTimers();
+  });
+});
