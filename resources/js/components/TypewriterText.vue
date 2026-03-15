@@ -6,7 +6,14 @@
       v-if="!animate"
       class="inline-flex"
     >
-      {{ text }}
+      <template v-if="hasTwoLines">
+        <span>{{ line1Full }}</span>
+        <br />
+        <span :class="secondaryClass">{{ line2Full }}</span>
+      </template>
+      <template v-else>
+        {{ text }}
+      </template>
     </span>
 
     <span
@@ -16,7 +23,14 @@
       :class="fading ? 'opacity-0' : 'opacity-100'"
       :style="{ transitionDuration: `${fadeDurationMs}ms` }"
     >
-      {{ typed }}
+      <template v-if="hasTwoLines">
+        <span>{{ line1Typed }}</span>
+        <br />
+        <span :class="secondaryClass">{{ line2Typed }}</span>
+      </template>
+      <template v-else>
+        {{ typed }}
+      </template>
     </span>
 
     <span
@@ -41,6 +55,7 @@ const props = defineProps({
   fadeDurationMs: { type: Number, default: 420 },
   loop: { type: Boolean, default: true },
   disabled: { type: Boolean, default: false },
+  secondaryClass: { type: String, default: '' },
 });
 
 const prefersReducedMotion = ref(false);
@@ -51,6 +66,30 @@ let timers = [];
 
 const animate = computed(() => {
   return !props.disabled && !prefersReducedMotion.value && Boolean(props.text);
+});
+
+const hasTwoLines = computed(() => String(props.text || '').includes('\n'));
+
+const line1Full = computed(() => {
+  const full = String(props.text || '');
+  return full.split('\n')[0] || '';
+});
+
+const line2Full = computed(() => {
+  const full = String(props.text || '');
+  const parts = full.split('\n');
+  return parts.length > 1 ? parts.slice(1).join('\n') : '';
+});
+
+const line1Typed = computed(() => {
+  const t = String(typed.value || '');
+  return t.split('\n')[0] || '';
+});
+
+const line2Typed = computed(() => {
+  const t = String(typed.value || '');
+  const parts = t.split('\n');
+  return parts.length > 1 ? parts.slice(1).join('\n') : '';
 });
 
 const cursorClass = computed(() => {

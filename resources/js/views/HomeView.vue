@@ -58,9 +58,8 @@
                 :pause-before-fade-ms="1200"
                 :fade-duration-ms="500"
                 :loop="true"
+                secondary-class="text-slate-500 dark:text-slate-400"
               />
-              <br />
-              <span class="text-slate-500 dark:text-slate-400">digital systems.</span>
             </h1>
 
             <p class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-400">
@@ -652,7 +651,7 @@ const profilePicture = computed(() => {
 const experienceItems = ref([]);
 const loadingTimeline = ref(false);
 const resumeDownloadUrl = computed(() => settings.value?.resume_url || '/resume/melvin-rey-c-tambis-resume.pdf');
-const heroTitleText = computed(() => settings.value?.site_title || 'Building scalable');
+const heroTitleText = computed(() => `${settings.value?.site_title || 'Building scalable'}\ndigital systems.`);
 const heroAuthor = computed(() => settings.value?.site_author || 'Melvin Rey C Tambis');
 const heroRole = computed(() => settings.value?.site_description || 'System Programmer');
 const heroEntered = ref(false);

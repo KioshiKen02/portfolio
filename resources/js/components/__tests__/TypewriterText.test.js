@@ -27,6 +27,15 @@ describe('TypewriterText', () => {
     vi.useRealTimers();
   });
 
+  it('renders two-line text with secondary class', () => {
+    const wrapper = mount(TypewriterText, {
+      props: { text: 'Line1\nLine2', disabled: true, secondaryClass: 'text-muted' },
+    });
+    expect(wrapper.html()).toContain('Line1');
+    expect(wrapper.html()).toContain('Line2');
+    expect(wrapper.html()).toContain('text-muted');
+  });
+
   it('respects prefers-reduced-motion and renders text without sr-only fallback', () => {
     const original = window.matchMedia;
     window.matchMedia = vi.fn().mockReturnValue({ matches: true, addEventListener() {}, removeEventListener() {} });
@@ -41,4 +50,3 @@ describe('TypewriterText', () => {
     window.matchMedia = original;
   });
 });
-
