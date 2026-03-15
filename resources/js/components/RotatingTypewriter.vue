@@ -96,12 +96,19 @@ function escapeForMeasure(s) {
 
 function canvasMeasure(text, font) {
   if (typeof document === 'undefined') return text.length * 10;
-  const c = document.createElement('canvas');
-  const ctx = c.getContext && c.getContext('2d');
-  if (!ctx) return text.length * 10;
-  ctx.font = font;
-  const m = ctx.measureText(text);
-  return m && typeof m.width === 'number' ? m.width : text.length * 10;
+  if (typeof window !== 'undefined' && window.navigator && /jsdom/i.test(window.navigator.userAgent || '')) {
+    return text.length * 10;
+  }
+  try {
+    const c = document.createElement('canvas');
+    const ctx = c.getContext && c.getContext('2d');
+    if (!ctx) return text.length * 10;
+    ctx.font = font;
+    const m = ctx.measureText(text);
+    return m && typeof m.width === 'number' ? m.width : text.length * 10;
+  } catch {
+    return text.length * 10;
+  }
 }
 
 function measureWidth(text, scale) {
@@ -187,7 +194,11 @@ function computeScaleToFit(text, maxWidth) {
     }
   }
 
-  return clamp(best, loMin, hiMax);
+  let scaled = clamp(best, loMin, hiMax);
+  while (scaled > 0.5 && !canFitTwoLines(t, scaled, maxWidth)) {
+    scaled = clamp(scaled - 0.05, 0.5, hiMax);
+  }
+  return scaled;
 }
 
 const layoutScale = ref(1);
@@ -206,7 +217,10 @@ function updateLayout() {
     props.maxLineHeight
   );
   reserveBreakIdx.value = findBestBreak(baseText, scale, w);
+  if (reserveBreakIdx.value == null && baseText.length > 1) reserveBreakIdx.value = Math.floor(baseText.length / 2);
+
   breakIdx.value = findBestBreak(activePhrase.value, scale, w) ?? reserveBreakIdx.value;
+  if (breakIdx.value == null && activePhrase.value.length > 1) breakIdx.value = Math.floor(activePhrase.value.length / 2);
 }
 
 function readMetrics() {

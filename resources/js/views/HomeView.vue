@@ -35,8 +35,8 @@
       <div class="pointer-events-none absolute inset-0 -z-10 hero-shine"></div>
 
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
-        <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
-          <div class="relative z-20 space-y-8" v-motion="{ reveal: { delayMs: 60, y: 18 } }">
+        <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-20 lg:items-center">
+          <div class="relative z-20 min-w-0 space-y-8 lg:pr-6" v-motion="{ reveal: { delayMs: 60, y: 18 } }">
             <div
               class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
               <span class="relative flex h-2 w-2">
@@ -47,7 +47,7 @@
               Available for Hire
             </div>
 
-            <h1 class="text-5xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-6xl xl:text-7xl">
+            <h1 class="max-w-[26ch] text-5xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-6xl xl:text-7xl">
               <RotatingTypewriter
                 :phrases="heroPhrases"
                 :typing-ms="120"
