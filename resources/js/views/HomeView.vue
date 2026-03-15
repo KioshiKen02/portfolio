@@ -99,7 +99,7 @@
             </div>
 
             <!-- Code Window -->
-            <div class="relative rounded-xl bg-slate-900 shadow-2xl ring-1 ring-slate-800 overflow-hidden">
+            <div class="relative rounded-xl bg-slate-900 shadow-2xl ring-1 ring-slate-800 overflow-hidden h-[520px]">
               <!-- Window Header -->
               <div class="flex items-center gap-2 px-4 py-3 bg-slate-800/50 border-b border-slate-700/50">
                 <div class="flex gap-1.5">
@@ -116,8 +116,17 @@
               </div>
 
               <!-- Code Content -->
-              <div class="p-5 overflow-x-auto">
-                <AnimatedCodeBlock :lines="heroCodeLines" :line-delay-ms="70" :pause-before-restart-ms="1800" :fade-duration-ms="520" :loop="true" />
+              <div class="p-5 h-[calc(520px-52px)] overflow-hidden">
+                <CodeTypewriter
+                  :text="heroCodeText"
+                  :start-delay-ms="450"
+                  :min-char-delay-ms="14"
+                  :max-char-delay-ms="55"
+                  :newline-delay-ms="160"
+                  :pause-after-finish-ms="1600"
+                  :loop="true"
+                  :reserve-space="true"
+                />
               </div>
             </div>
 
@@ -610,7 +619,7 @@ import PhotoLightbox from '../components/PhotoLightbox.vue';
 import ExperienceTimeline from '../components/ExperienceTimeline.vue';
 import ResumeDownloadButton from '../components/ResumeDownloadButton.vue';
 import TypewriterText from '../components/TypewriterText.vue';
-import AnimatedCodeBlock from '../components/AnimatedCodeBlock.vue';
+import CodeTypewriter from '../components/CodeTypewriter.vue';
 
 const projects = ref([]);
 const skills = ref([]);
@@ -645,24 +654,23 @@ function enterHero() {
   heroEntered.value = true;
 }
 
-const heroCodeLines = [
-  "<span class='text-pink-400'>class</span> <span class='text-yellow-200'>MelvinTambis</span> <span class='text-pink-400'>extends</span> <span class='text-indigo-300'>SystemProgrammer</span>",
-  "<span class='text-slate-500'>{</span>",
-  "    <span class='text-pink-400'>public</span> <span class='text-indigo-300'>$stack</span> <span class='text-slate-500'>=</span> <span class='text-slate-500'>[</span>",
-  "        <span class='text-emerald-300'>'Laravel'</span><span class='text-slate-500'>,</span>",
-  "        <span class='text-emerald-300'>'Vue.js'</span><span class='text-slate-500'>,</span>",
-  "        <span class='text-emerald-300'>'Flutter'</span>",
-  "    <span class='text-slate-500'>];</span>",
-  "",
-  "    <span class='text-pink-400'>public</span> <span class='text-pink-400'>function</span> <span class='text-blue-300'>handle</span><span class='text-slate-500'>()</span>",
-  "    <span class='text-slate-500'>{</span>",
-  "        <span class='text-purple-300'>$this</span><span class='text-slate-500'>-></span><span class='text-blue-300'>architectScalableSystems</span><span class='text-slate-500'>();</span>",
-  "        <span class='text-purple-300'>$this</span><span class='text-slate-500'>-></span><span class='text-blue-300'>deliverCleanCode</span><span class='text-slate-500'>();</span>",
-  "",
-  "        <span class='text-pink-400'>return</span> <span class='text-emerald-300'>\"High Performance\"</span><span class='text-slate-500'>;</span>",
-  "    <span class='text-slate-500'>}</span>",
-  "<span class='text-slate-500'>}</span>",
-];
+const heroCodeText =
+`class MelvinTambis extends SystemProgrammer
+{
+    public $stack = [
+        'Laravel',
+        'Vue.js',
+        'Flutter'
+    ];
+
+    public function handle()
+    {
+        $this->architectScalableSystems();
+        $this->deliverCleanCode();
+
+        return "High Performance";
+    }
+}`;
 
 function formatExperienceRange(startsAt, endsAt) {
   const start = startsAt ? new Date(startsAt) : null;
