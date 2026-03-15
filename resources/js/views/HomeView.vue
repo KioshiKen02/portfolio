@@ -117,7 +117,7 @@
 
               <!-- Code Content -->
               <div class="p-5 overflow-x-auto">
-                <AnimatedCodeBlock :lines="heroCodeLines" :line-delay-ms="55" />
+                <AnimatedCodeBlock :lines="heroCodeLines" :line-delay-ms="70" :pause-before-restart-ms="1800" :fade-duration-ms="520" :loop="true" />
               </div>
             </div>
 
@@ -658,7 +658,7 @@ const heroCodeLines = [
   "    <span class='text-slate-500'>{</span>",
   "        <span class='text-purple-300'>$this</span><span class='text-slate-500'>-></span><span class='text-blue-300'>architectScalableSystems</span><span class='text-slate-500'>();</span>",
   "        <span class='text-purple-300'>$this</span><span class='text-slate-500'>-></span><span class='text-blue-300'>deliverCleanCode</span><span class='text-slate-500'>();</span>",
-  "        ",
+  "",
   "        <span class='text-pink-400'>return</span> <span class='text-emerald-300'>\"High Performance\"</span><span class='text-slate-500'>;</span>",
   "    <span class='text-slate-500'>}</span>",
   "<span class='text-slate-500'>}</span>",

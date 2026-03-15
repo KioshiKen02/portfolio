@@ -1,5 +1,5 @@
 <template>
-  <pre class="font-mono text-sm leading-relaxed">
+  <pre class="m-0 font-mono text-sm leading-relaxed text-left whitespace-pre">
     <template v-if="!animate">
       <template v-for="(line, idx) in lines" :key="idx">
         <span v-html="line"></span><br v-if="idx < lines.length - 1" />
@@ -7,24 +7,32 @@
     </template>
 
     <template v-else>
-      <template v-for="(line, idx) in lines" :key="idx">
+      <template v-for="(line, idx) in lines" :key="`${seed}-${idx}`">
         <span
           class="acb-line inline-block opacity-0"
-          :style="{ animationDelay: `${idx * lineDelayMs}ms` }"
+          :style="{ animationDelay: `${startDelayMs + idx * lineDelayMs}ms` }"
           v-html="line"
         ></span><br v-if="idx < lines.length - 1" />
       </template>
-      <span class="acb-cursor inline-block w-[1ch]">|</span>
+      <span
+        class="acb-cursor inline-block w-[1ch] transition-opacity"
+        :class="fading ? 'opacity-0' : 'opacity-100'"
+        :style="{ transitionDuration: `${fadeDurationMs}ms` }"
+      >|</span>
     </template>
   </pre>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 const props = defineProps({
   lines: { type: Array, default: () => [] },
   lineDelayMs: { type: Number, default: 60 },
+  startDelayMs: { type: Number, default: 0 },
+  pauseBeforeRestartMs: { type: Number, default: 1400 },
+  fadeDurationMs: { type: Number, default: 450 },
+  loop: { type: Boolean, default: true },
   disabled: { type: Boolean, default: false },
 });
 
@@ -35,6 +43,51 @@ if (typeof window !== 'undefined') {
 }
 
 const animate = computed(() => !props.disabled && !prefersReducedMotion.value && props.lines.length > 0);
+
+const seed = ref(0);
+const fading = ref(false);
+let timers = [];
+
+function clearTimers() {
+  timers.forEach((t) => window.clearTimeout(t));
+  timers = [];
+}
+
+function schedule(fn, ms) {
+  const id = window.setTimeout(fn, ms);
+  timers.push(id);
+  return id;
+}
+
+function run() {
+  if (!animate.value) return;
+  clearTimers();
+  fading.value = false;
+  seed.value += 1;
+
+  const totalMs = props.startDelayMs + Math.max(0, (props.lines.length - 1) * props.lineDelayMs) + 420;
+  schedule(() => {
+    if (!animate.value) return;
+    fading.value = true;
+    schedule(() => {
+      if (!animate.value) return;
+      if (props.loop) run();
+    }, Math.max(0, props.fadeDurationMs));
+  }, Math.max(0, totalMs + props.pauseBeforeRestartMs));
+}
+
+onMounted(() => run());
+onBeforeUnmount(() => clearTimers());
+
+watch(
+  () => [props.lines, props.lineDelayMs, props.startDelayMs, props.pauseBeforeRestartMs, props.fadeDurationMs, props.loop, props.disabled, animate.value],
+  () => {
+    clearTimers();
+    fading.value = false;
+    if (animate.value) run();
+  },
+  { deep: false }
+);
 </script>
 
 <style scoped>
@@ -85,4 +138,3 @@ const animate = computed(() => !props.disabled && !prefersReducedMotion.value &&
   }
 }
 </style>
-
