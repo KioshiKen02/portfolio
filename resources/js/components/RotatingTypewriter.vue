@@ -1,5 +1,5 @@
 <template>
-  <span class="relative inline-block align-baseline">
+  <span class="relative z-10 inline-block align-baseline">
     <span v-if="reserveSpace" aria-hidden="true" class="rtw-reserve opacity-0 whitespace-pre">{{ reserveText }}</span>
     <span class="rtw-live" :class="reserveSpace ? 'absolute inset-0' : ''">
       <span class="whitespace-pre">{{ visible }}</span>

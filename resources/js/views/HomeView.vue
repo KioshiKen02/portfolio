@@ -36,7 +36,7 @@
 
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
         <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
-          <div class="space-y-8" v-motion="{ reveal: { delayMs: 60, y: 18 } }">
+          <div class="relative z-20 space-y-8" v-motion="{ reveal: { delayMs: 60, y: 18 } }">
             <div
               class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
               <span class="relative flex h-2 w-2">
@@ -89,10 +89,10 @@
             </div>
           </div>
 
-          <div class="hidden lg:block relative w-full max-w-lg mx-auto" v-motion="{ reveal: { delayMs: 140, y: 18 }, parallax: { speed: 0.06, max: 18 } }">
+          <div class="hidden lg:block relative z-0 w-full max-w-lg mx-auto" v-motion="{ reveal: { delayMs: 140, y: 18 }, parallax: { speed: 0.06, max: 18 } }">
             <!-- Background Glow -->
             <div
-              class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-2xl opacity-20 blur-2xl dark:opacity-30"
+              class="pointer-events-none absolute -inset-1 -z-10 bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-2xl opacity-20 blur-2xl dark:opacity-30"
               v-motion="{ reveal: false, parallax: { speed: 0.12, max: 28 } }"
             >
             </div>
