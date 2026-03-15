@@ -36,7 +36,11 @@
 
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
         <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
-          <div class="space-y-8" v-fade-slide-up>
+          <div
+            class="space-y-8 transition-all duration-700 will-change-transform"
+            :class="heroEntered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'"
+            v-fade-slide-up
+          >
             <div
               class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
               <span class="relative flex h-2 w-2">
@@ -48,12 +52,19 @@
             </div>
 
             <h1 class="text-5xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-6xl xl:text-7xl">
-              {{ settings.site_title || 'Building scalable' }} <br />
+              <TypewriterText
+                :text="heroTitleText"
+                :typing-speed-ms="52"
+                :pause-before-fade-ms="1200"
+                :fade-duration-ms="500"
+                :loop="true"
+              />
+              <br />
               <span class="text-slate-500 dark:text-slate-400">digital systems.</span>
             </h1>
 
             <p class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-400">
-              I'm <strong class="text-slate-900 dark:text-white">{{ settings.site_author || 'Melvin Rey C Tambis' }}</strong>, a {{ settings.site_description || 'System Programmer' }}
+              I'm <strong class="text-slate-900 dark:text-white">{{ heroAuthor }}</strong>, a {{ heroRole }}
               crafting high-performance Laravel backends, reactive Vue.js interfaces, and cross-platform Flutter apps.
             </p>
 
@@ -615,6 +626,7 @@ import ProjectPhotoCarousel from '../components/ProjectPhotoCarousel.vue';
 import PhotoLightbox from '../components/PhotoLightbox.vue';
 import ExperienceTimeline from '../components/ExperienceTimeline.vue';
 import ResumeDownloadButton from '../components/ResumeDownloadButton.vue';
+import TypewriterText from '../components/TypewriterText.vue';
 
 const projects = ref([]);
 const skills = ref([]);
@@ -640,6 +652,14 @@ const profilePicture = computed(() => {
 const experienceItems = ref([]);
 const loadingTimeline = ref(false);
 const resumeDownloadUrl = computed(() => settings.value?.resume_url || '/resume/melvin-rey-c-tambis-resume.pdf');
+const heroTitleText = computed(() => settings.value?.site_title || 'Building scalable');
+const heroAuthor = computed(() => settings.value?.site_author || 'Melvin Rey C Tambis');
+const heroRole = computed(() => settings.value?.site_description || 'System Programmer');
+const heroEntered = ref(false);
+
+function enterHero() {
+  heroEntered.value = true;
+}
 
 function formatExperienceRange(startsAt, endsAt) {
   const start = startsAt ? new Date(startsAt) : null;
@@ -1035,6 +1055,7 @@ onMounted(() => {
   loadProjects();
   loadSkills();
   loadTimeline();
+  requestAnimationFrame(() => enterHero());
 
   syncThemeState();
   themeObserver = new MutationObserver(() => syncThemeState());
