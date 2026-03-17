@@ -3,11 +3,13 @@
     class="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/60 shadow-sm backdrop-blur dark:border-slate-800/70 dark:bg-slate-950/30"
     @mouseenter="hovered = true"
     @mouseleave="hovered = false"
+    role="img"
+    :aria-label="alt"
   >
     <div class="relative aspect-square w-full">
       <img
         :src="resolvedDefaultSrc"
-        :alt="alt"
+        alt=""
         loading="lazy"
         decoding="async"
         class="absolute inset-0 h-full w-full object-cover transition duration-500 will-change-transform"
@@ -16,7 +18,7 @@
       />
       <img
         :src="resolvedHoverSrc"
-        :alt="alt"
+        alt=""
         loading="lazy"
         decoding="async"
         class="absolute inset-0 h-full w-full object-cover transition duration-500 will-change-transform"

@@ -17,17 +17,22 @@
 
     <div v-else class="absolute inset-0">
       <div class="absolute inset-0 bg-slate-200/60 dark:bg-slate-800/60" :class="loaded[current] ? 'opacity-0' : 'opacity-100 animate-pulse'" style="transition: opacity 300ms ease"></div>
-      <img
-        :src="currentSrc()"
-        :alt="altText(current)"
-        loading="lazy"
-        decoding="async"
-        class="absolute inset-0 h-full w-full object-cover"
-        :class="loaded[current] ? 'opacity-100' : 'opacity-0'"
-        style="transition: opacity 420ms cubic-bezier(0.22, 1, 0.36, 1)"
-        @load="markLoaded(current)"
-        @error="onImgError(current)"
-      />
+      
+      <div class="absolute inset-0">
+        <img
+          v-for="(src, idx) in images"
+          :key="src"
+          :src="srcOverride[idx] || src || ''"
+          :alt="altText(idx)"
+          loading="lazy"
+          decoding="async"
+          class="absolute inset-0 h-full w-full object-cover"
+          :class="idx === current ? (loaded[idx] ? 'opacity-100 z-10' : 'opacity-0 z-10') : 'opacity-0 z-0'"
+          style="transition: opacity 420ms cubic-bezier(0.22, 1, 0.36, 1)"
+          @load="markLoaded(idx)"
+          @error="onImgError(idx)"
+        />
+      </div>
     </div>
 
     <div v-if="images.length > 1" class="pointer-events-none absolute inset-x-0 bottom-0 p-3">
@@ -73,7 +78,7 @@ const reducedMotion = typeof window !== 'undefined'
   : false;
 
 function altText(idx) {
-  return `${props.title} photo ${idx + 1}`;
+  return `${props.title} - Screenshot ${idx + 1}`;
 }
 
 function markLoaded(idx) {
@@ -84,10 +89,6 @@ function cacheBust(url, n) {
   if (!url) return '';
   const sep = url.includes('?') ? '&' : '?';
   return `${url}${sep}retry=${n}`;
-}
-
-function currentSrc() {
-  return srcOverride.value[current.value] || props.images[current.value] || '';
 }
 
 function goTo(idx) {

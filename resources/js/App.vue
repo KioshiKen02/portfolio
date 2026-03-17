@@ -16,21 +16,21 @@
           </div>
         </div>
         <div class="hidden items-center gap-8 text-sm font-medium md:flex">
-          <button type="button" class="text-slate-600 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" @click="navigateAndScroll('hero')">
+          <a href="/#hero" class="text-slate-600 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
             Home
-          </button>
-          <button type="button" class="text-slate-600 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" @click="navigateAndScroll('about')">
+          </a>
+          <a href="/#about" class="text-slate-600 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
             About
-          </button>
-          <button type="button" class="text-slate-600 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" @click="navigateAndScroll('projects')">
+          </a>
+          <a href="/#projects" class="text-slate-600 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
             Projects
-          </button>
-          <button type="button" class="text-slate-600 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" @click="navigateAndScroll('skills')">
+          </a>
+          <a href="/#skills" class="text-slate-600 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
             Skills
-          </button>
-          <button type="button" class="text-slate-600 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" @click="navigateAndScroll('contact')">
+          </a>
+          <a href="/#contact" class="text-slate-600 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
             Contact
-          </button>
+          </a>
           <RouterLink to="/admin" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-900 transition hover:bg-slate-50 dark:border-slate-800 dark:text-white dark:hover:bg-slate-900">
             Admin
           </RouterLink>
@@ -64,14 +64,10 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
 
 // Initialize theme based on what's already in the DOM (set by app.blade.php)
 const isDark = document.documentElement.classList.contains('dark');
 const theme = ref(isDark ? 'dark' : 'light');
-
-const router = useRouter();
-const route = useRoute();
 
 const settings = ref(window.AppConfig?.settings || {});
 
@@ -89,26 +85,6 @@ function toggleTheme() {
   theme.value = theme.value === 'light' ? 'dark' : 'light';
   window.localStorage.setItem('theme', theme.value);
   applyTheme(theme.value);
-}
-
-function scrollToSection(id) {
-  const el = document.getElementById(id);
-
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-}
-
-function navigateAndScroll(id) {
-  if (route.path !== '/') {
-    router
-      .push({ path: '/', hash: `#${id}` })
-      .then(() => {
-        window.setTimeout(() => scrollToSection(id), 250);
-      });
-  } else {
-    scrollToSection(id);
-  }
 }
 
 onMounted(() => {

@@ -104,7 +104,7 @@ const pointers = new Map();
 let pinchStart = null;
 let swipeStart = null;
 
-const altText = computed(() => `${props.title} photo ${props.index + 1}`);
+const altText = computed(() => `${props.title} - Detailed view ${props.index + 1}`);
 
 const imgStyle = computed(() => {
   const s = scale.value;
@@ -141,9 +141,36 @@ function next() {
   emit('update:index', (props.index + 1) % props.images.length);
 }
 
-function toggleZoom() {
-  if (scale.value === 1) scale.value = 2;
-  else resetView();
+function toggleZoom(e) {
+  if (scale.value > 1) {
+    resetView();
+  } else {
+    // Zoom in to cursor position
+    const rect = stage.value.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Calculate offset from center
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    
+    // We want the clicked point (offset from center) to move to the center after scaling
+    // Wait, the logic is: NewCenterOffset = (ClickOffset * Scale)
+    // We want to translate the image so that this point is at (0,0) (center)
+    // So Translate = -NewCenterOffset
+    // But we need to account for the current translation which is 0.
+    
+    const targetScale = 2.5;
+    scale.value = targetScale;
+    
+    // Move the clicked point to the center of the screen
+    // Formula: TX = -(offset_from_center * scale)
+    const dx = x - cx;
+    const dy = y - cy;
+    
+    tx.value = -dx * targetScale;
+    ty.value = -dy * targetScale;
+  }
 }
 
 function onWheel(e) {

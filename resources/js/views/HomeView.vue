@@ -12,21 +12,20 @@
       :class="navVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'"
     >
       <nav class="flex items-center justify-between rounded-full border border-slate-200/60 bg-white/70 px-2 py-2 shadow-lg backdrop-blur dark:border-slate-800/70 dark:bg-slate-950/60">
-        <button
+        <a
           v-for="item in navItems"
           :key="item.id"
-          type="button"
-          class="group relative flex-1 rounded-full px-3 py-2 text-xs font-semibold tracking-wide text-slate-600 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 dark:text-slate-300"
+          :href="`#${item.id}`"
+          class="group relative flex-1 rounded-full px-3 py-2 text-xs font-semibold tracking-wide text-slate-600 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 dark:text-slate-300 text-center"
           :class="activeSection === item.id ? 'text-slate-900 dark:text-white' : 'hover:text-slate-900 dark:hover:text-white'"
           :aria-current="activeSection === item.id ? 'page' : undefined"
-          @click="scrollToSection(item.id)"
         >
           <span class="relative z-10">{{ item.label }}</span>
           <span
             class="absolute inset-0 rounded-full bg-slate-900/5 opacity-0 transition duration-300 dark:bg-white/10"
             :class="activeSection === item.id ? 'opacity-100' : 'group-hover:opacity-100'"
           ></span>
-        </button>
+        </a>
       </nav>
     </div>
 
@@ -44,7 +43,7 @@
                   class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
                 <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
               </span>
-              Available for Hire
+              {{ settings.hero_badge_text || 'Available for Hire' }}
             </div>
 
             <h1 class="max-w-[26ch] text-5xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-6xl xl:text-7xl">
@@ -60,15 +59,15 @@
             
             <p class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-400">
               I'm <strong class="text-slate-900 dark:text-white">{{ heroAuthor }}</strong>, a {{ heroRole }}
-              crafting high-performance Laravel backends, reactive Vue.js interfaces, and cross-platform Flutter apps.
+              {{ settings.hero_description || 'crafting high-performance Laravel backends, reactive Vue.js interfaces, and cross-platform Flutter apps.' }}
             </p>
 
             <div class="w-full max-w-xl">
               <div class="flex flex-wrap items-center justify-center gap-3">
                 <ResumeDownloadButton :url="resumeDownloadUrl" filename="melvin-rey-c-tambis-resume.pdf" />
                 
-                <button
-                  @click="scrollToSection('projects')"
+                <a
+                  href="#projects"
                   class="group relative inline-flex items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-[var(--radius-button)] bg-[var(--color-brand)] px-4 py-3 text-xs font-semibold text-white shadow-lg transition-all hover:bg-[var(--color-brand-hover)] hover:shadow-xl hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 sm:px-6 sm:py-3.5 sm:text-sm dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
                 >
                   View Selected Work
@@ -76,14 +75,14 @@
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
-                </button>
+                </a>
                
-                <button
-                  @click="scrollToSection('contact')"
+                <a
+                  href="#contact"
                   class="inline-flex items-center justify-center whitespace-nowrap rounded-[var(--radius-button)] border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-900 transition-all hover:bg-slate-50 hover:border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 sm:px-6 sm:py-3.5 sm:text-sm dark:border-slate-800 dark:bg-slate-950 dark:text-white dark:hover:bg-slate-900"
                 >
                   Contact Me
-                </button>
+                </a>
               </div>
             </div>
           </div>
@@ -157,16 +156,14 @@
           <div class="md:col-span-7 space-y-6" v-motion="{ reveal: { delayMs: 80 } }">
             <div>
               <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-                Engineering with purpose.
+                {{ settings.about_heading || 'Engineering with purpose.' }}
               </h2>
               <div class="mt-4 space-y-4 text-base leading-relaxed text-slate-600 dark:text-slate-400">
                 <p>
-                  I don't just write code; I solve problems. With a background in Computer Engineering, I approach every
-                  project with a focus on efficiency, security, and scalability.
+                  {{ settings.about_paragraph_1 || "I don't just write code; I solve problems. With a background in Computer Engineering, I approach every project with a focus on efficiency, security, and scalability." }}
                 </p>
                 <p>
-                  My expertise spans the entire development lifecycle—from database schema design to frontend state
-                  management and mobile app deployment. I build tools that businesses rely on.
+                  {{ settings.about_paragraph_2 || "My expertise spans the entire development lifecycle—from database schema design to frontend state management and mobile app deployment. I build tools that businesses rely on." }}
                 </p>
               </div>
             </div>
@@ -194,13 +191,13 @@
           <div class="md:col-span-5 space-y-6" v-motion="{ reveal: { delayMs: 140 } }">
             <div class="mx-auto w-full max-w-sm">
               <ProfilePicture
-                :is-dark="isDarkTheme"
-                :alt="`${settings.site_author || 'Profile'} photo`"
-                :light-default-src="profilePicture.lightDefault"
-                :light-hover-src="profilePicture.lightHover"
-                :dark-default-src="profilePicture.darkDefault"
-                :dark-hover-src="profilePicture.darkHover"
-              />
+              :is-dark="isDarkThemeProxy"
+              :alt="`${settings.site_author || 'Profile'} photo`"
+              :light-default-src="profilePicture.lightDefault"
+              :light-hover-src="profilePicture.lightHover"
+              :dark-default-src="profilePicture.darkDefault"
+              :dark-hover-src="profilePicture.darkHover"
+            />
             </div>
 
             <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-1">
@@ -535,7 +532,7 @@
                     <div class="absolute inset-0 bg-slate-200/70 dark:bg-slate-800/70" :class="galleryLoaded[idx] ? 'opacity-0' : 'opacity-100 animate-pulse'" style="transition: opacity 260ms ease"></div>
                     <img
                       :src="img"
-                      :alt="`${selectedProject?.title || 'Project'} photo ${idx + 1}`"
+                      :alt="`${selectedProject?.title || 'Project'} - Detailed view ${idx + 1}`"
                       loading="lazy"
                       decoding="async"
                       class="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
@@ -609,7 +606,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import axios from 'axios';
 import ProfilePicture from '../components/ProfilePicture.vue';
 import ProjectPhotoCarousel from '../components/ProjectPhotoCarousel.vue';
@@ -618,19 +615,71 @@ import ExperienceTimeline from '../components/ExperienceTimeline.vue';
 import ResumeDownloadButton from '../components/ResumeDownloadButton.vue';
 import CodeTypewriter from '../components/CodeTypewriter.vue';
 import RotatingTypewriter from '../components/RotatingTypewriter.vue';
+import { useTheme } from '../composables/useTheme';
+import { useScrollSpy } from '../composables/useScrollSpy';
+import { useContactForm } from '../composables/useContactForm';
+import { usePortfolioData } from '../composables/usePortfolioData';
 
-const projects = ref([]);
-const skills = ref([]);
-const loadingProjects = ref(false);
-const loadingSkills = ref(false);
 const settings = ref(window.AppConfig?.settings || {});
 
-const isDarkTheme = ref(false);
-let themeObserver = null;
+const { isDarkTheme } = useTheme();
+const isDarkThemeProxy = isDarkTheme; // Alias for template compatibility
 
-function syncThemeState() {
-  isDarkTheme.value = document.documentElement.classList.contains('dark');
+const heroSection = ref(null);
+const aboutSection = ref(null);
+const projectsSection = ref(null);
+const skillsSection = ref(null);
+const contactSection = ref(null);
+
+const navItems = [
+  { id: 'about', label: 'About' },
+  { id: 'projects', label: 'Projects' },
+  { id: 'skills', label: 'Skills' },
+  { id: 'contact', label: 'Contact' },
+];
+
+const sections = computed(() => [
+    { id: 'hero', ref: heroSection },
+    { id: 'about', ref: aboutSection },
+    { id: 'projects', ref: projectsSection },
+    { id: 'skills', ref: skillsSection },
+    { id: 'contact', ref: contactSection },
+]);
+
+const {
+    activeSection,
+    navVisible,
+    sceneIndex,
+    sceneNextIndex,
+    sceneT,
+    recalcAnchors,
+    updateScrollEffects
+} = useScrollSpy(sections);
+
+const {
+    projects,
+    skills,
+    experienceItems,
+    loadingProjects,
+    loadingSkills,
+    loadingTimeline,
+    loadAllData,
+    normalizeImageUrl
+} = usePortfolioData({
+    onProjectsLoaded: () => {
+        recalcAnchors();
+        updateScrollEffects();
+    }
+});
+
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
+
+const { form, errors, submitState, handleContactSubmit } = useContactForm();
 
 const profilePicture = computed(() => {
   const lightDefault = settings.value?.profile_picture_light_default || '/logo.svg';
@@ -640,8 +689,6 @@ const profilePicture = computed(() => {
   return { lightDefault, lightHover, darkDefault, darkHover };
 });
 
-const experienceItems = ref([]);
-const loadingTimeline = ref(false);
 const resumeDownloadUrl = computed(() => settings.value?.resume_url || '/resume/melvin-rey-c-tambis-resume.pdf');
 const heroPhrases = computed(() => ([
   'Building scalable digital systems.',
@@ -668,175 +715,6 @@ const heroCodeText =
     }
 }`;
 
-function formatExperienceRange(startsAt, endsAt) {
-  const start = startsAt ? new Date(startsAt) : null;
-  const end = endsAt ? new Date(endsAt) : null;
-  const fmt = new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short' });
-  const startText = start && !isNaN(start.getTime()) ? fmt.format(start) : '—';
-  const endText = end && !isNaN(end.getTime()) ? fmt.format(end) : 'Present';
-  return `${startText} — ${endText}`;
-}
-
-async function loadTimeline() {
-  loadingTimeline.value = true;
-  try {
-    const { data } = await axios.get('/timeline');
-    const entries = Array.isArray(data) ? data : [];
-    experienceItems.value = entries
-      .slice()
-      .sort((a, b) => {
-        const ao = Number(a.sort_order || 0);
-        const bo = Number(b.sort_order || 0);
-        if (ao !== bo) return ao - bo;
-        return new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime();
-      })
-      .map((e) => ({
-        id: e.id,
-        title: e.title,
-        company: e.organization || '',
-        range: formatExperienceRange(e.starts_at, e.ends_at),
-        description: e.description || '',
-        bullets: Array.isArray(e.responsibilities) ? e.responsibilities : [],
-        media_url: e.media_url || '',
-        media_alt: e.media_alt || '',
-      }));
-  } catch {
-    experienceItems.value = [];
-  } finally {
-    loadingTimeline.value = false;
-  }
-}
-
-const heroSection = ref(null);
-const aboutSection = ref(null);
-const projectsSection = ref(null);
-const skillsSection = ref(null);
-const contactSection = ref(null);
-
-const navItems = [
-  { id: 'about', label: 'About' },
-  { id: 'projects', label: 'Projects' },
-  { id: 'skills', label: 'Skills' },
-  { id: 'contact', label: 'Contact' },
-];
-
-const activeSection = ref('about');
-const navVisible = ref(false);
-
-const sceneIndex = ref(0);
-const sceneNextIndex = ref(0);
-const sceneT = ref(0);
-const sectionAnchors = ref([]);
-let scrollRaf = 0;
-let resizeRaf = 0;
-let activeObserver = null;
-
-function getSectionElements() {
-  return [
-    { id: 'hero', el: heroSection.value },
-    { id: 'about', el: aboutSection.value },
-    { id: 'projects', el: projectsSection.value },
-    { id: 'skills', el: skillsSection.value },
-    { id: 'contact', el: contactSection.value },
-  ].filter(s => s.el);
-}
-
-function recalcAnchors() {
-  const sections = getSectionElements();
-  sectionAnchors.value = sections.map(s => ({
-    id: s.id,
-    top: s.el.offsetTop,
-  }));
-}
-
-function updateScrollEffects() {
-  scrollRaf = 0;
-  const y = window.scrollY || 0;
-  navVisible.value = y > 40;
-
-  const anchors = sectionAnchors.value;
-  if (anchors.length < 2) return;
-
-  const center = y + window.innerHeight * 0.55;
-  let idx = 0;
-  for (let i = 0; i < anchors.length - 1; i++) {
-    if (center >= anchors[i].top && center < anchors[i + 1].top) {
-      idx = i;
-      break;
-    }
-    if (center >= anchors[anchors.length - 1].top) {
-      idx = anchors.length - 1;
-    }
-  }
-
-  const from = anchors[idx];
-  const to = anchors[Math.min(idx + 1, anchors.length - 1)];
-  const denom = Math.max(1, to.top - from.top);
-  const t = idx === anchors.length - 1 ? 0 : Math.min(1, Math.max(0, (center - from.top) / denom));
-
-  const map = ['hero', 'about', 'projects', 'skills', 'contact'];
-  const currentScene = Math.max(0, Math.min(map.length - 1, map.indexOf(from.id)));
-  const nextScene = Math.max(0, Math.min(map.length - 1, map.indexOf(to.id)));
-  sceneIndex.value = currentScene === -1 ? 0 : currentScene;
-  sceneNextIndex.value = nextScene === -1 ? 0 : nextScene;
-  sceneT.value = t;
-}
-
-function onScroll() {
-  if (scrollRaf) return;
-  scrollRaf = window.requestAnimationFrame(updateScrollEffects);
-}
-
-function onResize() {
-  if (resizeRaf) return;
-  resizeRaf = window.requestAnimationFrame(() => {
-    resizeRaf = 0;
-    recalcAnchors();
-    updateScrollEffects();
-  });
-}
-
-function setupActiveSectionObserver() {
-  if (activeObserver) activeObserver.disconnect();
-  const sections = getSectionElements().filter(s => s.id !== 'hero');
-  if (!sections.length) return;
-
-  activeObserver = new IntersectionObserver(
-    (entries) => {
-      const visible = entries
-        .filter(e => e.isIntersecting)
-        .sort((a, b) => (b.intersectionRatio || 0) - (a.intersectionRatio || 0))[0];
-      if (visible?.target?.id) activeSection.value = visible.target.id;
-    },
-    { root: null, threshold: [0.2, 0.35, 0.5], rootMargin: '-20% 0px -55% 0px' }
-  );
-
-  sections.forEach(s => activeObserver.observe(s.el));
-}
-
-const form = reactive({
-  name: '',
-  email: '',
-  subject: '', // Optional subject logic kept for compatibility
-  message: '',
-});
-
-const errors = reactive({
-  name: '',
-  email: '',
-  subject: '',
-  message: '',
-});
-
-const submitState = ref('idle');
-
-function scrollToSection(id) {
-  const el = document.getElementById(id);
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-}
-
 function normalizedTechnologies(project) {
   if (!project.technologies) return [];
   if (Array.isArray(project.technologies)) return project.technologies;
@@ -846,102 +724,6 @@ function normalizedTechnologies(project) {
   } catch {
     return [];
   }
-}
-
-function validateField(field) {
-  const value = form[field] ? form[field].trim() : '';
-
-  if (field === 'name') {
-    errors.name = value.length === 0 ? 'Please enter your name.' : '';
-  }
-
-  if (field === 'email') {
-    if (!value.length) {
-      errors.email = 'Please enter your email.';
-    } else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value)) {
-      errors.email = 'Please enter a valid email address.';
-    } else {
-      errors.email = '';
-    }
-  }
-
-  if (field === 'message') {
-    if (!value.length) {
-      errors.message = 'Please include a short message.';
-    } else if (value.length > 2000) {
-      errors.message = 'Message cannot exceed 2000 characters.';
-    } else {
-      errors.message = '';
-    }
-  }
-}
-
-function validateForm() {
-  validateField('name');
-  validateField('email');
-  validateField('message');
-  return !errors.name && !errors.email && !errors.message;
-}
-
-async function handleContactSubmit() {
-  if (!validateForm()) {
-    submitState.value = 'error';
-    return;
-  }
-
-  submitState.value = 'submitting';
-
-  try {
-    await axios.post('/contact', {
-      name: form.name,
-      email: form.email,
-      subject: form.subject || 'Portfolio Contact', // Default subject if not in form
-      message: form.message,
-    });
-
-    submitState.value = 'success';
-    form.name = '';
-    form.email = '';
-    form.subject = '';
-    form.message = '';
-
-    // Clear errors
-    Object.keys(errors).forEach(key => errors[key] = '');
-
-  } catch (error) {
-    console.error(error);
-    submitState.value = 'error';
-  } finally {
-    setTimeout(() => {
-      if (submitState.value === 'success') {
-        submitState.value = 'idle';
-      }
-    }, 3000);
-  }
-}
-
-function projectImageUrl(project) {
-  if (!project || !project.image) return '';
-  return normalizeImageUrl(project.image);
-}
-
-function normalizeImageUrl(path) {
-  if (!path || typeof path !== 'string') return '';
-  if (path.startsWith('http')) return path;
-  return `/images/projects/${path}`;
-}
-
-function projectPhotoUrls(project) {
-  if (!project) return [];
-  const candidates = [];
-  if (Array.isArray(project.images)) candidates.push(...project.images);
-  if (project.image) candidates.push(project.image);
-  const normalized = candidates
-    .filter(Boolean)
-    .map((img) => (typeof img === 'string' ? img : ''))
-    .filter(Boolean)
-    .map(normalizeImageUrl);
-  return Array.from(new Set(normalized));
 }
 
 const projectModalOpen = ref(false);
@@ -1026,63 +808,12 @@ watch(projectModalOpen, async (open) => {
   }
 });
 
-async function loadProjects() {
-  loadingProjects.value = true;
-  try {
-    const { data } = await axios.get('/projects');
-    const raw = Array.isArray(data) ? data : [];
-    projects.value = raw.map((p) => ({
-      ...p,
-      photo_urls: projectPhotoUrls(p),
-    }));
-  } catch {
-    projects.value = [];
-  } finally {
-    loadingProjects.value = false;
-    requestAnimationFrame(() => {
-      recalcAnchors();
-      updateScrollEffects();
-    });
-  }
-}
-
-async function loadSkills() {
-  loadingSkills.value = true;
-  try {
-    const { data } = await axios.get('/skills');
-    skills.value = Array.isArray(data) ? data : [];
-  } catch {
-    skills.value = [];
-  } finally {
-    loadingSkills.value = false;
-  }
-}
-
 onMounted(() => {
-  loadProjects();
-  loadSkills();
-  loadTimeline();
-
-  syncThemeState();
-  themeObserver = new MutationObserver(() => syncThemeState());
-  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-  recalcAnchors();
-  setupActiveSectionObserver();
-  updateScrollEffects();
-
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', onResize, { passive: true });
+  loadAllData();
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener('scroll', onScroll);
-  window.removeEventListener('resize', onResize);
   window.removeEventListener('keydown', onProjectModalKeydown);
-  if (themeObserver) themeObserver.disconnect();
-  if (scrollRaf) window.cancelAnimationFrame(scrollRaf);
-  if (resizeRaf) window.cancelAnimationFrame(resizeRaf);
-  if (activeObserver) activeObserver.disconnect();
   unlockScroll();
 });
 </script>

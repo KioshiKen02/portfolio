@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
     server: {
-        host: process.env.VITE_DEV_HOST || '172.29.160.1',
+        host: process.env.VITE_DEV_HOST || '172.17.16.1',
         port: Number(process.env.VITE_DEV_PORT || 5173),
         strictPort: true,
     },
