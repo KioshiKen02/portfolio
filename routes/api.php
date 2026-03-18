@@ -6,6 +6,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TimelineController;
+use App\Http\Controllers\CertificateController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -19,9 +20,11 @@ Route::prefix('auth')->group(function () {
 Route::middleware(['auth:api', 'admin'])->group(function () {
     Route::prefix('admin')->group(function () {
         Route::post('upload', [ProjectController::class, 'upload']);
+        Route::post('upload/sign', [ProjectController::class, 'signUpload']);
         Route::apiResource('projects', ProjectController::class);
         Route::apiResource('skills', SkillController::class);
         Route::apiResource('settings', SettingController::class);
+        Route::apiResource('certificates', CertificateController::class)->except(['show']);
         Route::apiResource('timeline', TimelineController::class)->except(['show']);
         Route::get('timeline-audit', [TimelineController::class, 'audit']);
         Route::get('contacts', [ContactController::class, 'index']);
@@ -33,5 +36,6 @@ Route::middleware(['auth:api', 'admin'])->group(function () {
 
 Route::get('/projects', [ProjectController::class, 'index']);
 Route::get('/skills', [SkillController::class, 'index']);
+Route::get('/certificates', [CertificateController::class, 'index']);
 Route::post('/contact', [ContactController::class, 'store']);
 Route::get('/timeline', [TimelineController::class, 'publicIndex']);

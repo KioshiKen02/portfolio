@@ -370,7 +370,180 @@
       </div>
     </section>
 
-    <!-- Contact Section -->
+    <!-- Certificates & Seminars Section -->
+      <section
+        id="certificates"
+        ref="certificatesSection"
+        class="relative min-h-screen py-24 sm:py-32"
+        :class="{ 'opacity-0': sceneIndex < 4, 'opacity-100': sceneIndex >= 4 }"
+        style="transition: opacity 800ms ease"
+      >
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+          <div class="max-w-2xl">
+            <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+              Certificates / Seminars and Trainings
+            </h2>
+            <p class="mt-4 text-lg leading-8 text-slate-600 dark:text-slate-400">
+              Professional qualifications and continuous learning achievements.
+            </p>
+          </div>
+
+          <div class="mt-16 space-y-12">
+            
+            <div v-if="loadingCertificates" class="flex justify-center py-10">
+              <div class="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-slate-800 dark:border-slate-700 dark:border-t-white"></div>
+            </div>
+            
+            <template v-else>
+              <!-- Certifications & Eligibility -->
+              <div>
+                <button
+                @click="certsExpanded = !certsExpanded"
+                class="flex w-full items-center justify-between border-b border-slate-200 pb-4 text-left dark:border-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-sm"
+                :aria-expanded="certsExpanded"
+                aria-controls="certifications-list"
+              >
+                <h3 class="text-2xl font-semibold text-slate-900 dark:text-white">
+                  Certifications & Eligibility
+                </h3>
+                <svg
+                  class="h-6 w-6 transform text-slate-500 transition-transform duration-300 dark:text-slate-400"
+                  :class="certsExpanded ? 'rotate-180' : ''"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              <div
+                v-show="certsExpanded"
+                id="certifications-list"
+                class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+              >
+                <article
+                  v-for="(item, idx) in certifications"
+                  :key="'cert-'+idx"
+                  class="group flex flex-col items-start justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                >
+                  <div class="relative w-full">
+                    <div class="flex h-32 w-full items-center justify-center overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800">
+                      <img
+                        v-if="item.photo"
+                        :src="item.photo"
+                        :alt="`Certificate for ${item.title}`"
+                        loading="lazy"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <svg v-else class="h-12 w-12 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="max-w-xl mt-4">
+                    <h4 class="text-lg font-semibold leading-6 text-slate-900 dark:text-white">
+                      {{ item.title }}
+                    </h4>
+                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                      <span class="font-medium text-slate-900 dark:text-slate-300">{{ item.issuer }}</span>
+                      <span class="mx-2 text-slate-300 dark:text-slate-600">&bull;</span>
+                      {{ item.date }}
+                    </p>
+                  </div>
+                  <a
+                    v-if="item.photo"
+                    :href="item.photo"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="mt-6 inline-flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 w-full justify-center"
+                  >
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download certificate
+                  </a>
+                </article>
+              </div>
+            </div>
+
+            <!-- Seminars, Workshops & Trainings -->
+            <div>
+              <button
+                @click="seminarsExpanded = !seminarsExpanded"
+                class="flex w-full items-center justify-between border-b border-slate-200 pb-4 text-left dark:border-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-sm"
+                :aria-expanded="seminarsExpanded"
+                aria-controls="seminars-list"
+              >
+                <h3 class="text-2xl font-semibold text-slate-900 dark:text-white">
+                  Seminars, Workshops & Trainings
+                </h3>
+                <svg
+                  class="h-6 w-6 transform text-slate-500 transition-transform duration-300 dark:text-slate-400"
+                  :class="seminarsExpanded ? 'rotate-180' : ''"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              <div
+                v-show="seminarsExpanded"
+                id="seminars-list"
+                class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+              >
+                <article
+                  v-for="(item, idx) in seminars"
+                  :key="'sem-'+idx"
+                  class="group flex flex-col items-start justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                >
+                  <div class="relative w-full">
+                    <div class="flex h-32 w-full items-center justify-center overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800">
+                      <img
+                        v-if="item.photo"
+                        :src="item.photo"
+                        :alt="`Certificate for ${item.title}`"
+                        loading="lazy"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <svg v-else class="h-12 w-12 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="max-w-xl mt-4">
+                    <h4 class="text-lg font-semibold leading-6 text-slate-900 dark:text-white">
+                      {{ item.title }}
+                    </h4>
+                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                      <span class="font-medium text-slate-900 dark:text-slate-300">{{ item.issuer }}</span>
+                      <span class="mx-2 text-slate-300 dark:text-slate-600">&bull;</span>
+                      {{ item.date }}
+                    </p>
+                  </div>
+                  <a
+                    v-if="item.photo"
+                    :href="item.photo"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="mt-6 inline-flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 w-full justify-center"
+                  >
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download certificate
+                  </a>
+                </article>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact Section -->
     <section ref="contactSection" id="contact" class="section-block py-24 scroll-mt-28">
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
         <div class="grid gap-16 lg:grid-cols-2">
@@ -629,13 +802,18 @@ const heroSection = ref(null);
 const aboutSection = ref(null);
 const projectsSection = ref(null);
 const skillsSection = ref(null);
+const certificatesSection = ref(null);
 const contactSection = ref(null);
+
+const certsExpanded = ref(true);
+const seminarsExpanded = ref(true);
 
 const navItems = [
   { id: 'about', label: 'About' },
   { id: 'projects', label: 'Projects' },
-  { id: 'skills', label: 'Skills' },
-  { id: 'contact', label: 'Contact' },
+    { id: 'skills', label: 'Skills' },
+    { id: 'certificates', label: 'Certificates' },
+    { id: 'contact', label: 'Contact' },
 ];
 
 const sections = computed(() => [
@@ -643,6 +821,7 @@ const sections = computed(() => [
     { id: 'about', ref: aboutSection },
     { id: 'projects', ref: projectsSection },
     { id: 'skills', ref: skillsSection },
+    { id: 'certificates', ref: certificatesSection },
     { id: 'contact', ref: contactSection },
 ]);
 
@@ -660,9 +839,12 @@ const {
     projects,
     skills,
     experienceItems,
+    certifications,
+    seminars,
     loadingProjects,
     loadingSkills,
     loadingTimeline,
+    loadingCertificates,
     loadAllData,
     normalizeImageUrl
 } = usePortfolioData({

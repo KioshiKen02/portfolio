@@ -573,7 +573,7 @@
                     <div class="flex items-start justify-between gap-4">
                       <div>
                         <div class="text-sm font-semibold text-slate-900 dark:text-white">Optional Media</div>
-                        <div class="text-xs text-slate-500">Upload an image (JPG/PNG/WebP up to 5MB).</div>
+                        <div class="text-xs text-slate-500">Upload an image (JPG/PNG/WebP up to 10MB).</div>
                       </div>
                       <div v-if="timelineDraftUpload.uploading" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
                         Uploading {{ timelineDraftUpload.progress }}%
@@ -709,7 +709,7 @@
                             <div class="flex items-start justify-between gap-4">
                               <div>
                                 <div class="text-sm font-semibold text-slate-900 dark:text-white">Optional Media</div>
-                                <div class="text-xs text-slate-500">Upload an image (JPG/PNG/WebP up to 5MB).</div>
+                                <div class="text-xs text-slate-500">Upload an image (JPG/PNG/WebP up to 10MB).</div>
                               </div>
                               <div v-if="timelineEditUpload.uploading" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
                                 Uploading {{ timelineEditUpload.progress }}%
@@ -751,6 +751,235 @@
                       </div>
                     </li>
                   </ol>
+                </div>
+              </div>
+            </div>
+
+            <!-- Certificates -->
+            <div v-if="currentTab === 'certificates'" class="max-w-6xl animate-fade-in">
+              <div class="mb-6 flex items-center justify-between">
+                <div>
+                  <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Certificates & Seminars</h1>
+                  <p class="mt-1 text-sm text-slate-500">Manage your certifications, seminars, and training records.</p>
+                </div>
+                <button class="btn-primary" @click="toggleCertificateCreate">
+                  <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                  Add Entry
+                </button>
+              </div>
+
+              <!-- Create Certificate Form -->
+              <div v-if="showCertificateCreate" class="mb-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 animate-slide-up">
+                <div class="border-b border-slate-100 bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50 flex justify-between items-center">
+                  <h2 class="text-lg font-semibold text-slate-900 dark:text-white">New Entry</h2>
+                  <button @click="toggleCertificateCreate" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                <div class="p-6">
+                  <form @submit.prevent="createCertificate" class="space-y-6">
+                    <div class="grid gap-6 sm:grid-cols-2">
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Title <span class="text-rose-500">*</span></label>
+                        <input v-model="certificateDraft.title" type="text" class="input-field" placeholder="e.g. AWS Certified Cloud Practitioner" @input="validateCertificateDraft(certificateDraftErrors)">
+                        <p v-if="certificateDraftErrors.title" class="mt-1 text-xs text-rose-600">{{ certificateDraftErrors.title }}</p>
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Issuer / Host <span class="text-rose-500">*</span></label>
+                        <input v-model="certificateDraft.issuer" type="text" class="input-field" placeholder="e.g. Amazon Web Services" @input="validateCertificateDraft(certificateDraftErrors)">
+                        <p v-if="certificateDraftErrors.issuer" class="mt-1 text-xs text-rose-600">{{ certificateDraftErrors.issuer }}</p>
+                      </div>
+                    </div>
+
+                    <div class="grid gap-6 sm:grid-cols-3">
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Type <span class="text-rose-500">*</span></label>
+                        <select v-model="certificateDraft.type" class="input-field py-2.5">
+                          <option value="certification">Certification & Eligibility</option>
+                          <option value="seminar">Seminar & Workshop</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Date (Optional)</label>
+                        <input v-model="certificateDraft.date" type="text" class="input-field" placeholder="e.g. August 2023 or 2022-2023">
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Sort Order</label>
+                        <input v-model.number="certificateDraft.sort_order" type="number" class="input-field" placeholder="0">
+                      </div>
+                    </div>
+
+                    <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
+                      <div class="flex items-start justify-between gap-4">
+                        <div>
+                          <div class="text-sm font-semibold text-slate-900 dark:text-white">Certificate Image</div>
+                          <div class="text-xs text-slate-500">Upload a scan or screenshot of the certificate (Max 10MB).</div>
+                        </div>
+                        <div v-if="certificateDraftUpload.uploading" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                          Uploading {{ certificateDraftUpload.progress }}%
+                        </div>
+                      </div>
+                      <div class="mt-4 grid gap-4 sm:grid-cols-[112px_1fr] sm:items-center">
+                        <div class="h-24 w-28 overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
+                          <img
+                            v-if="certificateDraft.photo"
+                            :src="certificateDraft.photo"
+                            alt=""
+                            class="h-full w-full object-cover"
+                            loading="lazy"
+                            decoding="async"
+                            @error="certificateDraft.photo = ''"
+                          />
+                          <div v-else class="flex h-full w-full items-center justify-center text-slate-400">
+                            <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                          </div>
+                        </div>
+                        <div>
+                          <input ref="certificateDraftMediaInput" type="file" class="hidden" accept="image/png, image/jpeg, image/webp" @change="onCertificateMediaSelected($event, 'draft')">
+                          <div class="flex flex-wrap gap-2">
+                            <button type="button" class="btn-secondary" @click="certificateDraftMediaInput?.click()">Choose Image</button>
+                            <button type="button" class="btn-primary" :disabled="!certificateDraftUpload.file || certificateDraftUpload.uploading" @click="uploadCertificateMedia('draft')">Upload</button>
+                            <button type="button" class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 transition-colors" @click="clearCertificateMedia('draft')">Clear</button>
+                          </div>
+                          <p v-if="certificateDraftUpload.error" class="mt-2 text-xs font-medium text-rose-600">{{ certificateDraftUpload.error }}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                      <button type="button" class="btn-secondary" @click="toggleCertificateCreate">Cancel</button>
+                      <button type="submit" class="btn-primary" :disabled="certificateSaving">
+                        {{ certificateSaving ? 'Saving...' : 'Save Entry' }}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <!-- Certificates List -->
+              <div class="card overflow-hidden">
+                <div v-if="certificatesLoading" class="p-12 text-center">
+                  <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent align-[-0.125em]"></div>
+                  <p class="mt-4 text-sm text-slate-500">Loading entries...</p>
+                </div>
+                
+                <div v-else-if="certificates.length === 0" class="p-12 text-center">
+                  <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+                    <svg class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                  </div>
+                  <h3 class="mt-2 text-sm font-semibold text-slate-900 dark:text-white">No entries found</h3>
+                  <p class="mt-1 text-sm text-slate-500">Get started by creating a new certificate or seminar.</p>
+                </div>
+
+                <div v-else>
+                  <ul role="list" class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                    <li v-for="cert in certificates" :key="cert.id">
+                      <!-- View Mode -->
+                      <div v-if="certificateEditId !== cert.id" class="flex items-center justify-between gap-x-6 px-6 py-5 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                        <div class="flex min-w-0 gap-x-4 items-center">
+                          <div class="h-12 w-16 flex-shrink-0 overflow-hidden rounded border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
+                             <img v-if="cert.photo" :src="cert.photo" class="h-full w-full object-cover" />
+                             <svg v-else class="h-full w-full p-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                          </div>
+                          <div class="min-w-0 flex-auto">
+                            <p class="text-sm font-semibold leading-6 text-slate-900 dark:text-white">
+                              {{ cert.title }}
+                            </p>
+                            <p class="mt-1 flex text-xs leading-5 text-slate-500 dark:text-slate-400">
+                              <span class="truncate">{{ cert.issuer }}</span>
+                              <span v-if="cert.date" class="mx-1.5">&middot;</span>
+                              <span v-if="cert.date" class="whitespace-nowrap">{{ cert.date }}</span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="flex flex-none items-center gap-x-4">
+                          <span class="hidden sm:inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" :class="cert.type === 'certification' ? 'bg-indigo-50 text-indigo-700 ring-indigo-600/20 dark:bg-indigo-400/10 dark:text-indigo-400 dark:ring-indigo-400/30' : 'bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-400/10 dark:text-emerald-400 dark:ring-emerald-400/30'">
+                            {{ cert.type === 'certification' ? 'Certification' : 'Seminar' }}
+                          </span>
+                          <button @click="startCertificateEdit(cert)" class="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">Edit</button>
+                          <button @click="confirmDelete('certificate', cert)" class="text-sm font-medium text-rose-600 hover:text-rose-500 dark:text-rose-400">Delete</button>
+                        </div>
+                      </div>
+
+                      <!-- Edit Mode -->
+                      <div v-else class="p-6 bg-slate-50 dark:bg-slate-800/30 border-y border-indigo-100 dark:border-indigo-900/30 relative">
+                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500 rounded-r"></div>
+                        <form @submit.prevent="saveCertificateEdit" class="space-y-6">
+                          <div class="grid gap-6 sm:grid-cols-2">
+                            <div>
+                              <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Title <span class="text-rose-500">*</span></label>
+                              <input v-model="certificateEdit.title" type="text" class="input-field" @input="validateCertificateEdit">
+                              <p v-if="certificateEditErrors.title" class="mt-1 text-xs text-rose-600">{{ certificateEditErrors.title }}</p>
+                            </div>
+                            <div>
+                              <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Issuer / Host <span class="text-rose-500">*</span></label>
+                              <input v-model="certificateEdit.issuer" type="text" class="input-field" @input="validateCertificateEdit">
+                              <p v-if="certificateEditErrors.issuer" class="mt-1 text-xs text-rose-600">{{ certificateEditErrors.issuer }}</p>
+                            </div>
+                          </div>
+
+                          <div class="grid gap-6 sm:grid-cols-3">
+                            <div>
+                              <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Type <span class="text-rose-500">*</span></label>
+                              <select v-model="certificateEdit.type" class="input-field py-2.5">
+                                <option value="certification">Certification & Eligibility</option>
+                                <option value="seminar">Seminar & Workshop</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Date</label>
+                              <input v-model="certificateEdit.date" type="text" class="input-field">
+                            </div>
+                            <div>
+                              <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Sort Order</label>
+                              <input v-model.number="certificateEdit.sort_order" type="number" class="input-field">
+                            </div>
+                          </div>
+
+                          <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+                            <div class="flex items-start justify-between gap-4">
+                              <div>
+                                <div class="text-sm font-semibold text-slate-900 dark:text-white">Certificate Image</div>
+                              </div>
+                              <div v-if="certificateEditUpload.uploading" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                                Uploading {{ certificateEditUpload.progress }}%
+                              </div>
+                            </div>
+                            <div class="mt-4 grid gap-4 sm:grid-cols-[112px_1fr] sm:items-center">
+                              <div class="h-24 w-28 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800">
+                                <img
+                                  v-if="certificateEdit.photo"
+                                  :src="certificateEdit.photo"
+                                  alt=""
+                                  class="h-full w-full object-cover"
+                                  loading="lazy"
+                                  decoding="async"
+                                  @error="certificateEdit.photo = ''"
+                                />
+                                <div v-else class="flex h-full w-full items-center justify-center text-slate-400">
+                                  <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                </div>
+                              </div>
+                              <div>
+                                <input ref="certificateEditMediaInput" type="file" class="hidden" accept="image/png, image/jpeg, image/webp" @change="onCertificateMediaSelected($event, 'edit')">
+                                <div class="flex flex-wrap gap-2">
+                                  <button type="button" class="btn-secondary" @click="certificateEditMediaInput?.click()">Choose Image</button>
+                                  <button type="button" class="btn-primary" :disabled="!certificateEditUpload.file || certificateEditUpload.uploading" @click="uploadCertificateMedia('edit')">Upload</button>
+                                  <button type="button" class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 transition-colors" @click="clearCertificateMedia('edit')">Clear</button>
+                                </div>
+                                <p v-if="certificateEditUpload.error" class="mt-2 text-xs font-medium text-rose-600">{{ certificateEditUpload.error }}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div class="flex flex-wrap items-center justify-end gap-3 pt-1">
+                            <button type="button" class="btn-secondary" @click="cancelCertificateEdit">Cancel</button>
+                            <button type="submit" class="btn-primary" :disabled="certificateSaving">Save Changes</button>
+                          </div>
+                        </form>
+                      </div>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -836,7 +1065,7 @@
                           {{ profilePictureState[variant.key].error }}
                         </p>
                         <p v-else class="mt-2 text-xs text-slate-500">
-                          JPG/PNG/WebP up to 5MB.
+                          JPG/PNG/WebP up to 10MB.
                         </p>
                       </div>
                     </div>
@@ -1570,20 +1799,61 @@ const timelineAuditLoading = ref(false);
 
 const timelineDraftResponsibilitiesCount = computed(() => parseResponsibilities(timelineDraft.responsibilitiesText).length);
 
+// Certificates State
+const certificates = ref([]);
+const certificatesLoading = ref(false);
+const showCertificateCreate = ref(false);
+const certificateSaving = ref(false);
+
+const certificateDraft = reactive({
+  title: '',
+  issuer: '',
+  date: '',
+  photo: '',
+  type: 'certification',
+  sort_order: 0,
+});
+const certificateDraftErrors = reactive({});
+const certificateDraftUpload = reactive({ file: null, progress: 0, uploading: false, error: '', previewUrl: '' });
+const certificateDraftMediaInput = ref(null);
+
+const certificateEditId = ref(null);
+const certificateEdit = reactive({
+  id: null,
+  title: '',
+  issuer: '',
+  date: '',
+  photo: '',
+  type: 'certification',
+  sort_order: 0,
+});
+const certificateEditErrors = reactive({});
+const certificateEditUpload = reactive({ file: null, progress: 0, uploading: false, error: '', previewUrl: '' });
+const certificateEditMediaInput = ref(null);
+
 const deleteModalTitle = computed(() => {
   if (!itemToDelete.value) return 'Delete?';
   if (itemToDelete.value.type === 'timeline') return 'Delete Timeline Entry?';
+  if (itemToDelete.value.type === 'certificate') return 'Delete Certificate?';
   return 'Delete Message?';
 });
 
 const deleteModalDescription = computed(() => {
   if (!itemToDelete.value) return 'This action cannot be undone.';
   if (itemToDelete.value.type === 'timeline') return 'Are you sure you want to delete this timeline entry? This action cannot be undone.';
+  if (itemToDelete.value.type === 'certificate') return 'Are you sure you want to delete this certificate? This action cannot be undone.';
   return 'Are you sure you want to delete this message? This action cannot be undone.';
 });
 
 function toggleTimelineCreate() {
   showTimelineCreate.value = !showTimelineCreate.value;
+}
+
+function toggleCertificateCreate() {
+  showCertificateCreate.value = !showCertificateCreate.value;
+  if (!showCertificateCreate.value) {
+    resetCertificateDraft();
+  }
 }
 
 function formatTimelineRange(entry) {
@@ -1684,8 +1954,8 @@ function onTimelineMediaSelected(event, mode) {
     upload.error = 'Invalid file type. Use JPG, PNG, or WebP.';
     return;
   }
-  if (file.size > 5 * 1024 * 1024) {
-    upload.error = 'File is too large. Max 5MB.';
+  if (file.size > 10 * 1024 * 1024) {
+    upload.error = 'File is too large. Max 10MB.';
     return;
   }
 
@@ -1704,26 +1974,15 @@ async function uploadTimelineMedia(mode) {
   upload.progress = 0;
 
   try {
-    const formData = new FormData();
-    formData.append('image', upload.file);
-    formData.append('folder', 'timeline');
-
-    const { data } = await axios.post('/admin/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      onUploadProgress: (evt) => {
-        const total = evt.total || 0;
-        if (!total) return;
-        upload.progress = Math.round((evt.loaded / total) * 100);
-      },
-    });
+    const url = await uploadFileDirectly(upload.file, 'timeline');
 
     if (upload.previewUrl) URL.revokeObjectURL(upload.previewUrl);
     upload.previewUrl = '';
     upload.file = null;
-    entry.media_url = data.url;
+    entry.media_url = url;
     upload.progress = 100;
   } catch (e) {
-    upload.error = e.response?.data?.message || 'Upload failed.';
+    upload.error = 'Upload failed.';
   } finally {
     upload.uploading = false;
     const input = mode === 'edit' ? timelineEditMediaInput.value : timelineDraftMediaInput.value;
@@ -1940,7 +2199,7 @@ function addPhotos(files) {
   if (!files.length) return;
 
   const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-  const maxSize = 5 * 1024 * 1024;
+  const maxSize = 10 * 1024 * 1024;
 
   const nextFiles = [];
   for (const file of files) {
@@ -1949,7 +2208,7 @@ function addPhotos(files) {
       return;
     }
     if (file.size > maxSize) {
-      photosError.value = 'File is too large. Max 5MB per image.';
+      photosError.value = 'File is too large. Max 10MB per image.';
       return;
     }
     nextFiles.push(file);
@@ -2012,6 +2271,150 @@ const profileForm = reactive({
 const profileSubmitting = ref(false);
 const showProfilePassword = ref(false);
 const showProfileConfirmPassword = ref(false);
+
+// Certificate Functions
+function validateCertificateDraft(targetErrors) {
+  const errors = {};
+  if (!certificateDraft.title.trim()) errors.title = 'Title is required.';
+  if (!certificateDraft.issuer.trim()) errors.issuer = 'Issuer is required.';
+  
+  Object.keys(targetErrors).forEach((k) => delete targetErrors[k]);
+  Object.entries(errors).forEach(([k, v]) => (targetErrors[k] = v));
+  return Object.keys(errors).length === 0;
+}
+
+function validateCertificateEdit() {
+  const errors = {};
+  if (!certificateEdit.title.trim()) errors.title = 'Title is required.';
+  if (!certificateEdit.issuer.trim()) errors.issuer = 'Issuer is required.';
+  
+  Object.keys(certificateEditErrors).forEach((k) => delete certificateEditErrors[k]);
+  Object.entries(errors).forEach(([k, v]) => (certificateEditErrors[k] = v));
+  return Object.keys(errors).length === 0;
+}
+
+function resetCertificateDraft() {
+  certificateDraft.title = '';
+  certificateDraft.issuer = '';
+  certificateDraft.date = '';
+  certificateDraft.photo = '';
+  certificateDraft.type = 'certification';
+  certificateDraft.sort_order = 0;
+  Object.keys(certificateDraftErrors).forEach((k) => delete certificateDraftErrors[k]);
+  clearCertificateMedia('draft');
+}
+
+function clearCertificateMedia(mode) {
+  const upload = mode === 'edit' ? certificateEditUpload : certificateDraftUpload;
+  const entry = mode === 'edit' ? certificateEdit : certificateDraft;
+  if (upload.previewUrl) URL.revokeObjectURL(upload.previewUrl);
+  upload.file = null;
+  upload.progress = 0;
+  upload.uploading = false;
+  upload.error = '';
+  upload.previewUrl = '';
+  entry.photo = '';
+}
+
+function onCertificateMediaSelected(event, mode) {
+  const file = event?.target?.files?.[0];
+  const upload = mode === 'edit' ? certificateEditUpload : certificateDraftUpload;
+  const entry = mode === 'edit' ? certificateEdit : certificateDraft;
+  upload.error = '';
+  upload.file = null;
+  upload.progress = 0;
+
+  if (!file) return;
+  const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  if (!validTypes.includes(file.type)) {
+    upload.error = 'Invalid file type. Use JPG, PNG, or WebP.';
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    upload.error = 'File is too large. Max 10MB.';
+    return;
+  }
+
+  if (upload.previewUrl) URL.revokeObjectURL(upload.previewUrl);
+  upload.previewUrl = URL.createObjectURL(file);
+  upload.file = file;
+  entry.photo = upload.previewUrl;
+}
+
+async function uploadCertificateMedia(mode) {
+  const upload = mode === 'edit' ? certificateEditUpload : certificateDraftUpload;
+  const entry = mode === 'edit' ? certificateEdit : certificateDraft;
+  if (!upload.file || upload.uploading) return;
+  upload.uploading = true;
+  upload.error = '';
+  upload.progress = 0;
+
+  try {
+    const url = await uploadFileDirectly(upload.file, 'certificates');
+
+    if (upload.previewUrl) URL.revokeObjectURL(upload.previewUrl);
+    upload.previewUrl = '';
+    upload.file = null;
+    entry.photo = url;
+    upload.progress = 100;
+  } catch (e) {
+    upload.error = 'Upload failed.';
+  } finally {
+    upload.uploading = false;
+    const input = mode === 'edit' ? certificateEditMediaInput.value : certificateDraftMediaInput.value;
+    if (input) input.value = '';
+  }
+}
+
+async function createCertificate() {
+  if (!validateCertificateDraft(certificateDraftErrors)) return;
+  certificateSaving.value = true;
+  try {
+    const { data } = await axios.post('/admin/certificates', certificateDraft);
+    certificates.value.unshift(data);
+    addToast('Entry created successfully.', 'success');
+    showCertificateCreate.value = false;
+    resetCertificateDraft();
+  } catch (e) {
+    addToast(e.response?.data?.message || 'Failed to create entry.', 'error');
+  } finally {
+    certificateSaving.value = false;
+  }
+}
+
+function startCertificateEdit(cert) {
+  certificateEditId.value = cert.id;
+  certificateEdit.id = cert.id;
+  certificateEdit.title = cert.title;
+  certificateEdit.issuer = cert.issuer;
+  certificateEdit.date = cert.date || '';
+  certificateEdit.photo = cert.photo || '';
+  certificateEdit.type = cert.type;
+  certificateEdit.sort_order = cert.sort_order;
+  clearCertificateMedia('edit');
+  Object.keys(certificateEditErrors).forEach((k) => delete certificateEditErrors[k]);
+}
+
+function cancelCertificateEdit() {
+  certificateEditId.value = null;
+  clearCertificateMedia('edit');
+}
+
+async function saveCertificateEdit() {
+  if (!validateCertificateEdit()) return;
+  certificateSaving.value = true;
+  try {
+    const { data } = await axios.put(`/admin/certificates/${certificateEdit.id}`, certificateEdit);
+    const index = certificates.value.findIndex((c) => c.id === data.id);
+    if (index !== -1) certificates.value[index] = data;
+    addToast('Entry updated successfully.', 'success');
+    cancelCertificateEdit();
+  } catch (e) {
+    addToast(e.response?.data?.message || 'Failed to update entry.', 'error');
+  } finally {
+    certificateSaving.value = false;
+  }
+}
 
 // --- Auth Functions ---
 
@@ -2162,8 +2565,8 @@ function onProfilePictureSelected(event, variantKey) {
     return;
   }
 
-  if (file.size > 5 * 1024 * 1024) {
-    st.error = 'File is too large. Max 5MB.';
+  if (file.size > 10 * 1024 * 1024) {
+    st.error = 'File is too large. Max 10MB.';
     input.value = '';
     return;
   }
@@ -2187,27 +2590,16 @@ async function uploadProfilePicture(variantKey) {
   st.progress = 0;
 
   try {
-    const formData = new FormData();
-    formData.append('image', st.file);
-    formData.append('folder', 'profile');
+    const url = await uploadFileDirectly(st.file, 'profile');
 
-    const { data } = await axios.post('/admin/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      onUploadProgress: (evt) => {
-        const total = evt.total || 0;
-        if (!total) return;
-        st.progress = Math.round((evt.loaded / total) * 100);
-      },
-    });
-
-    ensureSetting(variant.settingKey, { type: 'url', group: 'profile' }).value = data.url;
-    st.preview = data.url;
+    ensureSetting(variant.settingKey, { type: 'url', group: 'profile' }).value = url;
+    st.preview = url;
     st.file = null;
     st.progress = 100;
     addToast('Profile picture uploaded. Saving settings...', 'success');
     await saveSettings();
   } catch (e) {
-    st.error = e.response?.data?.message || 'Upload failed.';
+    st.error = 'Upload failed.';
   } finally {
     st.uploading = false;
     const input = profilePictureInputs[variantKey];
@@ -2361,15 +2753,17 @@ async function loadData() {
 
   try {
     timelineLoading.value = true;
+    certificatesLoading.value = true;
     const results = await Promise.allSettled([
       axios.get('/admin/projects'),
       axios.get('/admin/skills'),
       axios.get('/admin/contacts'),
       axios.get('/admin/settings'),
-      axios.get('/admin/timeline')
+      axios.get('/admin/timeline'),
+      axios.get('/admin/certificates')
     ]);
 
-    const [pRes, sRes, mRes, setRes, tRes] = results;
+    const [pRes, sRes, mRes, setRes, tRes, cRes] = results;
 
     if (pRes.status === 'fulfilled') projects.value = pRes.value.data.data || pRes.value.data;
     if (sRes.status === 'fulfilled') skills.value = sRes.value.data.data || sRes.value.data;
@@ -2379,6 +2773,9 @@ async function loadData() {
     }
     if (tRes.status === 'fulfilled') {
         timelineEntries.value = tRes.value.data.data || tRes.value.data || [];
+    }
+    if (cRes.status === 'fulfilled') {
+        certificates.value = cRes.value.data.data || cRes.value.data || [];
     }
   } catch (error) {
     console.error('Data load failed:', error);
@@ -2451,6 +2848,11 @@ async function confirmDelete() {
       timelineEntries.value = timelineEntries.value.filter(e => e.id !== id);
       addToast('Timeline entry deleted.', 'success');
       if (timelineEditId.value === id) cancelTimelineEdit();
+    } else if (type === 'certificate') {
+      await axios.delete(`/admin/certificates/${id}`);
+      certificates.value = certificates.value.filter(c => c.id !== id);
+      addToast('Certificate deleted.', 'success');
+      if (certificateEditId.value === id) cancelCertificateEdit();
     }
   } catch {
     addToast('Failed to delete item.', 'error');
@@ -2505,6 +2907,39 @@ function closeProjectModal() {
   editingProject.value = null;
 }
 
+async function uploadFileDirectly(file, folder) {
+  // 1. Get presigned URL
+  const { data: signData } = await axios.post('/admin/upload/sign', {
+    filename: file.name,
+    folder: folder,
+    content_type: file.type
+  });
+
+  if (signData.strategy === 's3_presigned') {
+    // 2. Upload directly to S3/Supabase
+    await axios.put(signData.upload_url, file, {
+      headers: {
+        'Content-Type': file.type,
+        // Supabase/S3 might require public-read ACL header if signed with it
+        // But usually it's embedded in the signature.
+      },
+      onUploadProgress: (evt) => {
+        // We can wire this to the progress callback if needed
+      }
+    });
+    return signData.public_url;
+  } else {
+    // Fallback to server upload (local dev)
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('folder', folder);
+    const { data } = await axios.post('/admin/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return data.url;
+  }
+}
+
 async function saveProject() {
   try {
     // Parse technologies
@@ -2523,20 +2958,18 @@ async function saveProject() {
 
     for (let i = 0; i < newFiles.length; i++) {
       const file = newFiles[i];
-      const formData = new FormData();
-      formData.append('image', file);
-      formData.append('folder', 'projects');
-
-      const { data } = await axios.post('/admin/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        onUploadProgress: (evt) => {
-          const total = evt.total || 0;
-          const fileT = total ? Math.min(1, evt.loaded / total) : 0;
-          const overall = ((i + fileT) / Math.max(1, newFiles.length)) * 100;
-          photosUploadProgress.value = Math.round(overall);
-        }
-      });
-      uploaded.push(data.url);
+      
+      try {
+        const publicUrl = await uploadFileDirectly(file, 'projects');
+        uploaded.push(publicUrl);
+        
+        // Update progress
+        const overall = ((i + 1) / Math.max(1, newFiles.length)) * 100;
+        photosUploadProgress.value = Math.round(overall);
+      } catch (e) {
+        console.error('Upload failed for file:', file.name, e);
+        throw new Error(`Failed to upload ${file.name}`);
+      }
     }
 
     const finalImages = [...existingImages, ...uploaded].slice(0, 20);

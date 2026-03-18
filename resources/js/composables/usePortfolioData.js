@@ -5,10 +5,13 @@ export function usePortfolioData(callbacks = {}) {
     const projects = ref([]);
     const skills = ref([]);
     const experienceItems = ref([]);
+    const certifications = ref([]);
+    const seminars = ref([]);
     
     const loadingProjects = ref(false);
     const loadingSkills = ref(false);
     const loadingTimeline = ref(false);
+    const loadingCertificates = ref(false);
 
     function normalizeImageUrl(path, size = 'full') {
         if (!path || typeof path !== 'string') return '';
@@ -107,22 +110,56 @@ export function usePortfolioData(callbacks = {}) {
         }
     }
 
+    async function loadCertificates() {
+        loadingCertificates.value = true;
+        try {
+            const { data } = await axios.get('/certificates');
+            const items = Array.isArray(data) ? data : [];
+            
+            // Fix Vercel storage issue by ensuring photo path is normalized
+            const normalizeCertPhoto = (photo) => {
+                if (!photo) return null;
+                if (photo.startsWith('http')) return photo;
+                return `/images/certificates/${photo}`;
+            };
+            
+            certifications.value = items
+                .filter(item => item.type === 'certification')
+                .map(item => ({ ...item, photo: normalizeCertPhoto(item.photo) }));
+                
+            seminars.value = items
+                .filter(item => item.type === 'seminar')
+                .map(item => ({ ...item, photo: normalizeCertPhoto(item.photo) }));
+        } catch (error) {
+            console.error('Failed to load certificates:', error);
+            certifications.value = [];
+            seminars.value = [];
+        } finally {
+            loadingCertificates.value = false;
+        }
+    }
+
     function loadAllData() {
         loadProjects();
         loadSkills();
         loadTimeline();
+        loadCertificates();
     }
 
     return {
         projects,
         skills,
         experienceItems,
+        certifications,
+        seminars,
         loadingProjects,
         loadingSkills,
         loadingTimeline,
+        loadingCertificates,
         loadProjects,
         loadSkills,
         loadTimeline,
+        loadCertificates,
         loadAllData,
         normalizeImageUrl,
         projectPhotoUrls

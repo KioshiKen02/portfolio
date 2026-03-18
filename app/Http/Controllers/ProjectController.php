@@ -65,16 +65,16 @@ class ProjectController extends Controller
     public function upload(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
             'folder' => 'nullable|string',
         ]);
 
         if ($request->hasFile('image')) {
             // Determine disk based on environment
-            $disk = env('FILESYSTEM_DISK', 'public');
+            $disk = env('FILESYSTEM_DISK', 'supabase');
 
             $folder = $request->input('folder', 'projects');
-            if (!in_array($folder, ['projects', 'profile', 'timeline'], true)) {
+            if (!in_array($folder, ['projects', 'profile', 'timeline', 'certificates'], true)) {
                 $folder = 'projects';
             }
             
@@ -94,6 +94,61 @@ class ProjectController extends Controller
         }
 
         return response()->json(['message' => 'Upload failed'], 400);
+    }
+
+    public function signUpload(Request $request)
+    {
+        $request->validate([
+            'filename' => 'required|string',
+            'folder' => 'nullable|string',
+            'content_type' => 'required|string',
+        ]);
+
+        $disk = env('FILESYSTEM_DISK', 'public');
+        
+        // If we are using local/public disk, we can't do direct uploads easily without a separate controller
+        // So we fallback to the standard upload for local dev
+        if ($disk === 'public' || $disk === 'local') {
+            return response()->json(['strategy' => 'server']);
+        }
+
+        $folder = $request->input('folder', 'projects');
+        if (!in_array($folder, ['projects', 'profile', 'timeline', 'certificates'], true)) {
+            $folder = 'projects';
+        }
+
+        // Generate a unique filename
+        $extension = pathinfo($request->filename, PATHINFO_EXTENSION);
+        $path = $folder . '/' . \Illuminate\Support\Str::random(40) . '.' . $extension;
+
+        // Generate Presigned URL
+        // Expiry: 5 minutes
+        $client = \Illuminate\Support\Facades\Storage::disk($disk)->getClient();
+        $command = $client->getCommand('PutObject', [
+            'Bucket' => config("filesystems.disks.{$disk}.bucket"),
+            'Key' => $path,
+            'ContentType' => $request->input('content_type'),
+            'ACL' => 'public-read', // Ensure it's public
+        ]);
+
+        $request = $client->createPresignedRequest($command, '+5 minutes');
+        $signedUrl = (string) $request->getUri();
+
+        // Calculate the final public URL
+        $publicUrl = \Illuminate\Support\Facades\Storage::disk($disk)->url($path);
+        if ($disk === 'supabase' && !str_starts_with($publicUrl, 'http')) {
+             $publicUrl = env('SUPABASE_URL') . '/' . $path;
+        }
+
+        return response()->json([
+            'strategy' => 's3_presigned',
+            'upload_url' => $signedUrl,
+            'public_url' => $publicUrl,
+            'method' => 'PUT',
+            'headers' => [
+                'Content-Type' => $request->getHeader('Content-Type')[0] ?? $request->input('content_type'),
+            ]
+        ]);
     }
 
     public function destroy(Project $project)
