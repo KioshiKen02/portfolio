@@ -381,7 +381,7 @@
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
           <div class="max-w-2xl">
             <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-              Certificates / Seminars and Trainings
+              Certificates / Seminars / Workshops and Trainings
             </h2>
             <p class="mt-4 text-lg leading-8 text-slate-600 dark:text-slate-400">
               Professional qualifications and continuous learning achievements.
@@ -811,9 +811,9 @@ const seminarsExpanded = ref(true);
 const navItems = [
   { id: 'about', label: 'About' },
   { id: 'projects', label: 'Projects' },
-    { id: 'skills', label: 'Skills' },
-    { id: 'certificates', label: 'Certificates' },
-    { id: 'contact', label: 'Contact' },
+  { id: 'skills', label: 'Skills' },
+  { id: 'certificates', label: 'Certificates' },
+  { id: 'contact', label: 'Contact' },
 ];
 
 const sections = computed(() => [

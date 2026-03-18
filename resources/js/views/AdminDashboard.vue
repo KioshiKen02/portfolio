@@ -1662,10 +1662,13 @@ const TimelineIcon = createIcon('M4 6h16M4 12h10M4 18h16M16 10l2 2 4-4');
 const SuccessIcon = createIcon('M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'text-emerald-500');
 const ErrorIcon = createIcon('M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'text-rose-500');
 
+const AcademicCapIcon = createIcon('M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222');
+
 const tabs = [
   { id: 'dashboard', label: 'Dashboard', icon: DashboardIcon },
   { id: 'projects', label: 'Projects', icon: ProjectIcon },
   { id: 'skills', label: 'Skills', icon: SkillIcon },
+  { id: 'certificates', label: 'Certificates', icon: AcademicCapIcon },
   { id: 'messages', label: 'Messages', icon: MessageIcon },
   { id: 'timeline', label: 'Timeline', icon: TimelineIcon },
   { id: 'settings', label: 'Site Settings', icon: SettingsIcon },
