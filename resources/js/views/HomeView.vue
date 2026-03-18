@@ -378,7 +378,7 @@
     <section ref="certificatesSection" id="certificates" class="section-block py-24 scroll-mt-28">
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
         <div class="mb-12" v-motion="{ reveal: { delayMs: 80 } }">
-          <div class="max-w-xl">
+          <div class="max-w-4xl">
             <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
               Certificates / Seminars / Workshops and Trainings
             </h2>
