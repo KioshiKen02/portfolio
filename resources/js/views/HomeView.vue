@@ -30,7 +30,11 @@
     </div>
 
     <!-- Hero Section -->
-    <section ref="heroSection" class="section-hero relative flex min-h-screen items-center overflow-hidden pt-20 pb-16">
+    <section ref="heroSection" id="hero" class="section-hero relative flex min-h-screen items-center overflow-hidden pt-20 pb-16">
+      
+      <!-- Dynamic Bento Grid Background -->
+      <MechanicalBentoGrid />
+
       <div class="pointer-events-none absolute inset-0 -z-10 hero-shine"></div>
 
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
@@ -371,24 +375,20 @@
     </section>
 
     <!-- Certificates & Seminars Section -->
-      <section
-        id="certificates"
-        ref="certificatesSection"
-        class="relative min-h-screen py-24 sm:py-32"
-        :class="{ 'opacity-0': sceneIndex < 4, 'opacity-100': sceneIndex >= 4 }"
-        style="transition: opacity 800ms ease"
-      >
-        <div class="mx-auto max-w-7xl px-6 lg:px-8">
-          <div class="max-w-2xl">
+    <section ref="certificatesSection" id="certificates" class="section-block py-24 scroll-mt-28">
+      <div class="container mx-auto px-6 md:px-12 xl:px-24">
+        <div class="mb-12" v-motion="{ reveal: { delayMs: 80 } }">
+          <div class="max-w-xl">
             <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
               Certificates / Seminars / Workshops and Trainings
             </h2>
-            <p class="mt-4 text-lg leading-8 text-slate-600 dark:text-slate-400">
+            <p class="mt-4 text-lg text-slate-600 dark:text-slate-400">
               Professional qualifications and continuous learning achievements.
             </p>
           </div>
+        </div>
 
-          <div class="mt-16 space-y-12">
+        <div class="mt-12 space-y-12">
             
             <div v-if="loadingCertificates" class="flex justify-center py-10">
               <div class="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-slate-800 dark:border-slate-700 dark:border-t-white"></div>
@@ -788,6 +788,7 @@ import ExperienceTimeline from '../components/ExperienceTimeline.vue';
 import ResumeDownloadButton from '../components/ResumeDownloadButton.vue';
 import CodeTypewriter from '../components/CodeTypewriter.vue';
 import RotatingTypewriter from '../components/RotatingTypewriter.vue';
+import MechanicalBentoGrid from '../components/MechanicalBentoGrid.vue';
 import { useTheme } from '../composables/useTheme';
 import { useScrollSpy } from '../composables/useScrollSpy';
 import { useContactForm } from '../composables/useContactForm';
