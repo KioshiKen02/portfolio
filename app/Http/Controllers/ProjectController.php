@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ProjectController extends Controller
 {
     public function index()
     {
-        return Project::orderByDesc('created_at')->get();
+        return Cache::remember('projects.index', now()->addDay(), function () {
+            return Project::orderByDesc('created_at')->get();
+        });
     }
 
     public function store(Request $request)
@@ -27,6 +30,8 @@ class ProjectController extends Controller
         ]);
 
         $project = Project::create($validated);
+        
+        Cache::forget('projects.index');
 
         return response()->json($project, 201);
     }
@@ -51,6 +56,8 @@ class ProjectController extends Controller
         ]);
 
         $project->update($validated);
+        
+        Cache::forget('projects.index');
 
         return response()->json($project);
     }
@@ -92,6 +99,8 @@ class ProjectController extends Controller
     public function destroy(Project $project)
     {
         $project->delete();
+        
+        Cache::forget('projects.index');
 
         return response()->json(null, 204);
     }

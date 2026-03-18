@@ -5,16 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\TimelineAuditLog;
 use App\Models\TimelineEntry;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class TimelineController extends Controller
 {
     public function publicIndex()
     {
         return response()->json(
-            TimelineEntry::query()
-                ->orderBy('sort_order')
-                ->orderByDesc('starts_at')
-                ->get()
+            Cache::remember('timeline.index', now()->addDay(), function () {
+                return TimelineEntry::query()
+                    ->orderBy('sort_order')
+                    ->orderByDesc('starts_at')
+                    ->get();
+            })
         );
     }
 
@@ -45,6 +48,8 @@ class TimelineController extends Controller
 
         $entry = TimelineEntry::create($data);
         $this->log($request, 'created', null, $entry->toArray(), $entry->id);
+        
+        Cache::forget('timeline.index');
 
         return response()->json($entry, 201);
     }
@@ -56,6 +61,8 @@ class TimelineController extends Controller
 
         $timeline->update($data);
         $this->log($request, 'updated', $before, $timeline->toArray(), $timeline->id);
+        
+        Cache::forget('timeline.index');
 
         return response()->json($timeline);
     }
@@ -67,6 +74,8 @@ class TimelineController extends Controller
         $timeline->delete();
 
         $this->log($request, 'deleted', $before, null, $id);
+        
+        Cache::forget('timeline.index');
 
         return response()->json(null, 204);
     }

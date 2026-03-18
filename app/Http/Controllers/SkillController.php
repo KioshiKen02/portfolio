@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Skill;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class SkillController extends Controller
 {
     public function index()
     {
-        return Skill::orderByDesc('proficiency')->get();
+        return Cache::remember('skills.index', now()->addDay(), function () {
+            return Skill::orderByDesc('proficiency')->get();
+        });
     }
 
     public function store(Request $request)
@@ -22,6 +25,8 @@ class SkillController extends Controller
         ]);
 
         $skill = Skill::create($validated);
+        
+        Cache::forget('skills.index');
 
         return response()->json($skill, 201);
     }
@@ -36,6 +41,8 @@ class SkillController extends Controller
         ]);
 
         $skill->update($validated);
+        
+        Cache::forget('skills.index');
 
         return response()->json($skill);
     }
@@ -43,6 +50,8 @@ class SkillController extends Controller
     public function destroy(Skill $skill)
     {
         $skill->delete();
+        
+        Cache::forget('skills.index');
 
         return response()->json(null, 204);
     }
