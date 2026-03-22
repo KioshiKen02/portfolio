@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useLoading } from './useLoading';
 
 export function useContactForm() {
-    const { showLoading, hideLoading } = useLoading();
+    const { showLoading, hideLoading, setProgress } = useLoading();
     const form = reactive({
         name: '',
         email: '',
@@ -63,6 +63,7 @@ export function useContactForm() {
 
         submitState.value = 'submitting';
         showLoading();
+        setProgress(18);
 
         try {
             await axios.post('/api/contact', {
@@ -71,6 +72,8 @@ export function useContactForm() {
                 subject: form.subject || 'Portfolio Contact',
                 message: form.message,
             });
+
+            setProgress(92);
 
             submitState.value = 'success';
             form.name = '';

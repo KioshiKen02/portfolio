@@ -25,7 +25,8 @@ Route::middleware(['auth:api', 'admin'])->group(function () {
         Route::post('upload/sign', [ProjectController::class, 'signUpload']);
         Route::apiResource('projects', ProjectController::class);
         Route::apiResource('skills', SkillController::class);
-        Route::apiResource('settings', SettingController::class);
+        Route::get('settings', [SettingController::class, 'index']);
+        Route::put('settings', [SettingController::class, 'store']);
         Route::apiResource('certificates', CertificateController::class)->except(['show']);
         Route::apiResource('timeline', TimelineController::class)->except(['show']);
         Route::get('timeline-audit', [TimelineController::class, 'audit']);

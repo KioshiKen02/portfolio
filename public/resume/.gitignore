@@ -1,8 +1,0 @@
-# Place your resume PDF in this folder.
-# Example: public/resume/melvin-rey-c-tambis-resume.pdf
-
-# Ignore everything by default.
-*
-
-# But keep this file.
-!.gitignore

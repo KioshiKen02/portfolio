@@ -11,6 +11,7 @@ import {
   FileText
 } from 'lucide-vue-next';
 import { useAdminSettings } from '@/composables/admin/useAdminSettings';
+import api from '@/plugins/axios';
 import { onMounted, ref } from 'vue';
 
 const props = defineProps<{
@@ -37,14 +38,33 @@ const sections = [
   { id: 'social', label: 'Digital Presence', icon: LinkIcon }
 ];
 
-const fileInputs = ref<{ [key: string]: HTMLInputElement | null }>({});
-const uploadProgress = ref<{ [key: string]: number }>({});
+const profilePictureSlots = [
+  { key: 'profile_picture_light_default', label: 'Light Mode (Default)' },
+  { key: 'profile_picture_light_hover', label: 'Light Mode (Hover)' },
+  { key: 'profile_picture_dark_default', label: 'Dark Mode (Default)' },
+  { key: 'profile_picture_dark_hover', label: 'Dark Mode (Hover)' },
+] as const;
 
-const triggerUpload = (key: string) => {
+type ProfilePictureKey = (typeof profilePictureSlots)[number]['key'];
+
+const fileInputs = ref<Record<string, HTMLInputElement | null>>({});
+const uploadProgress = ref<Record<string, number>>({});
+
+const getProfileUrl = (key: ProfilePictureKey) => {
+  const value = (settings.value || {})[key];
+  return typeof value === 'string' ? value : '';
+};
+
+const clearProfileUrl = (key: ProfilePictureKey) => {
+  if (!settings.value) settings.value = {};
+  settings.value[key] = '';
+};
+
+const triggerUpload = (key: ProfilePictureKey) => {
   fileInputs.value[key]?.click();
 };
 
-const handleFileUpload = async (event: Event, key: string) => {
+const handleFileUpload = async (event: Event, key: ProfilePictureKey) => {
   const file = (event.target as HTMLInputElement).files?.[0];
   if (!file) return;
 
@@ -74,7 +94,7 @@ const handleFileUpload = async (event: Event, key: string) => {
       }
     });
     
-    // @ts-ignore
+    if (!settings.value) settings.value = {};
     settings.value[key] = data.url;
     uploadProgress.value[key] = 0;
   } catch (err) {
@@ -159,7 +179,6 @@ const handleFileUpload = async (event: Event, key: string) => {
           </div>
         </div>
 
-        <!-- Branding Section -->
         <div v-show="activeSection === 'branding'" class="space-y-8 animate-fade-in">
           <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
             <h4 class="text-lg font-black text-slate-900 dark:text-white">Profile Visuals</h4>
@@ -167,32 +186,25 @@ const handleFileUpload = async (event: Event, key: string) => {
           </div>
 
           <div class="grid gap-10 md:grid-cols-2">
-            <div v-for="(label, key) in {
-              profile_picture_light_default: 'Light Mode (Default)',
-              profile_picture_light_hover: 'Light Mode (Hover)',
-              profile_picture_dark_default: 'Dark Mode (Default)',
-              profile_picture_dark_hover: 'Dark Mode (Hover)'
-            }" :key="key" class="space-y-4">
+            <div v-for="slot in profilePictureSlots" :key="slot.key" class="space-y-4">
               <div class="flex items-center justify-between">
-                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">{{ label }}</label>
-                <div v-if="uploadProgress[key]" class="text-[10px] font-black text-indigo-600 animate-pulse">
-                  Uploading {{ uploadProgress[key] }}%
+                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">{{ slot.label }}</label>
+                <div v-if="uploadProgress[slot.key]" class="text-[10px] font-black text-indigo-600 animate-pulse">
+                  Uploading {{ uploadProgress[slot.key] }}%
                 </div>
               </div>
               
               <div class="relative group">
                 <div class="aspect-square w-full max-w-[200px] mx-auto rounded-[2rem] overflow-hidden bg-slate-50 dark:bg-slate-800/50 border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center transition-all group-hover:border-indigo-500/50">
-                  <!-- @ts-ignore -->
-                  <img v-if="settings[key]" :src="settings[key]" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <img v-if="getProfileUrl(slot.key)" :src="getProfileUrl(slot.key)" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
                   <template v-else>
                     <ImageIcon class="h-8 w-8 text-slate-300 mb-2" />
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 text-center">Drag image or click below</span>
                   </template>
 
-                  <!-- Progress Overlay -->
-                  <div v-if="uploadProgress[key]" class="absolute inset-0 bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm flex items-center justify-center">
+                  <div v-if="uploadProgress[slot.key]" class="absolute inset-0 bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm flex items-center justify-center">
                     <div class="h-1 w-2/3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                      <div class="h-full bg-indigo-600 transition-all duration-300" :style="{ width: `${uploadProgress[key]}%` }"></div>
+                      <div class="h-full bg-indigo-600 transition-all duration-300" :style="{ width: `${uploadProgress[slot.key]}%` }"></div>
                     </div>
                   </div>
                 </div>
@@ -202,19 +214,18 @@ const handleFileUpload = async (event: Event, key: string) => {
                     type="file" 
                     class="hidden" 
                     accept="image/*"
-                    :ref="(el) => fileInputs[key] = el as HTMLInputElement"
-                    @change="(e) => handleFileUpload(e, key)"
+                    :ref="(el) => fileInputs[slot.key] = el as HTMLInputElement"
+                    @change="(e) => handleFileUpload(e, slot.key)"
                   />
                   <button 
-                    @click="triggerUpload(key)"
+                    @click="triggerUpload(slot.key)"
                     class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-600/10 transition-all active:scale-95"
                   >
                     Upload New
                   </button>
-                  <!-- @ts-ignore -->
                   <button 
-                    v-if="settings[key]"
-                    @click="settings[key] = ''"
+                    v-if="getProfileUrl(slot.key)"
+                    @click="clearProfileUrl(slot.key)"
                     class="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
                   >
                     Clear

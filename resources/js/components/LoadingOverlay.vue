@@ -6,19 +6,23 @@
       aria-busy="true"
       :aria-label="`Loading state: ${state}`"
     >
-      <div class="loader-coordinator flex flex-col items-center gap-12 w-full max-w-lg px-6">
-        
-        <!-- Particle Background for the Loader -->
-        <ParticleLoader
-          v-if="state === 'loading' && showParticles"
-          :particle-count="16"
-          :show-label="false"
-          class="absolute inset-0 -z-10 pointer-events-none"
+      <div class="loader-coordinator flex flex-col items-center gap-12 w-full max-w-3xl px-6">
+
+        <CinematicPortfolioLoader
+          v-if="loaderType === 'cinematic'"
+          :state="state"
+          :progress="progress"
+        />
+
+        <MinimalistPortfolioLoader
+          v-else-if="loaderType === 'minimalist'"
+          :state="state"
+          :progress="progress"
         />
 
         <!-- Main Advanced Loader (Morphing Shape) -->
         <AdvancedLoader
-          v-if="loaderType === 'advanced'"
+          v-else-if="loaderType === 'advanced'"
           :state="state"
           size="lg"
           :show-label="true"
@@ -76,20 +80,20 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useLoading } from '@/composables/useLoading';
+import CinematicPortfolioLoader from './CinematicPortfolioLoader.vue';
+import MinimalistPortfolioLoader from './MinimalistPortfolioLoader.vue';
 import AdvancedLoader from './AdvancedLoader.vue';
 import ProgressIndicator from './ProgressIndicator.vue';
 import SkeletonLoader from './SkeletonLoader.vue';
-import ParticleLoader from './ParticleLoader.vue';
 import TypingNameLoader from './TypingNameLoader.vue';
 
-const { isLoading, state } = useLoading();
+const { isLoading, state, progress } = useLoading();
 
 // Loader configuration
-const loaderType = ref('typing-name'); // 'advanced', 'progress', 'skeleton', 'typing-name'
+const loaderType = ref('minimalist'); // 'minimalist', 'cinematic', 'advanced', 'progress', 'skeleton', 'typing-name'
 const progressMode = ref('circular'); // 'linear', 'circular'
-const showParticles = ref(true);
 const currentProgress = ref(0);
 
 const loaderColors = {
@@ -125,12 +129,6 @@ watch(state, (newState) => {
   } else {
     if (progressInterval) clearInterval(progressInterval);
   }
-});
-
-onMounted(() => {
-  // Randomly select a loader type for demonstration
-  const types = ['advanced', 'progress', 'typing-name'];
-  loaderType.value = types[Math.floor(Math.random() * types.length)];
 });
 </script>
 

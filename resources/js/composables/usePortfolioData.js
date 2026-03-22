@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useLoading } from './useLoading';
 
 export function usePortfolioData(callbacks = {}) {
-    const { showLoading, hideLoading } = useLoading();
+    const { showLoading, hideLoading, setProgress } = useLoading();
     const projects = ref([]);
     const skills = ref([]);
     const experienceItems = ref([]);
@@ -143,13 +143,25 @@ export function usePortfolioData(callbacks = {}) {
 
     async function loadAllData() {
         showLoading();
+        setProgress(6);
         try {
-            await Promise.all([
-                loadProjects(),
-                loadSkills(),
-                loadTimeline(),
-                loadCertificates()
-            ]);
+            const steps = [
+                { fn: loadProjects, weight: 26 },
+                { fn: loadSkills, weight: 18 },
+                { fn: loadTimeline, weight: 26 },
+                { fn: loadCertificates, weight: 24 },
+            ];
+
+            let acc = 6;
+            await Promise.all(
+                steps.map(async (s) => {
+                    await s.fn();
+                    acc += s.weight;
+                    setProgress(Math.min(94, acc));
+                })
+            );
+
+            setProgress(98);
             await hideLoading('success');
         } catch (error) {
             console.error('Data loading failed:', error);
