@@ -35,13 +35,21 @@ export function useAdminCertificates(onSuccess?: () => void) {
   };
 
   const openCertModal = (cert: Certificate | null = null) => {
-    selectedCert.value = cert ? { ...cert } : {
-      title: '',
-      issuer: '',
-      type: 'certification',
-      issued_at: new Date().toISOString().split('T')[0],
-      sort_order: 0,
-    };
+    if (cert) {
+      selectedCert.value = { 
+        ...cert,
+        issued_at: cert.issued_at ? new Date(cert.issued_at).toISOString().split('T')[0] : '',
+        expires_at: cert.expires_at ? new Date(cert.expires_at).toISOString().split('T')[0] : '',
+      };
+    } else {
+      selectedCert.value = {
+        title: '',
+        issuer: '',
+        type: 'certification',
+        issued_at: new Date().toISOString().split('T')[0],
+        sort_order: 0,
+      };
+    }
     certModalOpen.value = true;
   };
 

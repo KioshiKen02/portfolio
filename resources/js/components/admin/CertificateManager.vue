@@ -32,6 +32,15 @@ const {
 } = useAdminCertificates(props.onSuccess);
 
 onMounted(fetchCertificates);
+
+const formatDate = (dateStr: string | undefined) => {
+  if (!dateStr) return '';
+  return new Date(dateStr).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+};
 </script>
 
 <template>
@@ -88,7 +97,7 @@ onMounted(fetchCertificates);
             </div>
             <div class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
               <Calendar class="h-3.5 w-3.5" />
-              {{ cert.issued_at }}
+              {{ formatDate(cert.issued_at) }}
             </div>
           </div>
 

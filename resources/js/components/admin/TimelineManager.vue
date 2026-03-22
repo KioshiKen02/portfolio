@@ -32,6 +32,14 @@ const {
 
 onMounted(fetchTimeline);
 
+const formatDate = (dateStr: string | undefined) => {
+  if (!dateStr) return '';
+  return new Date(dateStr).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short'
+  });
+};
+
 const addResponsibility = () => {
   if (!selectedEntry.value?.responsibilities) selectedEntry.value!.responsibilities = [];
   selectedEntry.value!.responsibilities.push('');
@@ -89,7 +97,7 @@ const removeResponsibility = (index: number) => {
             <div class="flex items-center gap-4 mt-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
               <div class="flex items-center gap-1.5">
                 <Calendar class="h-3.5 w-3.5" />
-                {{ entry.starts_at }} — {{ entry.ends_at || 'Present' }}
+                {{ formatDate(entry.starts_at) }} — {{ entry.ends_at ? formatDate(entry.ends_at) : 'Present' }}
               </div>
               <div v-if="entry.location" class="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-700"></div>
               <div v-if="entry.location">{{ entry.location }}</div>

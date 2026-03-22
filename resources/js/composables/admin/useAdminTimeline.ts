@@ -35,14 +35,22 @@ export function useAdminTimeline(onSuccess?: () => void) {
   };
 
   const openEntryModal = (entry: TimelineEntry | null = null) => {
-    selectedEntry.value = entry ? { ...entry } : {
-      title: '',
-      organization: '',
-      type: 'work',
-      starts_at: new Date().toISOString().split('T')[0],
-      responsibilities: [],
-      sort_order: 0,
-    };
+    if (entry) {
+      selectedEntry.value = { 
+        ...entry,
+        starts_at: entry.starts_at ? new Date(entry.starts_at).toISOString().split('T')[0] : '',
+        ends_at: entry.ends_at ? new Date(entry.ends_at).toISOString().split('T')[0] : '',
+      };
+    } else {
+      selectedEntry.value = {
+        title: '',
+        organization: '',
+        type: 'work',
+        starts_at: new Date().toISOString().split('T')[0],
+        responsibilities: [],
+        sort_order: 0,
+      };
+    }
     entryModalOpen.value = true;
   };
 
