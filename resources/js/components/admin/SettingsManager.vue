@@ -25,16 +25,64 @@ const {
   handleSettingsSubmit
 } = useAdminSettings(props.onSuccess);
 
-const activeSection = ref('general'); // 'general', 'hero', 'about', 'social'
+const activeSection = ref('general'); // 'general', 'branding', 'hero', 'about', 'social'
 
 onMounted(fetchSettings);
 
 const sections = [
   { id: 'general', label: 'General Identity', icon: Globe },
+  { id: 'branding', label: 'Branding & Images', icon: ImageIcon },
   { id: 'hero', label: 'Hero / Introduction', icon: User },
   { id: 'about', label: 'About / Bio', icon: FileText },
   { id: 'social', label: 'Digital Presence', icon: LinkIcon }
 ];
+
+const fileInputs = ref<{ [key: string]: HTMLInputElement | null }>({});
+const uploadProgress = ref<{ [key: string]: number }>({});
+
+const triggerUpload = (key: string) => {
+  fileInputs.value[key]?.click();
+};
+
+const handleFileUpload = async (event: Event, key: string) => {
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (!file) return;
+
+  // Validate file type and size
+  if (!file.type.startsWith('image/')) {
+    alert('Please upload an image file.');
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    alert('File size exceeds 10MB limit.');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('image', file);
+  formData.append('folder', 'profile');
+
+  uploadProgress.value[key] = 10;
+  
+  try {
+    const { data } = await api.post('/api/admin/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total) {
+          uploadProgress.value[key] = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        }
+      }
+    });
+    
+    // @ts-ignore
+    settings.value[key] = data.url;
+    uploadProgress.value[key] = 0;
+  } catch (err) {
+    console.error('Upload failed:', err);
+    alert('Upload failed. Please try again.');
+    uploadProgress.value[key] = 0;
+  }
+};
 </script>
 
 <template>
@@ -108,6 +156,72 @@ const sections = [
           <div class="space-y-2">
             <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Meta Description</label>
             <textarea v-model="settings.site_description" rows="3" class="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none resize-none"></textarea>
+          </div>
+        </div>
+
+        <!-- Branding Section -->
+        <div v-show="activeSection === 'branding'" class="space-y-8 animate-fade-in">
+          <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <h4 class="text-lg font-black text-slate-900 dark:text-white">Profile Visuals</h4>
+            <span class="text-[10px] font-black text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 px-3 py-1 rounded-full uppercase tracking-widest">4 States Required</span>
+          </div>
+
+          <div class="grid gap-10 md:grid-cols-2">
+            <div v-for="(label, key) in {
+              profile_picture_light_default: 'Light Mode (Default)',
+              profile_picture_light_hover: 'Light Mode (Hover)',
+              profile_picture_dark_default: 'Dark Mode (Default)',
+              profile_picture_dark_hover: 'Dark Mode (Hover)'
+            }" :key="key" class="space-y-4">
+              <div class="flex items-center justify-between">
+                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">{{ label }}</label>
+                <div v-if="uploadProgress[key]" class="text-[10px] font-black text-indigo-600 animate-pulse">
+                  Uploading {{ uploadProgress[key] }}%
+                </div>
+              </div>
+              
+              <div class="relative group">
+                <div class="aspect-square w-full max-w-[200px] mx-auto rounded-[2rem] overflow-hidden bg-slate-50 dark:bg-slate-800/50 border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center transition-all group-hover:border-indigo-500/50">
+                  <!-- @ts-ignore -->
+                  <img v-if="settings[key]" :src="settings[key]" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <template v-else>
+                    <ImageIcon class="h-8 w-8 text-slate-300 mb-2" />
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 text-center">Drag image or click below</span>
+                  </template>
+
+                  <!-- Progress Overlay -->
+                  <div v-if="uploadProgress[key]" class="absolute inset-0 bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm flex items-center justify-center">
+                    <div class="h-1 w-2/3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div class="h-full bg-indigo-600 transition-all duration-300" :style="{ width: `${uploadProgress[key]}%` }"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-4 flex gap-2 justify-center">
+                  <input 
+                    type="file" 
+                    class="hidden" 
+                    accept="image/*"
+                    :ref="(el) => fileInputs[key] = el as HTMLInputElement"
+                    @change="(e) => handleFileUpload(e, key)"
+                  />
+                  <button 
+                    @click="triggerUpload(key)"
+                    class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-600/10 transition-all active:scale-95"
+                  >
+                    Upload New
+                  </button>
+                  <!-- @ts-ignore -->
+                  <button 
+                    v-if="settings[key]"
+                    @click="settings[key] = ''"
+                    class="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

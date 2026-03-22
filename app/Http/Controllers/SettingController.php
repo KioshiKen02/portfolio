@@ -10,75 +10,79 @@ class SettingController extends Controller
 {
     public function index()
     {
-        return response()->json(Setting::all());
+        $settings = Setting::all();
+        $flatSettings = [];
+        foreach ($settings as $setting) {
+            $flatSettings[$setting->key] = $setting->value;
+        }
+        return response()->json($flatSettings);
     }
 
     public function store(Request $request)
     {
-        return $this->syncSettings($request);
+        return $this->bulkUpdate($request);
     }
 
-    public function update(Request $request, Setting $setting)
+    public function update(Request $request, $id = null)
     {
-        $data = $request->validate([
-            'value' => 'nullable|string',
-            'type' => 'nullable|string',
-            'group' => 'nullable|string',
-        ]);
+        // If $id is provided, it's a single setting update
+        if ($id) {
+            $setting = Setting::findOrFail($id);
+            $data = $request->validate([
+                'value' => 'nullable|string',
+                'type' => 'nullable|string',
+                'group' => 'nullable|string',
+            ]);
 
-        $setting->update([
-            'value' => $data['value'] ?? $setting->value,
-            'type' => $data['type'] ?? $setting->type,
-            'group' => $data['group'] ?? $setting->group,
-        ]);
+            $setting->update([
+                'value' => $data['value'] ?? $setting->value,
+                'type' => $data['type'] ?? $setting->type,
+                'group' => $data['group'] ?? $setting->group,
+            ]);
 
-        return response()->json($setting);
+            return response()->json($setting);
+        }
+
+        // If no ID, it's a bulk update from the settings object
+        return $this->bulkUpdate($request);
     }
 
-    protected function syncSettings(Request $request)
+    protected function bulkUpdate(Request $request)
     {
-        $data = $request->validate([
-            'settings' => 'required|array',
-            'settings.*.key' => 'required|string',
-            'settings.*.value' => 'nullable|string',
-            'settings.*.type' => 'nullable|string',
-            'settings.*.group' => 'nullable|string',
-        ]);
+        $data = $request->all();
+        
+        foreach ($data as $key => $value) {
+            // Determine type based on key or value if needed
+            $type = 'text';
+            if (str_contains($key, '_url') || str_contains($key, 'picture') || str_contains($key, 'logo')) {
+                $type = 'url';
+            } elseif (str_contains($key, 'description') || str_contains($key, 'paragraph')) {
+                $type = 'textarea';
+            } elseif (str_contains($key, 'email')) {
+                $type = 'email';
+            }
 
-        foreach ($data['settings'] as $item) {
-            $type = $item['type'] ?? 'text';
-            $value = $item['value'] ?? null;
-
-            if ($type === 'url' && $value !== null && $value !== '') {
-                $isAbsolute = filter_var($value, FILTER_VALIDATE_URL) !== false;
-                $isRelative = is_string($value) && str_starts_with($value, '/');
-                if (!$isAbsolute && !$isRelative) {
-                    throw ValidationException::withMessages([
-                        'settings' => ['One or more URL settings are invalid.'],
-                    ]);
-                }
+            // Determine group based on key
+            $group = 'general';
+            if (str_contains($key, 'hero')) {
+                $group = 'hero';
+            } elseif (str_contains($key, 'about')) {
+                $group = 'about';
+            } elseif (str_contains($key, 'contact') || str_contains($key, 'url') || str_contains($key, 'link')) {
+                $group = 'social';
+            } elseif (str_contains($key, 'picture') || str_contains($key, 'logo')) {
+                $group = 'branding';
             }
 
             Setting::updateOrCreate(
-                ['key' => $item['key']],
+                ['key' => $key],
                 [
-                    'value' => $item['value'],
+                    'value' => $value,
                     'type' => $type,
-                    'group' => $item['group'] ?? 'general'
+                    'group' => $group
                 ]
             );
         }
-        
-        // Optional: Remove keys that are not in the request? 
-        // For now, let's keep it additive/update-only to be safe.
-        // Or if we want full sync, we would delete others. 
-        // Given the UI allows removing fields, we probably should delete missing keys if we want true sync.
-        // But let's stick to updateOrCreate for safety unless specified.
-        // Wait, if I remove a field in UI, it won't be sent. So it won't be deleted.
-        // To support deletion, I should probably delete keys not present in the request.
-        
-        $keys = collect($data['settings'])->pluck('key');
-        Setting::whereNotIn('key', $keys)->delete();
 
         return response()->json(['message' => 'Settings updated successfully']);
     }
