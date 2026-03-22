@@ -11,7 +11,7 @@ class EnsureAdmin
     {
         $user = $request->user('api');
 
-        if (!$user || !$user->is_admin) {
+        if (!$user || (int)$user->is_admin !== 1) {
             return response()->json(['message' => 'Forbidden.'], 403);
         }
 

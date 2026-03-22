@@ -1,6 +1,9 @@
 <template>
   <div class="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-white theme-transition">
-    <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80 h-[var(--header-height)]">
+    <header 
+      v-if="!isAdminRoute"
+      class="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80 h-[var(--header-height)]"
+    >
       <nav class="container mx-auto flex h-full items-center justify-between px-6">
         <div class="flex items-center gap-3">
           <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 overflow-hidden">
@@ -64,8 +67,12 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
+import { useRoute } from 'vue-router';
 import LoadingOverlay from './components/LoadingOverlay.vue';
+
+const route = useRoute();
+const isAdminRoute = computed(() => route.path.startsWith('/admin'));
 
 // Initialize theme based on what's already in the DOM (set by app.blade.php)
 const isDark = document.documentElement.classList.contains('dark');

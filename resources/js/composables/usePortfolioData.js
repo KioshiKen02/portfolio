@@ -48,7 +48,7 @@ export function usePortfolioData(callbacks = {}) {
     async function loadProjects() {
         loadingProjects.value = true;
         try {
-            const { data } = await axios.get('/projects');
+            const { data } = await axios.get('/api/projects');
             const raw = Array.isArray(data) ? data : [];
             projects.value = raw.map((p) => ({
                 ...p,
@@ -71,7 +71,7 @@ export function usePortfolioData(callbacks = {}) {
     async function loadSkills() {
         loadingSkills.value = true;
         try {
-            const { data } = await axios.get('/skills');
+            const { data } = await axios.get('/api/skills');
             skills.value = Array.isArray(data) ? data : [];
         } catch (error) {
             console.error('Failed to load skills:', error);
@@ -84,7 +84,7 @@ export function usePortfolioData(callbacks = {}) {
     async function loadTimeline() {
         loadingTimeline.value = true;
         try {
-            const { data } = await axios.get('/timeline');
+            const { data } = await axios.get('/api/timeline');
             const entries = Array.isArray(data) ? data : [];
             experienceItems.value = entries
                 .slice()
@@ -115,7 +115,7 @@ export function usePortfolioData(callbacks = {}) {
     async function loadCertificates() {
         loadingCertificates.value = true;
         try {
-            const { data } = await axios.get('/certificates');
+            const { data } = await axios.get('/api/certificates');
             const items = Array.isArray(data) ? data : [];
             
             // Fix Vercel storage issue by ensuring photo path is normalized

@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '../views/HomeView.vue';
 
 const AdminDashboard = () =>
-    import('../views/AdminDashboard.vue');
+    import('../views/admin/AdminDashboardRedesign.vue');
 
 const router = createRouter({
     history: createWebHistory(),

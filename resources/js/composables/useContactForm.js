@@ -65,7 +65,7 @@ export function useContactForm() {
         showLoading();
 
         try {
-            await axios.post('/contact', {
+            await axios.post('/api/contact', {
                 name: form.name,
                 email: form.email,
                 subject: form.subject || 'Portfolio Contact',

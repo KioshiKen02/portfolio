@@ -7,18 +7,20 @@ use App\Http\Controllers\SkillController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\Admin\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
-    Route::match(['get', 'post'], '/me', [AuthController::class, 'me']);
-    Route::put('/profile', [AuthController::class, 'update']);
+    Route::middleware('auth:api')->get('/me', [AuthController::class, 'me']);
+    Route::middleware('auth:api')->put('/profile', [AuthController::class, 'update']);
 });
 
 Route::middleware(['auth:api', 'admin'])->group(function () {
     Route::prefix('admin')->group(function () {
+        Route::get('stats', [DashboardController::class, 'stats']);
         Route::post('upload', [ProjectController::class, 'upload']);
         Route::post('upload/sign', [ProjectController::class, 'signUpload']);
         Route::apiResource('projects', ProjectController::class);

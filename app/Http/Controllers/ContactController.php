@@ -29,7 +29,7 @@ class ContactController extends Controller
             });
         }
 
-        $contacts = $query->paginate(15);
+        $contacts = $query->get();
 
         return response()->json($contacts);
     }
