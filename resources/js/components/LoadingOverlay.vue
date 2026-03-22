@@ -59,10 +59,11 @@
         <Transition name="message-fade">
           <div v-if="state !== 'loading'" class="status-message flex flex-col items-center gap-3">
             <span 
+              v-if="loaderType !== 'typing-name' || state === 'error'"
               class="text-xl font-bold tracking-tight"
               :class="state === 'success' ? 'text-emerald-400' : 'text-rose-400'"
             >
-              {{ state === 'success' ? 'Welcome To My Portfolio' : 'Connection Error' }}
+              {{ state === 'success' ? 'Experience Ready' : 'Connection Error' }}
             </span>
             <p class="text-sm text-white/60 text-center max-w-xs">
               {{ state === 'success' ? 'Glad you\'re here. Enjoy exploring my work.' : 'Please check your internet connection or try refreshing the page.' }}
