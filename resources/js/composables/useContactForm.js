@@ -1,7 +1,9 @@
 import { reactive, ref } from 'vue';
 import axios from 'axios';
+import { useLoading } from './useLoading';
 
 export function useContactForm() {
+    const { showLoading, hideLoading } = useLoading();
     const form = reactive({
         name: '',
         email: '',
@@ -60,6 +62,7 @@ export function useContactForm() {
         }
 
         submitState.value = 'submitting';
+        showLoading();
 
         try {
             await axios.post('/contact', {
@@ -76,9 +79,11 @@ export function useContactForm() {
             form.message = '';
 
             Object.keys(errors).forEach((key) => (errors[key] = ''));
+            await hideLoading('success');
         } catch (error) {
             console.error(error);
             submitState.value = 'error';
+            await hideLoading('error');
         } finally {
             setTimeout(() => {
                 if (submitState.value === 'success') {

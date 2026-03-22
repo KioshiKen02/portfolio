@@ -65,4 +65,57 @@ body {
     .input-field::placeholder {
         @apply text-slate-400 dark:text-slate-400;
     }
+
+    /* Animation Classes */
+    .animate-intro-zoom {
+        will-change: transform, opacity;
+        animation: intro-zoom 800ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .animate-intro-fade {
+        will-change: opacity;
+        animation: intro-fade 600ms ease-out forwards;
+    }
+
+    .animate-intro-slide-up {
+        will-change: transform, opacity;
+        animation: intro-slide-up 700ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes intro-zoom {
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes intro-fade {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes intro-slide-up {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .animate-intro-zoom,
+        .animate-intro-fade,
+        .animate-intro-slide-up {
+            animation-duration: 0.1ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.1ms !important;
+        }
+    }
 }

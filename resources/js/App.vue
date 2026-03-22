@@ -59,11 +59,13 @@
     <main>
       <RouterView />
     </main>
+    <LoadingOverlay />
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue';
+import LoadingOverlay from './components/LoadingOverlay.vue';
 
 // Initialize theme based on what's already in the DOM (set by app.blade.php)
 const isDark = document.documentElement.classList.contains('dark');

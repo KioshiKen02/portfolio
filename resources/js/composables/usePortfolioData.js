@@ -1,7 +1,9 @@
 import { ref } from 'vue';
 import axios from 'axios';
+import { useLoading } from './useLoading';
 
 export function usePortfolioData(callbacks = {}) {
+    const { showLoading, hideLoading } = useLoading();
     const projects = ref([]);
     const skills = ref([]);
     const experienceItems = ref([]);
@@ -139,11 +141,20 @@ export function usePortfolioData(callbacks = {}) {
         }
     }
 
-    function loadAllData() {
-        loadProjects();
-        loadSkills();
-        loadTimeline();
-        loadCertificates();
+    async function loadAllData() {
+        showLoading();
+        try {
+            await Promise.all([
+                loadProjects(),
+                loadSkills(),
+                loadTimeline(),
+                loadCertificates()
+            ]);
+            await hideLoading('success');
+        } catch (error) {
+            console.error('Data loading failed:', error);
+            await hideLoading('error');
+        }
     }
 
     return {

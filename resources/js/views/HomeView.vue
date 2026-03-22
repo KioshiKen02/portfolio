@@ -33,71 +33,82 @@
     <section ref="heroSection" id="hero" class="section-hero relative flex min-h-screen items-center overflow-hidden pt-20 pb-16">
       
       <!-- Dynamic Bento Grid Background -->
-      <MechanicalBentoGrid />
+      <ParallaxWrapper :speed="0.5" class="absolute inset-0 -z-20">
+        <MechanicalBentoGrid />
+      </ParallaxWrapper>
 
       <div class="pointer-events-none absolute inset-0 -z-10 hero-shine"></div>
 
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
         <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-20 lg:items-center">
-          <div class="relative z-20 min-w-0 space-y-8 lg:pr-6" v-motion="{ reveal: { delayMs: 60, y: 18 } }">
-            <div
-              class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-              <span class="relative flex h-2 w-2">
-                <span
-                  class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-              </span>
-              {{ settings.hero_badge_text || 'Available for Hire' }}
-            </div>
-
-            <h1 class="max-w-[26ch] text-5xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-6xl xl:text-7xl">
-              <RotatingTypewriter
-                :phrases="heroPhrases"
-                :typing-ms="120"
-                :deleting-ms="120"
-                :pause-ms="650"
-                :start-delay-ms="140"
-                :loop="true"
-              />
-            </h1>
-            
-            <p class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-400">
-              I'm <strong class="text-slate-900 dark:text-white">{{ heroAuthor }}</strong>, a {{ heroRole }}
-              {{ settings.hero_description || 'crafting high-performance Laravel backends, reactive Vue.js interfaces, and cross-platform Flutter apps.' }}
-            </p>
-
-            <div class="w-full max-w-xl">
-              <div class="flex flex-wrap items-center justify-center gap-3">
-                <ResumeDownloadButton :url="resumeDownloadUrl" filename="melvin-rey-c-tambis-resume.pdf" />
-                
-                <a
-                  href="#projects"
-                  class="group relative inline-flex items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-[var(--radius-button)] bg-[var(--color-brand)] px-4 py-3 text-xs font-semibold text-white shadow-lg transition-all hover:bg-[var(--color-brand-hover)] hover:shadow-xl hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 sm:px-6 sm:py-3.5 sm:text-sm dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
-                >
-                  View Selected Work
-                  <svg class="hidden h-4 w-4 transition-transform group-hover:translate-x-1 sm:inline-flex" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </a>
-               
-                <a
-                  href="#contact"
-                  class="inline-flex items-center justify-center whitespace-nowrap rounded-[var(--radius-button)] border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-900 transition-all hover:bg-slate-50 hover:border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 sm:px-6 sm:py-3.5 sm:text-sm dark:border-slate-800 dark:bg-slate-950 dark:text-white dark:hover:bg-slate-900"
-                >
-                  Contact Me
-                </a>
+          <div class="relative z-20 min-w-0 space-y-8 lg:pr-6">
+            <IntroAnimation type="slide-up" :delay="100">
+              <div
+                class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+                <span class="relative flex h-2 w-2">
+                  <span
+                    class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                </span>
+                {{ settings.hero_badge_text || 'Available for Hire' }}
               </div>
-            </div>
+            </IntroAnimation>
+
+            <IntroAnimation type="slide-up" :delay="200">
+              <h1 class="max-w-[26ch] text-5xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-6xl xl:text-7xl">
+                <RotatingTypewriter
+                  :phrases="heroPhrases"
+                  :typing-ms="120"
+                  :deleting-ms="120"
+                  :pause-ms="650"
+                  :start-delay-ms="140"
+                  :loop="true"
+                />
+              </h1>
+            </IntroAnimation>
+            
+            <IntroAnimation type="slide-up" :delay="300">
+              <p class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-400">
+                I'm <strong class="text-slate-900 dark:text-white">{{ heroAuthor }}</strong>, a {{ heroRole }}
+                {{ settings.hero_description || 'crafting high-performance Laravel backends, reactive Vue.js interfaces, and cross-platform Flutter apps.' }}
+              </p>
+            </IntroAnimation>
+
+            <IntroAnimation type="slide-up" :delay="400">
+              <div class="w-full max-w-xl">
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                  <ResumeDownloadButton :url="resumeDownloadUrl" filename="melvin-rey-c-tambis-resume.pdf" />
+                  
+                  <a
+                    href="#projects"
+                    class="group relative inline-flex items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-[var(--radius-button)] bg-[var(--color-brand)] px-4 py-3 text-xs font-semibold text-white shadow-lg transition-all hover:bg-[var(--color-brand-hover)] hover:shadow-xl hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 sm:px-6 sm:py-3.5 sm:text-sm dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+                  >
+                    View Selected Work
+                    <svg class="hidden h-4 w-4 transition-transform group-hover:translate-x-1 sm:inline-flex" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </a>
+                
+                  <a
+                    href="#contact"
+                    class="inline-flex items-center justify-center whitespace-nowrap rounded-[var(--radius-button)] border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-900 transition-all hover:bg-slate-50 hover:border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 sm:px-6 sm:py-3.5 sm:text-sm dark:border-slate-800 dark:bg-slate-950 dark:text-white dark:hover:bg-slate-900"
+                  >
+                    Contact Me
+                  </a>
+                </div>
+              </div>
+            </IntroAnimation>
           </div>
 
-          <div class="hidden lg:block relative z-0 w-full max-w-lg mx-auto" v-motion="{ reveal: { delayMs: 140, y: 18 }, parallax: { speed: 0.06, max: 18 } }">
+          <IntroAnimation type="zoom" :delay="200" class="hidden lg:block relative z-0 w-full max-w-lg mx-auto">
             <!-- Background Glow -->
-            <div
-              class="pointer-events-none absolute -inset-1 -z-10 bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-2xl opacity-20 blur-2xl dark:opacity-30"
-              v-motion="{ reveal: false, parallax: { speed: 0.12, max: 28 } }"
-            >
-            </div>
+            <ParallaxWrapper :speed="0.8">
+              <div
+                class="pointer-events-none absolute -inset-1 -z-10 bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-2xl opacity-20 blur-2xl dark:opacity-30"
+              >
+              </div>
+            </ParallaxWrapper>
 
             <!-- Code Window -->
             <div class="relative rounded-xl bg-slate-900 shadow-2xl ring-1 ring-slate-800 overflow-hidden h-[520px]">
@@ -132,23 +143,25 @@
             </div>
 
             <!-- Floating Badge -->
-            <div
-              class="absolute -bottom-6 -right-6 rounded-xl bg-white p-4 shadow-xl border border-slate-100 dark:bg-slate-800 dark:border-slate-700 animate-float">
-              <div class="flex items-center gap-3">
-                <div
-                  class="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
-                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">Status</div>
-                  <div class="text-sm font-bold text-slate-900 dark:text-white">Open to Work</div>
+            <ParallaxWrapper :speed="1.2" class="absolute -bottom-6 -right-6">
+              <div
+                class="rounded-xl bg-white p-4 shadow-xl border border-slate-100 dark:bg-slate-900 dark:border-slate-800 animate-float">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">Status</div>
+                    <div class="text-sm font-bold text-slate-900 dark:text-white">Open to Work</div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </ParallaxWrapper>
+          </IntroAnimation>
         </div>
       </div>
     </section>
@@ -157,20 +170,22 @@
     <section ref="aboutSection" id="about" class="section-block py-16 md:py-20 scroll-mt-28">
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
         <div class="grid gap-10 md:grid-cols-12 md:items-start">
-          <div class="md:col-span-7 space-y-6" v-motion="{ reveal: { delayMs: 80 } }">
-            <div>
-              <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-                {{ settings.about_heading || 'Engineering with purpose.' }}
-              </h2>
-              <div class="mt-4 space-y-4 text-base leading-relaxed text-slate-600 dark:text-slate-400">
-                <p>
-                  {{ settings.about_paragraph_1 || "I don't just write code; I solve problems. With a background in Computer Engineering, I approach every project with a focus on efficiency, security, and scalability." }}
-                </p>
-                <p>
-                  {{ settings.about_paragraph_2 || "My expertise spans the entire development lifecycle—from database schema design to frontend state management and mobile app deployment. I build tools that businesses rely on." }}
-                </p>
+          <div class="md:col-span-7 space-y-6">
+            <IntroAnimation type="fade" :delay="100">
+              <div>
+                <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+                  {{ settings.about_heading || 'Engineering with purpose.' }}
+                </h2>
+                <div class="mt-4 space-y-4 text-base leading-relaxed text-slate-600 dark:text-slate-400">
+                  <p>
+                    {{ settings.about_paragraph_1 || "I don't just write code; I solve problems. With a background in Computer Engineering, I approach every project with a focus on efficiency, security, and scalability." }}
+                  </p>
+                  <p>
+                    {{ settings.about_paragraph_2 || "My expertise spans the entire development lifecycle—from database schema design to frontend state management and mobile app deployment. I build tools that businesses rely on." }}
+                  </p>
+                </div>
               </div>
-            </div>
+            </IntroAnimation>
 
             <div class="card p-5">
               <div class="grid grid-cols-2 gap-6">
@@ -232,24 +247,26 @@
     <!-- Projects Section -->
     <section ref="projectsSection" id="projects" class="section-block py-24 scroll-mt-28">
       <div class="container mx-auto px-6 md:px-12 xl:px-24">
-        <div class="mb-16 md:flex md:items-end md:justify-between" v-motion="{ reveal: { delayMs: 80 } }">
-          <div class="max-w-xl">
-            <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Selected Work</h2>
-            <p class="mt-4 text-lg text-slate-600 dark:text-slate-400">
-              A collection of projects highlighting my technical capabilities.
-            </p>
+        <IntroAnimation type="slide-up" :delay="100">
+          <div class="mb-16 md:flex md:items-end md:justify-between">
+            <div class="max-w-xl">
+              <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Selected Work</h2>
+              <p class="mt-4 text-lg text-slate-600 dark:text-slate-400">
+                A collection of projects highlighting my technical capabilities.
+              </p>
+            </div>
+            <div class="mt-6 md:mt-0 hidden md:block">
+              <a href="https://github.com/KioshiKen02" target="_blank"
+                class="text-sm font-semibold text-slate-900 hover:text-slate-600 dark:text-white dark:hover:text-slate-300 flex items-center gap-2">
+                View Github Profile
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3">
+                  </path>
+                </svg>
+              </a>
+            </div>
           </div>
-          <div class="mt-6 md:mt-0 hidden md:block">
-            <a href="https://github.com/KioshiKen02" target="_blank"
-              class="text-sm font-semibold text-slate-900 hover:text-slate-600 dark:text-white dark:hover:text-slate-300 flex items-center gap-2">
-              View Github Profile
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3">
-                </path>
-              </svg>
-            </a>
-          </div>
-        </div>
+        </IntroAnimation>
 
         <div v-if="loadingProjects" class="flex justify-center py-20">
           <div
@@ -789,6 +806,8 @@ import ResumeDownloadButton from '../components/ResumeDownloadButton.vue';
 import CodeTypewriter from '../components/CodeTypewriter.vue';
 import RotatingTypewriter from '../components/RotatingTypewriter.vue';
 import MechanicalBentoGrid from '../components/MechanicalBentoGrid.vue';
+import IntroAnimation from '../components/IntroAnimation.vue';
+import ParallaxWrapper from '../components/ParallaxWrapper.vue';
 import { useTheme } from '../composables/useTheme';
 import { useScrollSpy } from '../composables/useScrollSpy';
 import { useContactForm } from '../composables/useContactForm';
